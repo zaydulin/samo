@@ -256,7 +256,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, '_media')
 
 SITE_ID = 1
 
-SESSION_COOKIE_DOMAIN = ".mentro.ru"  # Доступ ко всем поддоменам
+SESSION_COOKIE_DOMAIN = ".mentro.store"  # Доступ ко всем поддоменам
 SESSION_COOKIE_NAME = "sessionid"
 SESSION_COOKIE_SECURE = True  # Если у вас HTTPS, иначе False
 SESSION_COOKIE_HTTPONLY = True
