@@ -58,3 +58,4 @@ aiortc==1.8.0
 html2image==2.0.5
 html2image==2.0.5
 django-tinymce==4.1.0
+marshmallow>=3.13,<4.0
