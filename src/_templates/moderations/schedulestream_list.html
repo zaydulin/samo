@@ -1,0 +1,279 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+<link href="{% static 'site/_generals/css/vendors/calendar.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="container-fluid calendar-basic">
+    <div class="card">
+        <div class="card-body">
+            <div class="row" id="wrap">
+                <div class="col-3 ">
+                    <div class="card">
+                        <div class="card-header border-0">
+                            <div>
+                                <form id="monthForm" action="{% url 'moderation:schedule_list' %}" method="GET">
+                                    <h4 class="font-w600 text-black fs-20 mb-1" for="month">Выберите месяц:</h4>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <select name="month" id="month" class="form-control">
+                                                {% for month_year in months_list %}
+                                                <option value="{{ month_year }}" {% if month_year == current_month_year %}selected{% endif %}>
+                                                    {{ month_year }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-primary mb-2" type="submit">Показать</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <div class="card-body" id="event-list">
+                            {% for notebook in schedules_page %}
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div class="row">
+                                    <div class="col-1">
+                                        <i class="fa fa-clock" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-11 d-flex">
+                                        <p>
+                                            {{ notebook.data|date:"d/m/Y" }} |
+                                        </p>
+                                        <p>
+                                            {{ notebook.time_start }} - {{ notebook.time_end }}
+                                        </p>
+                                    </div>
+
+                                    <div class="col-12">
+                                        {{ notebook.description|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Pagination links -->
+                            <div class="pagination">
+                                <span class="step-links">
+                                  {% if schedules_page.has_previous %}
+                                    <a href="?month={{ current_month_year }}&page=1">&laquo; первый</a>
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.previous_page_number }}">предыдущий</a>
+                                  {% endif %}
+
+                                  <span class="current">
+                                    Страница {{ notebooks_page.number }} из {{ notebooks_page.paginator.num_pages }}.
+                                  </span>
+
+                                  {% if notebooks_page.has_next %}
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.next_page_number }}">следующий</a>
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.paginator.num_pages }}">последний &raquo;</a>
+                                  {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-9">
+                    <div class="calendar-default" id="calendar-container">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Container-fluid Ends-->
+
+
+ч<!-- Modal -->
+<div class="modal fade" id="InfoModalCenter">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body">
+                description
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block footer %}
+<!-- Required vendors -->
+
+<!-- calendar -->
+<script src="{% static 'site/_generals/js/calendar/fullcalendar.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar-custom.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    // Получить сегодняшнюю дату в формате YYYY-MM-DD
+    var today = new Date().toISOString().split('T')[0];
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+            left: 'today',
+            center: 'title',
+            right: 'prev,next'
+        },
+        initialDate: today,
+        editable: true,
+        selectable: true,
+        businessHours: true,
+        locale: 'ru',
+        dayMaxEvents: false,
+        events: function(fetchInfo, successCallback, failureCallback) {
+            fetch(`/schedulestream/events/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var events = data.map(event => ({
+                        title: event.title, // Убедитесь, что это поле присутствует в ответе сервера
+                        start: event.date + 'T' + event.time_start,
+                        end: event.date + 'T' + event.time_end,
+                        extendedProps: {
+                            description: event.description,
+                            time: formatTimeRange(event.time_start, event.time_end)
+                        }
+                    }));
+                    successCallback(events);
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                    failureCallback(error);
+                });
+        },
+        eventContent: function(arg) {
+            return {
+                html: `
+                <div class="fc-content">
+
+                    <div class="fc-time">${arg.event.extendedProps.time}</div>
+                </div>
+            `
+            };
+        },
+        eventClick: function(info) {
+            showEventInModal(info.event);
+        }
+    });
+
+    calendar.render();
+
+    function formatTimeRange(start, end) {
+        return start.substr(0, 5) + ' - ' + end.substr(0, 5);
+    }
+
+    function showEventInModal(event) {
+        var modal = document.getElementById('InfoModalCenter');
+        var modalTitle = modal.querySelector('.modal-title');
+        var modalBody = modal.querySelector('.modal-body');
+
+        modalTitle.textContent = event.title || 'Событие';
+
+        var content = `
+        <p><strong>Время:</strong> ${event.extendedProps.time}</p>
+        <p>${event.extendedProps.description || 'Описание отсутствует'}</p>
+    `;
+
+        modalBody.innerHTML = content;
+
+        modalBody.querySelectorAll('a').forEach(function(link) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        });
+
+        var bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Функция для обновления списка событий
+    function updateEventList(monthStr) {
+        var url = `/schedulestream/?month=${monthStr}`;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(html => {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var newEventList = doc.getElementById('event-list');
+
+                if (newEventList) {
+                    var eventListElement = document.getElementById('event-list');
+                    eventListElement.innerHTML = newEventList.innerHTML;
+                } else {
+                    console.error('Не удалось найти элемент #event-list в ответе');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching event list:', error);
+            });
+    }
+
+    // Обработчик события для формы фильтрации по месяцам
+    document.getElementById('monthForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var selectedMonthInput = document.getElementById('month').value;
+        if (!selectedMonthInput) {
+            alert('Пожалуйста, выберите месяц.');
+            return;
+        }
+
+        var [year, month] = selectedMonthInput.split('-');
+        var start = new Date(year, month - 1, 1);
+        calendar.gotoDate(start);
+
+        var monthStr = selectedMonthInput;
+        updateEventList(monthStr);
+    });
+
+    // Опциональная кнопка сброса фильтра
+    var resetButton = document.getElementById('resetMonthFilter');
+    if (resetButton) {
+        resetButton.addEventListener('click', function() {
+            var currentMonth = new Date();
+            var year = currentMonth.getFullYear();
+            var month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+            var selectedMonth = `${year}-${month}`;
+
+            calendar.gotoDate(currentMonth);
+            updateEventList(selectedMonth);
+            document.getElementById('month').value = selectedMonth;
+        });
+    }
+});
+
+</script>
+
+
+
+
+{% endblock footer %}

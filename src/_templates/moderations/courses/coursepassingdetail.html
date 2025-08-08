@@ -1,0 +1,516 @@
+{% extends 'moderations/base.html' %}
+{% load static moderations_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    /* Убираем рамку вокруг названия лекции */
+    .theme-link {
+        text-decoration: none; /* Убираем подчеркивание */
+    }
+
+    /* Стили для текста названия лекции */
+    .theme-name {
+        transition: color 0.3s ease; /* Плавное изменение цвета */
+    }
+
+    /* Эффект при наведении */
+    .theme-link:hover .theme-name {
+        color: #7366ff; /* Цвет текста при наведении */
+    }
+</style>
+<script src="//site.com/playerjs.js" type="text/javascript"></script>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader"
+                     style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+
+                <div class="info">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="text-md-start">
+                                        <div class="title">
+                                            <a>
+                                                {{course.name}}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex" style="position: absolute; right: 0;">
+                                <div style="padding-right: 5px;" class="text-md-end border-right">
+                                    <div class="follow-num counter" data-target="{{ course.courserewievs_set.count }}">
+                                        {{ course.courserewievs_set.count }}
+                                    </div>
+                                    <span>Отзывов</span>
+                                </div>
+                                <div class="text-md-start" style="padding-left: 5px;">
+                                    <div class="follow-num counter" data-target="{{ course.coursecomments_set.count }}">
+                                        {{ course.coursecomments_set.count }}
+                                    </div>
+                                    <span>Комментариев</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="nav nav-tabs border-tab tabs-scoial" id="top-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:course' course.slug %}">Информация</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:coursecomment' course.slug %}">Комментарии</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:coursereviews' course.slug %}">Отзывы</a>
+                        </li>
+                        <div class="desc">
+                            {% if all_themes_completed %}
+                            <a class="btn bg-success btn-hover-effect"
+                               href="{% url 'moderation:download_certificate' course.id %}">
+                                <i class="fa-solid fa-check me-2"></i>
+                                ПОЛУЧИТЬ СЕРТИФИКАТ
+                            </a>
+                            {% endif %}
+                        </div>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- user profile first-style end-->
+
+        <div class="col-xl-3 xl-40 col-lg-6 col-md-5 box-col-4">
+            <div class="default-according style-1 faq-accordion" id="accordionExample">
+                {% for module_data in modules_with_themes|dictsort:"position" %}
+                <div class="card">
+                    <div class="card-header" id="heading{{ module_data.id }}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-start collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ module_data.id }}"
+                                    aria-expanded="false"
+                                    aria-controls="collapse{{ module_data.id }}">
+                                {{ module_data.name }}
+                            </button>
+                        </h2>
+                    </div>
+                    <div class="collapse" id="collapse{{ module_data.id }}"
+                         aria-labelledby="heading{{ module_data.id }}" data-bs-parent="#accordionExample">
+                        <div class="card-body socialprofile filter-cards-view">
+                            <div class="card-body social-status filter-cards-view">
+                                {% for theme in module_data.themes_list %}
+                                {% if theme %}
+                                <div class="d-flex" style="height: 35px;">
+                                    <div class="flex-grow-1">
+                                        {% get_access_to_theme theme.id request as access_to_theme %}
+                                        {% get_theme_status theme.id request as status_theme %}
+                                        {% if access_to_theme %}
+
+                                            <a href="#" class="theme-link" data-theme-id="{{ theme.id }}">
+                                                <span class="f-w-600 d-block theme-name">{{ theme.name }}</span>
+                                            </a>
+
+                                            {% if status_theme %}
+                                            <span class="f-w-600 d-block" style="font-size: 12px;color: #65c15c !important;">Пройдено</span>
+
+                                            {% endif %}
+                                        {% else %}
+                                         <span class="f-w-600 d-block theme-name">Недоступно: {{ theme.name }}</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <span class="f-w-600 d-block">Нет лекций</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-xl-9 xl-60 col-lg-6 col-md-7 box-col-8">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body" id="course-description">
+                            <!-- Описание курса будет заменяться на описание темы -->
+                            {{ course.description|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<!-- СКРИПТ -->
+<script>
+// Глобальная функция для инициализации плеера
+function PlayerjsAsync() {
+    // Эта функция будет вызвана, когда скрипт плеера загрузится
+    if (window.pendingPlayers && window.pendingPlayers.length) {
+        window.pendingPlayers.forEach(function (config) {
+            new Playerjs(config);
+        });
+        window.pendingPlayers = [];
+    }
+}
+function handleNextLecture() {
+    const testButton = document.getElementById('nextTheme'); // Находим кнопку по ID
+
+    if (testButton) {
+        // Выполняем действия для else if (!data.have_questions)
+        testButton.id = 'nextTheme';
+        testButton.textContent = 'Следующая лекция';
+        testButton.classList.add('btn', 'btn-primary');
+        testButton.style.backgroundColor = '#7366ff';
+
+        const currentThemeSpan = document.querySelector('.theme-name.active'); // Находим активную тему по классу
+        if (currentThemeSpan) {
+            const currentThemeLink = currentThemeSpan.closest('.theme-link'); // Ищем родительскую ссылку
+            if (currentThemeLink) {
+                const currentModule = currentThemeLink.closest('.collapse'); // Текущий модуль
+
+                // Получаем все модули в порядке их расположения
+                const allModules = Array.from(document.querySelectorAll('.collapse'));
+                const currentModuleIndex = allModules.indexOf(currentModule);
+
+                // Получаем темы текущего модуля
+                const currentModuleThemes = Array.from(currentModule.querySelectorAll('.theme-link'));
+                const currentThemeIndex = currentModuleThemes.indexOf(currentThemeLink);
+
+                // Проверяем, есть ли следующая тема в текущем модуле
+                if (currentThemeIndex + 1 < currentModuleThemes.length) {
+                    const nextThemeLink = currentModuleThemes[currentThemeIndex + 1];
+                    updateActiveTheme(nextThemeLink);
+                    nextThemeLink.click();
+                } else {
+                    // Если в текущем модуле больше нет тем, переходим к следующему модулю
+                    if (currentModuleIndex + 1 < allModules.length) {
+                        const nextModule = allModules[currentModuleIndex + 1];
+                        const nextModuleButton = nextModule.parentElement.querySelector('button[data-bs-toggle="collapse"]');
+
+                        if (nextModuleButton) {
+                            nextModuleButton.click(); // Раскрываем следующий модуль
+
+                            // Ждем пока модуль раскроется, затем ищем первую тему
+                            setTimeout(() => {
+                                const firstThemeInNextModule = nextModule.querySelector('.theme-link');
+                                if (firstThemeInNextModule) {
+                                    updateActiveTheme(firstThemeInNextModule);
+                                    firstThemeInNextModule.click();
+                                }
+                            }, 300); // Задержка для анимации раскрытия
+                        }
+                    } else {
+                        console.log('Это последняя тема последнего модуля.');
+                    }
+                }
+            }
+        } else {
+            console.log('Активная тема не найдена.');
+        }
+    }
+
+    // Прокручиваем окно вверх после выполнения всех действий
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Добавляем плавную прокрутку
+    });
+}
+
+
+function updateActiveTheme(themeLink) {
+    const allThemeNames = document.querySelectorAll('.theme-name');
+    allThemeNames.forEach(themeName => {
+        themeName.style.color = '';
+        themeName.classList.remove('active');
+    });
+
+    // Установить нужный цвет для текущего .theme-name
+    const themeNameElement = themeLink.querySelector('.theme-name');
+    if (themeNameElement) {
+        themeNameElement.style.color = '#7366ff';  // Новый цвет
+        themeNameElement.classList.add('active');
+    }
+}
+// Функция генерации HTML для домашнего задания
+function generateHomeworkHtml(data, themeId) {
+    return `
+<div class="row">
+<div class="col-sm-12">
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4 class="card-title">${data.home_work}</h4>
+            <textarea id="homework-textarea" name="homework-text"></textarea>
+            <div class="file-upload mt-3">
+                <label for="homework-files" class="form-label">Загрузить файлы:</label>
+                <input type="file" id="homework-files" name="homework-files" multiple class="form-control">
+            </div>
+            <button id="submit-homework" class="btn btn-primary mt-3" style="background-color: #7366ff; border-color: #7366ff;">Отправить</button>
+        </div>
+    </div>
+</div>
+</div>`;
+}
+// Функция преобразования секунд в формат "MM:SS"
+function formatTime(seconds) {
+    var minutes = Math.floor(seconds / 60);
+    var sec = seconds % 60;
+    return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('click', function (e) {
+        const themeLink = e.target.closest('.theme-link');
+        if (themeLink) {
+            e.preventDefault();
+
+            const allThemeNames = document.querySelectorAll('.theme-name');
+            allThemeNames.forEach(themeName => {
+        themeName.style.color = '';
+        themeName.classList.remove('active');
+    });
+
+    // Установить нужный цвет для текущего .theme-name
+    const themeNameElement = themeLink.querySelector('.theme-name');
+    if (themeNameElement) {
+        themeNameElement.style.color = '#7366ff';  // Новый цвет
+        themeNameElement.classList.add('active');
+    }
+
+            const themeId = themeLink.getAttribute('data-theme-id');
+            const url = "{% url 'moderation:get_theme_description' 0 %}".replace('0', themeId);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let contentHtml = '';
+
+                    if (data.description) {
+                        contentHtml += `<div class="theme-description">${data.description}</div>`;
+                    }
+
+                    // Массив для хранения конфигураций плееров
+                    if (!window.pendingPlayers) {
+                        window.pendingPlayers = [];
+                    }
+
+                    if (data.files && data.files.length > 0) {
+                        data.files.forEach(file => {
+                            contentHtml += `<div class="mt-4">`; // Контейнер для файла
+
+                            if (file.type === 1) { // Видео
+                                if (file.files) {
+                                    const playerId = `player${file.id}`;
+                                    contentHtml += `<div id="${playerId}"></div>`;
+
+                                    // Добавляем конфигурацию плеера в очередь
+                                    window.pendingPlayers.push({
+                                        id: playerId,
+                                        file: file.files
+                                    });
+                                } else if (file.content) {
+                                    contentHtml += file.content;
+                                }
+                            } else if (file.type === 2) { // Аудио
+                                if (file.files) {
+                                    contentHtml += `
+                                    <audio controls class="w-100">
+                                        <source src="${file.files}" type="audio/mpeg">
+                                        Ваш браузер не поддерживает аудио элемент.
+                                    </audio>`;
+                                } else if (file.content) {
+                                    contentHtml += file.content;
+                                }
+                            } else if (file.type === 3) { // Документ
+                                if (file.files) {
+                                    contentHtml += `
+                                    <a href="${file.files}" class="btn btn-primary" download>
+                                        <i class="fas fa-download"></i> Скачать ${file.name || 'документ'}
+                                    </a>`;
+                                } else if (file.content) {
+                                    contentHtml += `<div class="document-content">${file.content}</div>`;
+                                }
+                            }
+
+                            if (file.name) {
+                                contentHtml += `
+                                <div class="file-name mt-2">
+                                    <small>${file.name}</small>
+                                </div>`;
+                            }
+
+                            contentHtml += `</div>`; // Закрываем контейнер файла
+                        });
+                    }
+                    if (data.home_work_status) {
+                        contentHtml += generateHomeworkHtml(data, themeId);
+
+                        setTimeout(() => {
+                            // Проверка наличия CKEditor с расширенной обработкой
+                            function initializeHomeworkSubmission() {
+                                const textareaElement = document.getElementById('homework-textarea');
+                                let editorInstance = null;
+
+                                // Инициализация CKEditor с безопасной проверкой
+                                try {
+                                    if (typeof CKEDITOR !== 'undefined') {
+                                        console.log('CKEditor доступен');
+                                        editorInstance = CKEDITOR.replace('homework-textarea');
+                                        console.log('CKEditor инициализирован');
+                                    } else {
+                                        console.warn('CKEditor не найден');
+                                    }
+                                } catch (error) {
+                                    console.error('Ошибка инициализации CKEditor:', error);
+                                }
+
+                                // Обработчик отправки домашнего задания
+                                document.getElementById('submit-homework').addEventListener('click', function () {
+                                    // Получение текста из CKEditor или обычного textarea
+                                    const homeworkText = editorInstance
+                                        ? editorInstance.getData()
+                                        : textareaElement.value;
+
+                                    const homeworkFiles = document.getElementById('homework-files').files;
+
+                                    const formData = new FormData();
+                                    formData.append('text', homeworkText);
+                                    formData.append('theme_id', themeId);
+
+                                    for (let i = 0; i < homeworkFiles.length; i++) {
+                                        formData.append('files', homeworkFiles[i]);
+                                    }
+
+                                    fetch('/submit_homework/', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                        },
+                                        body: formData
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('Домашнее задание успешно отправлено!');
+                                        } else {
+                                            alert('Ошибка отправки домашнего задания.');
+                                        }
+                                    })
+                                    .catch(error => console.error('Ошибка:', error));
+                                });
+                            }
+
+                            // Вызов функции инициализации
+                            initializeHomeworkSubmission();
+                        }, 0);
+                    }
+                    // Обновляем содержимое
+                    document.getElementById('course-description').innerHTML = contentHtml;
+
+                    // Если playerjs уже загружен, инициализируем плееры
+                    if (typeof Playerjs !== 'undefined') {
+                        PlayerjsAsync();
+                    }
+
+                    // Добавляем паддинг для параграфов
+
+
+                    // Удаление старой кнопки, если она существует
+                    var existingButton = document.querySelector('#course-description a');
+                    if (existingButton) {
+                        existingButton.remove();
+                    }
+
+                    var testButton = document.createElement('a');
+                    const quizurl = "{% url 'moderation:quiz_pass' 0 %}".replace('0', themeId);
+                    console.log(quizurl)
+                    console.log(data.have_questions)
+                    console.log(data.is_test_accessible)
+
+
+                    if (!data.is_test_accessible) {
+                        testButton.textContent = 'Тест недоступен';
+                        testButton.classList.add('btn', 'btn-secondary', 'disabled');
+                        testButton.style.backgroundColor = '#ccc';
+
+                        // Добавление таймера
+                        var timer = document.createElement('span');
+                        timer.textContent = formatTime(data.time_remaining);
+                        timer.style.marginLeft = '10px';
+                        testButton.appendChild(timer);
+
+                        // Таймер отсчета
+                        var timeLeft = data.time_remaining;
+                        var interval = setInterval(function () {
+                            timeLeft--;
+                            timer.textContent = formatTime(timeLeft);
+                            if (timeLeft <= 0) {
+                                clearInterval(interval);
+                                timer.textContent = 'Время истекло';
+
+                                // Возвращаем кнопку "Пройти тест"
+                                testButton.textContent = 'Пройти тест';
+                                testButton.classList.remove('disabled');
+                                testButton.classList.add('btn-primary');
+                                testButton.style.backgroundColor = '#7366ff';
+
+                                testButton.href = quizurl;
+                            }
+                        }, 1000);
+                    } else if (data.test_completed){
+                        testButton.id = 'nextTheme';
+                        testButton.textContent = 'Следующая лекция';
+                        testButton.classList.add('btn', 'btn-primary');
+                        testButton.style.backgroundColor = '#7366ff';
+                        testButton.onclick = handleNextLecture;
+                    } else if (!data.have_questions){
+                        testButton.id = 'nextTheme';
+                        testButton.textContent = 'Следующая лекция';
+                        testButton.classList.add('btn', 'btn-primary');
+                        testButton.style.backgroundColor = '#7366ff';
+                        testButton.onclick = handleNextLecture;
+                    } else {
+                        testButton.href = quizurl;
+                        testButton.textContent = 'Пройти тест';
+                        testButton.classList.add('btn', 'btn-primary');
+                        testButton.style.backgroundColor = '#7366ff';
+                    }
+
+                    testButton.style.float = 'right';
+                    testButton.style.padding = '5px 15px';
+                    document.getElementById('course-description').appendChild(testButton);
+                })
+                .catch(error => console.error('Ошибка:', error));
+        }
+    });
+});
+</script>
+<script src="{% static 'site/_generals/js/playerjs/playerjs.js' %}"></script>
+
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block footer %}{% endblock footer %}

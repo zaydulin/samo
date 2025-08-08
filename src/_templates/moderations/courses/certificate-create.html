@@ -1,0 +1,648 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select2.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+<link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.css">
+<style>
+    .dropdown-menu {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+    }
+    .hover-color {
+        color: black; /* базовый цвет */
+        text-decoration: none; /* убирает подчеркивание */
+    }
+
+    .hover-color:hover {
+        color: #7366ff; /* цвет при наведении */
+    }
+
+    .hover-color i {
+        transition: color 0.3s; /* плавный переход для иконки */
+    }
+
+    .hover-color:hover i {
+        color: #7366ff; /* цвет иконки при наведении */
+    }
+    .nav-item.dropdown {
+        max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+    }
+    .no-bg {
+        background-color: transparent !important; /* Убирает фон */
+        box-shadow: none !important; /* Убирает тени */
+    }
+
+    .dropdown-toggle::after {
+        display: none; /* Убирает стрелочку */
+    }
+
+    .ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused p {
+        margin-bottom: 16px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .ck-blurred.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline p {
+        margin-bottom: 16px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+</style>
+
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="card checkout-cart" id="sertificatemsform">
+            <div class="card-body">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Редактировать сертификат</h5>
+                    <div class="d-flex">
+                        <button onclick="SaveCertificate('save', '{{ course.id }}')" class="btn btn-primary" id="saveSertificate">Сохранить</button>
+                        <button onclick="SaveCertificate('publish', '{{ course.id }}')" class="btn btn-outline-primary ml-3" id="publicSertificate">{% if certificate.published %}В черновик{% else %}Опубликовать{% endif %}</button>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <form  method="post" enctype="multipart/form-data">
+                            <!-- Выбор образца сертификата -->
+                            <div class="form-group">
+                                <label for="sertificate-list">Выберите образец сертификата</label>
+                                <select id="sertificate-list" class="form-control">
+                                    <option data-image-active="{{ certificate.previev.url }}">
+                                        Активное
+                                    </option>
+                                    <option data-image-sample-1="{% static 'site/_generals/images/certificate/2.png' %}">
+                                        Образец №1
+                                    </option>
+                                    <option data-image-sample-2="{% static 'site/_generals/images/certificate/3.jpg' %}">
+                                        Образец №2
+                                    </option>
+                                    <option data-image-sample-3="{% static 'site/_generals/images/certificate/4.jpg' %}">
+                                        Образец №3
+                                    </option>
+                                    <option data-image-sample-4="{% static 'site/_generals/images/certificate/5.jpg' %}">
+                                        Образец №4
+                                    </option>
+                                    <option data-image-sample-5="{% static 'site/_generals/images/certificate/6.png' %}">
+                                        Образец №5
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Загрузка фона -->
+                            <div class="form-group">
+                                <label for="imageUploadSertificate">Загрузить фоновое изображение</label>
+                                <input type="file" class="form-control-file" id="imageUploadSertificate" accept="image/*" required>
+                                <input type="hidden" class="form-control" name="height" id="heightSertificate" value="{{ certificate.height }}">
+                                <input type="hidden" class="form-control" name="width" id="widthSertificate" value="{{ certificate.width }}">
+
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-outline-secondary" id="applyBackgroundButton">Применить</button>
+                            </div>
+
+                            <!-- Редактирование текста сертификата -->
+                            <div class="form-group">
+                                <label for="textInputSertificate">Введите текст сертификата</label>
+                                <textarea class="form-control" id="textInputSertificate" rows="10" placeholder="Введите текст здесь" required>{{ certificate.description }}</textarea>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showAlert(message, type) {
+        // Создаем элемент div для отображения уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили из вашего CSS
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px'; // Из CSS
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out'; // Из CSS
+
+        // Добавляем элемент на страницу (например, в начало body)
+        document.body.prepend(alertDiv);
+
+        // Удаляем элемент через 3 секунды
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    function SaveCertificate(action, courseId) {
+        const description = document.getElementById('textInputSertificate').value;
+        const previewInput = document.getElementById('imageUploadSertificate'); // Получаем сам элемент
+        const button = document.getElementById('publicSertificate');
+        const heightInput = document.getElementById('heightSertificate'); // Получаем элемент для высоты
+        const widthInput = document.getElementById('widthSertificate'); // Получаем элемент для ширины
+
+        const formData = new FormData();
+
+        formData.append('description', description);
+        formData.append('action', action);
+        // Добавляем значения для height и width
+        if (heightInput.value) {
+            formData.append('height', heightInput.value); // Добавляем высоту
+        }
+        if (widthInput.value) {
+            formData.append('width', widthInput.value); // Добавляем ширину
+        }
+        if (previewInput.files.length > 0) { // Проверяем наличие файлов
+            formData.append('previev', previewInput.files[0]);
+        }
+        const url = "{% url 'moderation:update_certificate' course.id %}";
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Предполагаем, что сервер вернет JSON с полем 'published' для подтверждения обновления
+                    return response.json();
+                } else {
+                    throw new Error('Ошибка при обновлении сертификата');
+                }
+            })
+            .then(data => {
+                showAlert('Сертификат успешно обновлен', 'success');
+
+                // Меняем текст кнопки в зависимости от текущего названия
+                if (action === 'publish') {
+                    if (button.textContent.trim() === 'Опубликовать') {
+                        button.textContent = 'В черновик';
+                    } else if (button.textContent.trim() === 'В черновик') {
+                        button.textContent = 'Опубликовать';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка', error);
+                showAlert('Ошибка при обновлении сертификата', 'danger');
+            });
+    }
+</script>
+
+<script type="importmap">
+    {
+      "imports": {
+        "ckeditor5": "https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.js"
+      }
+    }
+</script>
+<script type="module">
+    import {
+        ClassicEditor,
+        Essentials,
+        Bold,
+        Italic,
+        Font,
+        Paragraph,
+        createDropdown,
+        ButtonView,
+        DropdownView
+    } from 'ckeditor5';
+    // Initialize CKEditor instance
+    let editorInstance;
+    let currentBackgroundHeight;
+
+    ClassicEditor.create(document.querySelector('#textInputSertificate'), {
+        plugins: [Essentials, Bold, Italic, Font, Paragraph, MergeFieldPlugin],
+        toolbar: ['undo', 'redo', '|', 'bold', 'italic', '|', 'fontSize', 'fontFamily', 'fontColor', '|', 'mergeField'],
+
+        fontFamily: {
+            options: [
+                'default',
+                // Классические шрифты
+                'Arial, Helvetica, sans-serif',
+                'Times New Roman, Times, serif',
+                'Georgia, serif',
+                'Garamond, serif',
+                'Courier New, Courier, monospace',
+                'Verdana, Geneva, sans-serif',
+                'Tahoma, Geneva, sans-serif',
+                'Trebuchet MS, Helvetica, sans-serif',
+                'Impact, Charcoal, sans-serif',
+                'Lucida Console, Monaco, monospace',
+
+                // Современные веб-шрифты
+                'Roboto, sans-serif',
+                'Open Sans, sans-serif',
+                'Lato, sans-serif',
+                'Montserrat, sans-serif',
+                'Source Sans Pro, sans-serif',
+                'Raleway, sans-serif',
+                'Ubuntu, sans-serif',
+                'Merriweather, serif',
+                'Playfair Display, serif',
+                'Nunito, sans-serif',
+                'Poppins, sans-serif',
+                'Inter, sans-serif',
+
+                // Декоративные шрифты
+                'Pacifico, cursive',
+                'Dancing Script, cursive',
+                'Lobster, cursive',
+                'Great Vibes, cursive',
+                'Satisfy, cursive',
+                'Courgette, cursive',
+
+                // Рукописные шрифты
+                'Caveat, cursive',
+                'Permanent Marker, cursive',
+                'Indie Flower, cursive',
+                'Shadows Into Light, cursive',
+                'Amatic SC, cursive',
+
+                // Дисплейные шрифты
+                'Bebas Neue, sans-serif',
+                'Archivo Black, sans-serif',
+                'Righteous, cursive',
+                'Anton, sans-serif',
+                'Bangers, cursive',
+
+                // Элегантные шрифты
+                'Cormorant Garamond, serif',
+                'Crimson Text, serif',
+                'Libre Baskerville, serif',
+                'Playfair Display SC, serif',
+                'Cinzel, serif',
+
+                // Современные шрифты
+                'Quicksand, sans-serif',
+                'Comfortaa, cursive',
+                'Maven Pro, sans-serif',
+                'Questrial, sans-serif',
+                'Antic Slab, serif',
+
+                // Технические шрифты
+                'Fira Code, monospace',
+                'Source Code Pro, monospace',
+                'JetBrains Mono, monospace',
+                'IBM Plex Mono, monospace',
+
+                // Арабские стили
+                'Amiri, serif',
+                'Cairo, sans-serif',
+                'Scheherazade New, serif',
+
+                // Азиатские стили
+                'Noto Sans JP, sans-serif',
+                'Noto Sans KR, sans-serif',
+                'Noto Sans SC, sans-serif',
+                'Noto Sans TC, sans-serif',
+
+                // Дополнительные популярные шрифты
+                'Work Sans, sans-serif',
+                'Karla, sans-serif',
+                'Josefin Sans, sans-serif',
+                'Bitter, serif',
+                'Alegreya, serif',
+                'Titillium Web, sans-serif',
+                'PT Sans, sans-serif',
+                'PT Serif, serif',
+                'Rubik, sans-serif',
+                'Oxygen, sans-serif',
+                'Dosis, sans-serif',
+                'Cabin, sans-serif',
+                'Archivo Narrow, sans-serif',
+                'Fjalla One, sans-serif',
+                'Assistant, sans-serif'
+            ]
+        },
+
+
+        fontSize: {
+            options: [
+                'default',
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                16,
+                18,
+                20,
+                22,
+                24,
+                26,
+                28,
+                32,
+                36,
+                40,
+                44,
+                48,
+                54,
+                60,
+                66,
+                72,
+                80,
+                88,
+                96
+            ].map(size => {
+                if (size === 'default') {
+                    return 'default';
+                }
+                return {
+                    title: `${size}px`,
+                    model: `${size}px`,
+                    view: {
+                        name: 'span',
+                        styles: {
+                            'font-size': `${size}px`
+                        },
+                        priority: 5
+                    }
+                };
+            }),
+            supportAllValues: true
+        },
+
+
+    } )
+        .then(editor => {
+
+            editorInstance = editor;
+            const textInputSertificate = document.getElementById('textInputSertificate');
+
+            // Слушаем изменения в CKEditor и копируем их в textInputSertificate
+            editor.model.document.on('change:data', () => {
+                textInputSertificate.value = editor.getData();
+            });
+
+            const fontFamilyButton = editor.ui.componentFactory.create('fontFamily');
+            const dropdownView = fontFamilyButton.buttonView;
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Поиск шрифта...';
+            searchInput.classList.add('ck-search-input');
+
+            // Добавление поля поиска
+            dropdownView.on('open', () => {
+                const panelView = dropdownView.panelView;
+                panelView.element.appendChild(searchInput);
+
+                searchInput.addEventListener('input', () => {
+                    const query = searchInput.value.toLowerCase();
+                    const allItems = panelView.element.querySelectorAll('.ck-list-item');
+
+                    // Фильтрация элементов по вводу
+                    allItems.forEach(item => {
+                        const fontFamily = item.textContent.toLowerCase();
+                        if (fontFamily.includes(query)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            // Initialize with the first selected option's image if it exists
+            const selectedOption = document.getElementById('sertificate-list').options[0];
+
+            const activeImage = selectedOption.getAttribute('data-image-active');
+            if (activeImage) {
+                applyBackgroundImage(activeImage);
+                updateFileInput(activeImage);
+            }
+
+            editor.editing.view.document.on('focus', () => {
+                const editorElement = document.querySelector('.ck-editor__editable');
+                if (currentBackgroundHeight) {
+                    editorElement.style.height = `${currentBackgroundHeight}px`;
+                }
+            });
+
+            editor.editing.view.document.on('blur', () => {
+                const editorElement = document.querySelector('.ck-editor__editable');
+                if (currentBackgroundHeight) {
+                    editorElement.style.height = `${currentBackgroundHeight}px`;
+                }
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    function MergeFieldPlugin(editor) {
+        editor.ui.componentFactory.add('mergeField', locale => {
+            const dropdownView = createDropdown(locale);
+
+            // Добавление значений "Merge fields" в выпадающий список
+            const items = [
+                { label: "Имя студента", value: "[certificate_student_name]" },
+                { label: "Название курса", value: "[certificate_course]" },
+                { label: "Оценки учащихся", value: "[certificate_student_marks]" },
+                { label: "Дата присуждения ", value: "[certificate_student_date]" },
+                { label: "Электронная почта студента", value: "[certificate_student_email]" },
+                { label: "Уникальный код сертификата", value: "[certificate_code]" },
+                { label: "Фотография студента", value: "[certificate_student_photo]" },
+            ];
+
+            items.forEach(item => {
+                const button = new ButtonView(locale);
+                button.set({
+                    label: item.label,
+                    withText: true,
+                    tooltip: true
+                });
+
+                button.on('execute', () => {
+                    editor.model.change(writer => {
+                        const insertPosition = editor.model.document.selection.getFirstPosition();
+                        writer.insertText(item.value, insertPosition);
+                    });
+                });
+
+                dropdownView.buttonView.set({
+                    label: 'Insert → Merge field',
+                    tooltip: 'Insert a merge field'
+                });
+
+                dropdownView.panelView.children.add(button);
+            });
+
+            return dropdownView;
+        });
+    }
+
+    // Add change event listener to select element
+    document.getElementById('sertificate-list').addEventListener('change', function(e) {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+
+        // Get all attributes of the selected option
+        const attributes = selectedOption.attributes;
+        let imageUrl = null;
+
+        // First check for data-image-active
+        imageUrl = selectedOption.getAttribute('data-image-active');
+
+        // If no active image, look for sample images
+        if (!imageUrl) {
+            for (let i = 0; i < attributes.length; i++) {
+                const attr = attributes[i];
+                if (attr.name.startsWith('data-image-sample-')) {
+                    imageUrl = attr.value;
+                    break;
+                }
+            }
+        }
+
+        if (imageUrl) {
+            applyBackgroundImage(imageUrl);
+            updateImageDimensions(imageUrl);  // Update dimensions in the input fields
+        }
+    });
+
+    // Handle apply button click for file uploads
+    document.getElementById('applyBackgroundButton').addEventListener('click', function () {
+        const fileInput = document.getElementById('imageUploadSertificate');
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                applyBackgroundImage(e.target.result);
+                updateImageDimensions(e.target.result);  // Update dimensions in the input fields
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Пожалуйста, выберите изображение для фона.");
+        }
+    });
+
+    // Function to apply background image with proper scaling
+    // Function to apply background image with proper scaling
+function applyBackgroundImage(imageUrl) {
+    const image = new Image();
+
+    image.onload = function () {
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const editorElement = document.querySelector('.ck-editor__editable');
+        const editorWidth = editorElement.offsetWidth;
+        const aspectRatio = imageHeight / imageWidth;
+        const newHeight = Math.max(editorWidth * aspectRatio, 400);
+
+        currentBackgroundHeight = newHeight;
+
+        // Update width and height input fields
+        document.getElementById('widthSertificate').value = editorWidth;
+        document.getElementById('heightSertificate').value = newHeight;
+
+        // Apply styles to the editor
+        editorInstance.editing.view.change(writer => {
+            const root = editorInstance.editing.view.document.getRoot();
+
+            writer.setStyle('background-image', `url(${imageUrl})`, root);
+            writer.setStyle('background-size', 'contain', root);
+            writer.setStyle('background-position', 'center center', root);
+            writer.setStyle('background-repeat', 'no-repeat', root);
+            writer.setStyle('min-height', `${newHeight}px`, root);
+            writer.setStyle('height', `${newHeight}px`, root);
+        });
+
+        // Set editor height
+        editorElement.style.minHeight = `${newHeight}px`;
+        editorElement.style.height = `${newHeight}px`;
+
+        // Remove any existing style element for this editor
+        const existingStyle = document.getElementById('editor-fixed-height-style');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+
+        // Add new style element
+        const styleElement = document.createElement('style');
+        styleElement.id = 'editor-fixed-height-style';
+        styleElement.textContent = `
+            .ck-editor__editable {
+                height: ${newHeight}px !important;
+                min-height: ${newHeight}px !important;
+            }
+        `;
+        document.head.appendChild(styleElement);
+    };
+
+    image.src = imageUrl;
+}
+
+// Function to update file input with the selected image
+async function updateFileInput(imageUrl) {
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+
+        const fileName = imageUrl.split('/').pop() || 'background.png';
+        const file = new File([blob], fileName, { type: blob.type });
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        const fileInput = document.getElementById('imageUploadSertificate');
+        fileInput.files = dataTransfer.files;
+    } catch (error) {
+        console.error('Error updating file input:', error);
+    }
+}
+
+
+</script>
+<style>
+    ul.ck.ck-reset.ck-list {
+        height: 200px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    .ck.ck-dropdown .ck-dropdown__panel.ck-dropdown__panel-visible {
+        display: inline-grid!important;
+        width: 200px!important;
+    }
+</style>
+{% endblock content %}

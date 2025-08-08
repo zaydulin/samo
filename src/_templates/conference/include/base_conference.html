@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-sidenav-view="hover">
+<head>
+    <meta charset="UTF-8">
+    <title>Vizor - {% block headtitle %} {% endblock headtitle %}</title>
+    <meta name="description" content="{% block headdescription %}{% endblock headdescription %}" />
+    <meta name="keywords" content="{% block headkeywords %}{% endblock headkeywords %}" />
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="{% static 'admin_panel/images/favicon.ico' %}">
+    <!-- App css -->
+    <link href="{% static 'admin_panel/css/app.min.css' %}" rel="stylesheet" type="text/css">
+    <!-- Icons css -->
+    <link href="{% static 'admin_panel/css/icons.min.css' %}" rel="stylesheet" type="text/css">
+    <!-- Theme Config Js -->
+    <script src="{% static 'admin_panel/js/config.js' %}"></script>
+    {% block headlink %}{% endblock headlink %}
+</head>
+<body>
+<div class="flex wrapper">
+    <!-- Sidenav Menu -->
+    <div class="app-menu">
+        <!-- Sidenav Brand Logo -->
+        <a href="index.html" class="logo-box">
+            <!-- Light Brand Logo -->
+            <div class="logo-light">
+                <img src="assets/images/logo-light.png" class="logo-lg h-6" alt="Light logo">
+                <img src="assets/images/logo-sm.png" class="logo-sm" alt="Small logo">
+            </div>
+            <!-- Dark Brand Logo -->
+            <div class="logo-dark">
+                <img src="assets/images/logo-dark.png" class="logo-lg h-6" alt="Dark logo">
+                <img src="assets/images/logo-sm.png" class="logo-sm" alt="Small logo">
+            </div>
+        </a>
+        <!-- Sidenav Menu Toggle Button -->
+        <button id="button-hover-toggle" class="absolute top-5 end-2 rounded-full p-1.5">
+            <span class="sr-only">Menu Toggle Button</span>
+            <i class="mgc_round_line text-xl"></i>
+        </button>
+        <div class="srcollbar" data-simplebar>
+            {% include 'profile/include/side_menu.html' %}
+        </div>
+    </div>
+    <!-- Sidenav Menu End  -->
+    <div class="page-content">
+        <!-- Topbar Start -->
+        {% include 'profile/include/header.html' %}
+        <!-- Topbar End -->
+
+        <main class="flex-grow p-6">
+            {% block content %}{% endblock content %}
+        </main>
+    </div>
+</div>
+<!-- Back to Top Button -->
+<button data-toggle="back-to-top" class="fixed hidden h-10 w-10 items-center justify-center rounded-full z-10 bottom-20 end-14 p-2.5 bg-primary cursor-pointer shadow-lg text-white">
+    <i class="mgc_arrow_up_line text-lg"></i>
+</button>
+{% include 'profile/include/ThemeSettings.html' %}
+<!-- Plugin Js -->
+
+<script src="{% static 'admin_panel/libs/simplebar/simplebar.min.js' %}"></script>
+<script src="{% static 'admin_panel/libs/feather-icons/feather.min.js' %}"></script>
+<script src="{% static 'admin_panel/libs/@frostui/tailwindcss/frostui.js' %}"></script>
+<!-- App Js -->
+<script src="{% static 'admin_panel/js/app.js' %}"></script>
+<!-- Sortablejs -->
+<script src="{% static 'admin_panel/libs/sortablejs/Sortable.min.js' %}"></script>
+<!-- Dragula Demo Component js -->
+<script src="{% static 'admin_panel/js/pages/apps-kanban.js' %}"></script>
+    <script src="{% static 'admin_panel/js/pages/icons-material-symbols.js' %}"></script>
+{% block footer %}{% endblock footer %}
+
+</body>
+</html>

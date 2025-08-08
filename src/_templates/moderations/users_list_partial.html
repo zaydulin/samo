@@ -1,0 +1,117 @@
+{% load i18n %}
+<div class="-mx-5 ">
+    <table class="table">
+        <thead >
+        <tr class="border-bottom-primary">
+            <th scope="col">
+                ФИО
+            </th>
+            <th scope="col">
+                Почта
+            </th>
+            <th scope="col">
+                Номер телефона
+            </th>
+            <th scope="col">
+                Город
+            </th>
+            <th scope="col">
+                Действия
+            </th>
+        </tr>
+        </thead>
+        <tbody class="list " id="employeeList">
+        {% for user in users %}
+        <tr class="{% if user.blocked %}red-overlay{% elif user.deleted %}gray-overlay{% else %} {% endif %}">
+            <td class="ModerationGroupsName">
+                <img class="img-fluid table-avtar" src="{% if user.avatar %}{{ user.avatar.url }}{% endif %}" alt="">
+                {% if user.name %}{{ user.name }}{% endif %}
+            </td>
+            <td class="ModerationGroupsEmail">
+                {% if user.email %}{{ user.email }}{% endif %}
+            </td>
+            <td class="ModerationGroupsPhone">
+                {% if user.phone %}{{ user.phone }}{% endif %}
+            </td>
+            <td class="ModerationGroupsCountry">
+                {% if user.city %}{{ user.city }}{% endif %}
+            </td>
+            <td class="ModerationGroupsAction">
+                <div class="flex gap-3">
+                    <ul class="action">
+                        {% if user.blocked %}
+                        <li class="delete">
+                            <form method="post" action="{% url 'moderation:unblock_user' pk=user.id %}" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-primary light px-3">
+                                    <!-- Уменьшил отступ слева до ml-1 -->
+                                    <i class="fa fa-unlock"></i>
+                                    <span class="align-middle">{% trans 'Разблокировать' %}</span>
+                                </button>
+                            </form>
+                        </li>
+                        {% elif user.deleted %}
+                        <form method="post" action="{% url 'moderation:restore_user' pk=user.id %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-primary light px-3">
+                                <!-- Уменьшил отступ слева до ml-1 -->
+                                <i class="fa fa-refresh"></i>
+                                <span class="align-middle">{% trans 'Восстановить' %}</span>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'moderation:worker_delete' pk=user.id %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-primary light px-3">
+                                <!-- Уменьшил отступ слева до ml-1 -->
+                                <i class="fa fa-trash"></i>
+                                <span class="align-middle">{% trans 'Удалить' %}</span>
+                            </button>
+                        </form>
+                        {% else %}
+                        <li>
+                            <a class="btn btn-primary light px-3"
+                               href="{% url 'moderation:user_detail' user.id %}">
+                                <i class="fa fa-eye" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'useraccount:edit_profiles' user.id %}"
+                               data-modal-target="addEmployeeModal"
+                               class="btn btn-primary light px-3">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <form method="post"
+                                  action="{% url 'moderation:delete_user' user.id %}">
+                                {% csrf_token %}
+                                <button type="submit" data-modal-target="deleteModal"
+                                        class="btn btn-primary light px-3">
+                                    <i class="fa fa-trash"></i>
+                                    <span class="align-middle">{% trans 'Удалить' %}</span>
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <form method="post"
+                                  action="{% url 'moderation:block_user' pk=user.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-primary light px-3">
+                                    <i class="fa fa-ban"></i>
+                                    <span class="align-middle">{% trans 'Заблокировать' %}</span>
+                                </button>
+                            </form>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

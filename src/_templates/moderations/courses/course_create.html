@@ -1,0 +1,216 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+<style>
+    li.qwiz:hover{
+        background: #f7f7f7;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+        padding: 10px;
+    }
+    span.title {
+        height: 42px;
+        padding-left: 10px;
+        padding-top: 10px;
+    }
+    .main-title {
+        color: #7366ff!important;
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+        font-size: 16px;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+    }
+    .float-end {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+    }
+    .float-end-task {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+        padding-top:10px;
+    }
+    ul.nav.main-menu.custom-scrollbar li {
+        display: flex;
+        width: 100%;
+    }
+    ul.nav.main-menu.custom-scrollbar > li > ul.nav.main-menu.custom-scrollbar {
+        padding-left: 10px;
+    }
+    span.float-end-task a svg {
+        color: #9f9f9f!important;
+    }
+    .cropper-container.cropper-bg {
+        height: 75vh !important;
+    }
+    img#cropperImage {
+        height: 70vh;
+        width: 59vh;
+    }
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select2.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs border-tab tabs-scoial" id="top-tab" role="tablist">
+                    <li class="nav-item dropdown" id="generalSettingsDropdown">
+                        <a class="nav-link dropdown-toggle text-dark hover-color w-auto no-bg" href="#" role="button">
+                            <i class="fas fa-cog me-1"></i> Настройки
+                        </a>
+                        <ul class="dropdown-menu border-0">
+                            <li><a class="dropdown-item" href="#">Курс</a></li>
+                            <li><a class="dropdown-item" href="#">Общие настройки</a></li>
+                            <li><a class="dropdown-item" href="#">Расписание</a></li>
+                            <li><a class="dropdown-item" href="#">Сертификат</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:course_update' course.id %}">Информация</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link active" href="{% url 'moderation:course_update' course.id %}">Редактирование</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:course_assistants_list' course.id %}">Разработчики</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:mycourse_schedules' course.id %}">Расписание</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:mycourse_student' course.id %}">Ученики</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:mycourse_comment' course.id %}">Комментарии</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'moderation:mycourse_reviews' course.id %}">Отзывы</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div id="iframe-block" data-iframe-url="{% url 'moderation:course_update_iframe' course.id %}">
+                <iframe src="{% url 'moderation:course_update_iframe' course.id %}" width="100%" height="800px" frameborder="0"></iframe>
+            </div>
+            <!-- user profile first-style end-->
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно для обрезки -->
+<div id="cropperModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Обрезка изображения</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="cropperImage" src="" alt="Изображение для обрезки">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="cropButton">Обрезать</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/select2/select2.full.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/select2/select2-custom.js' %}"></script>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+
+
+
+
+
+
+{% endblock bootonfooter %}

@@ -1,0 +1,27 @@
+{% if assistants %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for assistant in assistants %}
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="flex items-center">
+                    <img src="{{ assistant.author.profile.avatar.url }}" alt="{{ assistant.author.profile.name }}" class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h3 class="font-semibold">{{ assistant.author.profile.name }}</h3>
+                        <p class="text-sm text-gray-500">@{{ assistant.author.username }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" class="form-checkbox" {% if assistant.bookmark_as %}checked{% endif %}
+                               onchange="updateAssistant('{{ assistant.id }}', this.checked)">
+                        <span class="ml-2">Закрепить</span>
+                    </label>
+                </div>
+                <div class="mt-2">
+                    <button class="text-red-500 hover:text-red-700" onclick="removeAssistant('{{ assistant.id }}')">Удалить</button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-center text-gray-500">Для этого курса еще не добавлены ассистенты.</p>
+{% endif %}

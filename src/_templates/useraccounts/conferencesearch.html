@@ -1,0 +1,93 @@
+{% extends 'useraccounts/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block headtitle %} Поиск кнференции{% endblock headtitle %}
+{% block headdescription %}{% endblock headdescription %}
+{% block headkeywords %}{% endblock headkeywords %}
+{% block headlink %}
+
+{% endblock headlink %}
+{% block content %}
+    <div class="flex justify-between items-center mb-6">
+        <h4 class="text-slate-900 dark:text-slate-200 text-lg font-medium">Поиск кнференции</h4>
+        <div class="md:flex hidden items-center gap-2.5 text-sm font-semibold">
+            <div class="flex items-center gap-2">
+                <a class="text-sm font-medium text-slate-700 dark:text-slate-400">Панель управления</a>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="mgc_right_line text-lg flex-shrink-0 text-slate-400 rtl:rotate-180"></i>
+                <a class="text-sm font-medium text-slate-700 dark:text-slate-400" aria-current="page">Поиск
+                    кнференции</a>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <form class="form-inline my-2 my-lg-0" method="GET" action="">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div>
+                            <input class="form-control form-control-sm mr-sm-1" type="search" name="token" placeholder="Введите токен для поиска" value="{{ request.GET.token }}">
+
+                        </div>
+                        <div>
+                            <button class="btn bg-primary text-white" type="submit">
+                                <i class="mgc_search_3_line text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- Отображение списка результатов -->
+        {% if request.GET.token %}
+            <!-- Display search results -->
+            {% if chat_rooms and chat_rooms.count %}
+                <div id="table-search">
+                    <div role="complementary" class="gridjs gridjs-container" style="width: 100%;">
+                        <div class="gridjs-wrapper" style="height: auto;">
+                            <table role="grid" class="gridjs-table" style="height: auto;">
+                                <thead class="gridjs-thead">
+                                <tr class="gridjs-tr">
+                                    <th data-column-id="name" class="gridjs-th">
+                                        <div class="gridjs-th-content">Название</div>
+                                    </th>
+                                    <th data-column-id="email" class="gridjs-th">
+                                        <div class="gridjs-th-content">Спикер</div>
+                                    </th>
+                                    <th data-column-id="position" class="gridjs-th">
+                                        <div class="gridjs-th-content">Дата</div>
+                                    </th>
+                                    <th data-column-id="company" class="gridjs-th">
+                                        <div class="gridjs-th-content">Время</div>
+                                    </th>
+                                    <th data-column-id="country" class="gridjs-th">
+                                        <div class="gridjs-th-content">Действие</div>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody class="gridjs-tbody">
+                                {% for chat_room in chat_rooms %}
+                                    <tr class="gridjs-tr">
+                                        <td data-column-id="name" class="gridjs-td">{{ chat_room.name }}</td>
+                                        <td data-column-id="email" class="gridjs-td">{{ chat_room.spiker }}</td>
+                                        <td data-column-id="position" class="gridjs-td">{{ chat_room.start_data }}</td>
+                                        <td data-column-id="company" class="gridjs-td">{{ chat_room.start_time }}</td>
+                                        <td data-column-id="country" class="gridjs-td"><a href="{% url 'useraccount:video_chat_root' chat_room.slug %}">Перейти</a></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="gridjs-temp" class="gridjs-temp"></div>
+                    </div>
+                </div>
+            {% else %}
+                <p>Результаты не найдены</p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock content %}

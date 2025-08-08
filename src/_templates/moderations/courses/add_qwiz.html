@@ -1,0 +1,528 @@
+<style>
+    .remove-row {
+  width: 120px;       /* Устанавливаем ширину 120 пикселей */
+  margin: 10px;       /* Устанавливаем отступ 10 пикселей */
+}
+</style>
+
+<form id="qwizForm" action="" method="post" enctype="multipart/form-data">
+    <div class="card checkout-cart">
+        <div class="card-body basic-wizard important-validation" id="msform">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Создание теста</h5>
+                <div>
+                    <button type="submit" class="btn btn-primary" id="saveqwizForm">Сохранить</button>
+                </div>
+            </div>
+            <div id="loading-indicator" class="htmx-indicator">
+                Сохранение...
+            </div>
+            <div class="row g-3 custom-input">
+                {% csrf_token %}
+                <input type="hidden" id="themeId" name="theme_id" value="">
+                <div class="col-sm-6">
+                    <label for="qwizName" class="form-label">Вопрос:</label>
+                    <input type="text" id="qwizName" name="name" class="form-control" placeholder="Введите вопрос или задание" >
+                    <div class="alert-danger" id="alert-qwizName"></div>
+                </div>
+                <div class="col-sm-4">
+                    <label class="form-label" for="qwizType">Тип</label>
+                    <select id="qwizType" class="form-control" name="type" >
+                        <option value="">Выберите тип теста</option>
+                        <option value="2">Текстовые варианты</option>
+                        <option value="3">Варианты с картинками</option>
+                        <option value="4">Выбор из двух</option>
+                        <option value="5">Заполнить пропуски</option>
+                        <option value="6">Найти соответствие</option>
+                    </select>
+                    <div class="alert-danger" id="alert-qwizType"></div>
+                </div>
+                <div class="col-sm-2" id="id_point_show_edit">
+                    <label class="form-label" for="id_point">Баллы</label>
+                    <input type="number" name="point" value="0" min="0" class="form-control" id="id_point">
+                    <div class="alert-danger" id="alert-point">{{ errors.point }}</div>
+                </div>
+                <div class="col-sm-12" style="display: none;">
+                    <label class="form-label" for="id_description_qwiz">Описание</label>
+                    <textarea name="description" id="id_description_qwiz" class="form-none" ></textarea>
+                    <div id="id_description_qwiz_form"></div>
+                    <div class="alert-danger" id="alert-description_qwiz"></div>
+                </div>
+                <!-- Тесты -->
+                <div id="qwiz-type-2" class="question-contain-type-2" style="display:none;" class="row g-3 custom-input">
+                    <div class="d-flex justify-content-between">
+                       <h3>Варианты ответов <br> <span style="font-size: 18px;">Введите варианты ответов, пометьте правильные</span> </h3>
+
+                    </div>
+                    <hr>
+                    <div class="question-container-type-2">
+                        <!-- Вопросы будут добавляться сюда динамически -->
+                        <div class="row question-type-2 mb-3">
+                            <div class="col-sm-8">
+                                <input type="text" id="qwiz_title_type_2_0" name="qwiz_title_type_2[]" class="form-control" placeholder="Вариант ответа" >
+                                <div class="alert-danger" id="alert-qwiz_title_type_2_0"></div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-check-size">
+                                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                                    <div class="btn btn-outline-success-2x">
+                                      <div class="checkbox checkbox-success">
+                                        <input id="qwiz_right_answer_type_2_0"  type="checkbox"  name="qwiz_right_answer_type_2[]" name="type">
+                                        <label class="mb-0" for="qwiz_right_answer_type_2_0">Правильный ответ</label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="alert-danger" id="alert-qwiz_right_answer_type_2_0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Тесты с картинками -->
+                <div id="qwiz-type-3" class="question-contain-type-3" style="display:none;" class="row g-3 custom-input">
+                    <div class="d-flex justify-content-between">
+                        <h5>Добавьте варианты ответов</h5>
+
+                    </div>
+                    <hr>
+                    <div class="question-container-type-3">
+                        <div class="row question-type-3 mb-3">
+                            <div class="col-sm-2">
+                                <label for="image-qwiz-type-3_0" style="height: 100%; display: flex; justify-content: center; align-items: center;" class="btn b-ln-height btn-outline-primary">
+                                    <i class="fa-solid fa-upload"></i>
+                                    <img id="preview-image-qwiz-type-3_0" src="" alt="Предварительный просмотр изображения"
+                                         style="display: none; width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                </label>
+                                <input type="file" name="image-qwiz-type-3[]" id="image-qwiz-type-3_0" style="display: none" class="form-control">
+                                <div class="alert-danger" id="alert-image-qwiz-type-3_0"></div>
+                            </div>
+                            <div class="col-sm-6">
+                            <input type="text" id="qwiz_title_type_3_0" name="qwiz_title_type_3[]" class="form-control" placeholder="Подпись к картинке" >
+                                </div>
+                            <div class="col-sm-4">
+                                <div class="form-check-size">
+                                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                                    <div class="btn btn-outline-success-2x">
+                                      <div class="checkbox checkbox-success">
+                                        <input id="qwiz_right_answer_type_3_0"  type="checkbox"  name="qwiz_right_answer_type_3[]" name="type">
+                                        <label class="mb-0" for="qwiz_right_answer_type_3_0">Правильный ответ</label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="alert-danger" id="alert-qwiz_right_answer_type_3_0"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Выборка -->
+                <div id="qwiz-type-4" class="question-contain-type-4" style="display:none;" class="row g-3 custom-input">
+                    <div class="d-flex justify-content-between">
+                        <h5>Добавьте варианты ответов</h5>
+
+                    </div>
+                    <hr>
+                    <div class="question-container-type-4">
+                        <div class="row question-type-4 mb-3">
+                            <div class="col-sm-6">
+                                <label for="qwiz_title_type_4_0_1" class="form-label">Ответ 1:</label>
+                                <input type="text" id="qwiz_title_type_4_0_1" name="qwiz_title_type_4_1[]" class="form-control" placeholder="Ответ" >
+                                <div class="alert-danger" id="alert-qwiz_title_type_4_0_1"></div>
+                                <label class="form-label" for="qwiz_right_answer_type_4_0_1">Правильный ответ</label>
+                                <div class="form-check-size">
+                                    <div class="form-check form-switch form-check-inline">
+                                        <select id="qwiz_right_answer_type_4_0_1" class="form-control" name="qwiz_right_answer_type_4_1[]" >
+                                            <option value="1">Слева</option>
+                                            <option value="2">Справа</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="alert-danger" id="alert-qwiz_right_answer_type_4_0_1"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="qwiz_title_type_4_0_2" class="form-label">Ответ 2:</label>
+                                <input type="text" id="qwiz_title_type_4_0_2" name="qwiz_title_type_4_2[]" class="form-control" placeholder="Ответ" >
+                                <div class="alert-danger" id="alert-qwiz_title_type_4_0_2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Заполните пропуск -->
+                <div id="qwiz-type-5" class="question-contain-type-5" style="display:none;" class="row g-3 custom-input">
+                    <div class="d-flex justify-content-between">
+                        <h5>Вопросы типа "Заполните пропуск"</h5>
+
+                    </div>
+                    <hr>
+                    <div class="question-container-type-5">
+                        <div class="row question-type-5 mb-3">
+                            <div class="col-sm-12">
+                                <span>Для пользователя будут выведены слова-подсказки чтобы было легче решить тест. Подсказки необязательны.</span><br>
+                                <button type="button" class="btn btn-primary"  id="add-hint">Добавить подсказку</button>
+                                <div id="input-container" class="mt-3">
+                                            <!-- Новые поля input будут добавляться сюда -->
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-sm-12">
+                                <label for="qwiz_description_type_5_0">Введите текст. Выделите жирным слова,вместо которых будет пропуск.</label>
+                                <textarea type="text" id="qwiz_description_type_5_0" name="qwiz_description_type_5[]" class="form-control" placeholder="Вопрос" style="display:none;"></textarea>
+                                <textarea type="text" id="qwiz_description_ckeditor_type_5_0" name="qwiz_description_ckeditor_type_5[]" class="form-control" placeholder="Вопрос" ></textarea>
+                                <div class="alert-danger" id="alert-qwiz_description_type_5_0"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id="qwiz-type-6" class="question-contain-type-6" style="display:none;" >
+                      <div class="d-flex justify-content-between">
+                        <h5>Вопросы типа "Найти соответствие"</h5>
+
+                    </div>
+                    <hr>
+    <!-- Это "шаблонный" блок, который будет клонироваться -->
+    <div class="row question-type-6 mb-3">
+        <div class="col-sm-2">
+            <label for="image-qwiz-type-6_0"
+                   class="btn b-ln-height btn-outline-primary"
+                   style="height: 100%; display: flex; justify-content: center; align-items: center;">
+                <i class="fa-solid fa-upload"></i>
+                <img id="preview-image-qwiz-type-6_0"
+                     src=""
+                     alt="Предварительный просмотр изображения"
+                     style="display: none; width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+            </label>
+            <input type="file"
+                   name="image-qwiz-type-6_0"
+                   id="image-qwiz-type-6_0"
+                   style="display: none"
+                   class="form-control">
+            <div class="alert-danger" id="alert-image-qwiz-type-6_0"></div>
+        </div>
+
+        <div class="col-sm-1" style="align-content: center;">
+            <span style="text-align: center; display: inline-block; width: 100%;">или</span>
+        </div>
+
+        <div class="col-sm-2">
+            <input type="text"
+                   id="qwiz_title_type_6_0"
+                   name="qwiz_title_type_6_0"
+                   class="form-control"
+                   placeholder="Текстовый вараинт">
+        </div>
+
+        <div class="col-sm-2">
+            <hr>
+        </div>
+
+        <div class="col-sm-2">
+            <label for="image-qwiz-type-second-6_0"
+                   class="btn b-ln-height btn-outline-primary"
+                   style="height: 100%; display: flex; justify-content: center; align-items: center;">
+                <i class="fa-solid fa-upload"></i>
+                <img id="preview-image-qwiz-type-second-6_0"
+                     src=""
+                     alt="Предварительный просмотр изображения"
+                     style="display: none; width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+            </label>
+            <input type="file"
+                   name="image-qwiz-type-second-6_0"
+                   id="image-qwiz-type-second-6_0"
+                   style="display: none"
+                   class="form-control">
+            <div class="alert-danger" id="alert-image-qwiz-type-second-6_0"></div>
+        </div>
+
+        <div class="col-sm-1" style="align-content: center;">
+            <span style="text-align: center; display: inline-block; width: 100%;">или</span>
+        </div>
+
+        <div class="col-sm-2">
+            <input type="text"
+                   id="qwiz_title_type_second_6_0"
+                   name="qwiz_title_type_second_6_0"
+                   class="form-control"
+                   placeholder="Текстовый вараинт">
+        </div>
+
+    </div>
+</div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <div>
+                    <!--ТЕст текст-->
+                    <button type="button" class="btn btn-primary" style="display: none" id="add-question-type-2">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <!--ТЕст картинки-->
+                <div>
+                    <button type="button" class="btn btn-primary"  style="display: none"  id="add-question-type-3">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <!--Выбор-->
+                <div>
+                    <button type="button" class="btn btn-primary"  style="display: none"  id="add-question-type-4">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                        <!--ТЕст пропуск-->
+                <div>
+                    <button type="button" class="btn btn-primary"  style="display: none"  id="add-question-type-5">Добавить вариант</button>
+                </div>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                        <!--ТЕст пропуск-->
+                <div>
+                    <button type="button" class="btn btn-primary"  style="display: none"  id="add-question-type-6">Добавить вариант</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</form>
+<script>
+const addBtn = document.getElementById("add-question-type-6");
+const container = document.getElementById("qwiz-type-6");
+
+function initRowEvents(row) {
+  // Левый блок
+  const fileLeft = row.querySelector('[id^="image-qwiz-type-6_"]');
+  const textLeft = row.querySelector('[id^="qwiz_title_type_6_"]');
+  const previewLeft = row.querySelector('[id^="preview-image-qwiz-type-6_"]');
+  const labelLeft = row.querySelector(`label[for="${fileLeft.id}"]`);
+  const iconLeft = labelLeft ? labelLeft.querySelector("i") : null;
+
+  if (fileLeft) {
+    fileLeft.addEventListener("change", function () {
+      console.log("Левый input изменился, id:", this.id);
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          let parts = this.id.split("_");
+          let index = parts[parts.length - 1];
+          console.log("Извлеченный индекс левого input:", index);
+          const preview = row.querySelector(`[id="preview-image-qwiz-type-6_${index}"]`);
+          if (preview) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          }
+          textLeft.disabled = true;
+          if (iconLeft) { iconLeft.className = "fas fa-times"; }
+        };
+        reader.readAsDataURL(this.files[0]);
+      } else {
+        let parts = this.id.split("_");
+        let index = parts[parts.length - 1];
+        const preview = row.querySelector(`[id="preview-image-qwiz-type-6_${index}"]`);
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
+        textLeft.disabled = false;
+        if (iconLeft) { iconLeft.className = "fa-solid fa-upload"; }
+      }
+    });
+  }
+
+  if (textLeft) {
+    textLeft.addEventListener("input", function () {
+      if (this.value.trim().length > 0) {
+        fileLeft.disabled = true;
+        if (iconLeft) { iconLeft.className = "fas fa-times"; }
+        let parts = fileLeft.id.split("_");
+        let index = parts[parts.length - 1];
+        const preview = row.querySelector(`[id="preview-image-qwiz-type-6_${index}"]`);
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
+      } else {
+        fileLeft.disabled = false;
+        if (iconLeft) { iconLeft.className = "fa-solid fa-upload"; }
+      }
+    });
+  }
+
+  // Правый блок
+  const fileRight = row.querySelector('[id^="image-qwiz-type-second-6_"]');
+  const textRight = row.querySelector('[id^="qwiz_title_type_second_6_"]');
+  const previewRight = row.querySelector('[id^="preview-image-qwiz-type-second-6_"]');
+  const labelRight = row.querySelector(`label[for="${fileRight.id}"]`);
+  const iconRight = labelRight ? labelRight.querySelector("i") : null;
+
+  if (fileRight) {
+    fileRight.addEventListener("change", function () {
+      console.log("Правый input изменился, id:", this.id);
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          let parts = this.id.split("_");
+          let index = parts[parts.length - 1];
+          console.log("Извлеченный индекс правого input:", index);
+          const preview = row.querySelector(`[id="preview-image-qwiz-type-second-6_${index}"]`);
+          if (preview) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          }
+          textRight.disabled = true;
+          if (iconRight) { iconRight.className = "fas fa-times"; }
+        };
+        reader.readAsDataURL(this.files[0]);
+      } else {
+        let parts = this.id.split("_");
+        let index = parts[parts.length - 1];
+        const preview = row.querySelector(`[id="preview-image-qwiz-type-second-6_${index}"]`);
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
+        textRight.disabled = false;
+        if (iconRight) { iconRight.className = "fa-solid fa-upload"; }
+      }
+    });
+  }
+
+  if (textRight) {
+    textRight.addEventListener("input", function () {
+      if (this.value.trim().length > 0) {
+        fileRight.disabled = true;
+        if (iconRight) { iconRight.className = "fas fa-times"; }
+        let parts = fileRight.id.split("_");
+        let index = parts[parts.length - 1];
+        const preview = row.querySelector(`[id="preview-image-qwiz-type-second-6_${index}"]`);
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
+      } else {
+        fileRight.disabled = false;
+        if (iconRight) { iconRight.className = "fa-solid fa-upload"; }
+      }
+    });
+  }
+
+  // Обработка кнопки удаления блока
+  const removeBtn = row.querySelector(".remove-row");
+  if (removeBtn) {
+    removeBtn.addEventListener("click", function () {
+      console.log("Удаление блока:", row);
+      row.remove();
+    });
+  }
+}
+
+addBtn.addEventListener("click", function () {
+  const rows = container.querySelectorAll(".question-type-6");
+  const newIndex = rows.length; // новый индекс равен количеству уже существующих блоков
+  console.log("Создание нового блока с индексом:", newIndex);
+  const lastRow = rows[rows.length - 1];
+  const newRow = lastRow.cloneNode(true);
+
+  // Обновляем ID и name для левого блока
+  const leftInput = newRow.querySelector('[id^="image-qwiz-type-6_"]');
+  const leftPreview = newRow.querySelector('[id^="preview-image-qwiz-type-6_"]');
+  const leftText = newRow.querySelector('[id^="qwiz_title_type_6_"]');
+  if (leftInput) {
+    leftInput.id = "image-qwiz-type-6_" + newIndex;
+    leftInput.name = "image-qwiz-type-6_" + newIndex;
+    console.log("Новый левый input ID:", leftInput.id);
+  }
+  if (leftPreview) {
+    leftPreview.id = "preview-image-qwiz-type-6_" + newIndex;
+    console.log("Новый левый preview ID:", leftPreview.id);
+  }
+  if (leftText) {
+    leftText.id = "qwiz_title_type_6_" + newIndex;
+    leftText.name = "qwiz_title_type_6_" + newIndex;
+  }
+
+  // Обновляем ID и name для правого блока
+  const rightInput = newRow.querySelector('[id^="image-qwiz-type-second-6_"]');
+  const rightPreview = newRow.querySelector('[id^="preview-image-qwiz-type-second-6_"]');
+  const rightText = newRow.querySelector('[id^="qwiz_title_type_second_6_"]');
+  if (rightInput) {
+    rightInput.id = "image-qwiz-type-second-6_" + newIndex;
+    rightInput.name = "image-qwiz-type-second-6_" + newIndex;
+    console.log("Новый правый input ID:", rightInput.id);
+  }
+  if (rightPreview) {
+    rightPreview.id = "preview-image-qwiz-type-second-6_" + newIndex;
+    console.log("Новый правый preview ID:", rightPreview.id);
+  }
+  if (rightText) {
+    rightText.id = "qwiz_title_type_second_6_" + newIndex;
+    rightText.name = "qwiz_title_type_second_6_" + newIndex;
+  }
+
+  // Обновляем атрибуты label (если они есть)
+  newRow.querySelectorAll("label").forEach(label => {
+    if (label.htmlFor) {
+      let parts = label.htmlFor.split("_");
+      label.htmlFor = parts[0] + "_" + newIndex;
+    }
+  });
+
+  // Сброс значений input, очистка preview и alert-ов
+  newRow.querySelectorAll("input").forEach(inp => { inp.value = ""; inp.disabled = false; });
+  newRow.querySelectorAll("img").forEach(img => { img.src = ""; img.style.display = "none"; });
+  newRow.querySelectorAll(".alert-danger").forEach(el => { el.textContent = ""; });
+
+  // Удаляем старые кнопки удаления, чтобы не было дублирования
+  newRow.querySelectorAll(".remove-row").forEach(btn => btn.remove());
+  // Создаем кнопку удаления для нового блока
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "btn btn-danger remove-row";
+  delBtn.textContent = "Удалить";
+  delBtn.addEventListener("click", () => {
+    console.log("Удаление нового блока с индексом:", newIndex);
+    newRow.remove();
+  });
+  newRow.appendChild(delBtn);
+
+  container.appendChild(newRow);
+  initRowEvents(newRow);
+});
+
+// Инициализируем обработчики для уже существующих блоков
+container.querySelectorAll(".question-type-6").forEach(initRowEvents);
+</script>
+<script>
+    // Добавляем обработчик события при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function () {
+        // Обработчик для контейнера с чекбоксами
+        const container = document.querySelector('.question-container-type-3');
+
+        // Используем делегирование событий для динамически добавленных чекбоксов
+        container.addEventListener('change', function (event) {
+            if (event.target.type === 'checkbox' && event.target.name === 'qwiz_right_answer_type_3[]') {
+                const checkboxes = container.querySelectorAll('input[name="qwiz_right_answer_type_3[]"]');
+
+                // Убираем выбор у всех остальных чекбоксов
+                checkboxes.forEach((checkbox) => {
+                    if (checkbox !== event.target) {
+                        checkbox.checked = false;
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Publish Stream</title>
+</head>
+<body>
+    <h1>Publish Stream</h1>
+    <video id="video" autoplay muted></video>
+    <button id="startButton">Start Publishing</button>
+    <script>
+        document.getElementById('startButton').addEventListener('click', async () => {
+            const video = document.getElementById('video');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            video.srcObject = stream;
+
+            const peerConnection = new RTCPeerConnection();
+            stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            const response = await fetch('/conference/publish/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sdp: offer.sdp })
+            });
+            const data = await response.json();
+            await peerConnection.setRemoteDescription(new RTCSessionDescription({ sdp: data.sdp, type: 'answer' }));
+        });
+    </script>
+</body>
+</html>

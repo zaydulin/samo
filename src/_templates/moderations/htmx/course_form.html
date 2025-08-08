@@ -1,0 +1,290 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select2.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+{% endblock head %}
+
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+
+{% block content %}
+<div class="row shipping-form">
+    <div class="col-xl-8">
+        <div class="card checkout-cart">
+            <div class="card-body basic-wizard important-validation">
+                <div class="shipping-content" id="msform">
+                    <div id="form-message"></div>
+                    <form method="post" enctype="multipart/form-data" id="courseForm"
+                          class="stepper-one row g-3 needs-validation shipping-wizard"
+                          hx-post="{% url 'moderation:course_update_iframe' pk=object.pk %}"
+                          hx-trigger="submit"
+                          hx-target="#courseForm"
+                          hx-swap="outerHTML">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" id="formAction" value="">
+
+                        <div class="row g-3 custom-input">
+                            <div class="col-sm-2">
+                                <label class="form-label" for="id_price">{{ form.price.label_tag }}</label>
+                                {{ form.price }}
+                                {% if form.price.errors %}
+                                    <div class="alert alert-danger">{{ form.price.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label" for="id_name">{{ form.name.label_tag }}</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="alert alert-danger">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label" for="id_category">{{ form.category.label_tag }}</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="alert alert-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="form-label" for="id_description">{{ form.description.label_tag }}</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="alert alert-danger">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Image fields -->
+                            <div class="col-6">
+                                <label class="form-label" for="id_cover">{{ form.cover.label_tag }}</label>
+                                {{ form.cover }}
+                                {% if form.cover.errors %}
+                                    <div class="alert alert-danger">{{ form.cover.errors }}</div>
+                                {% endif %}
+                                <img id="coverPreview" src="{% if form.instance.cover %}{{ form.instance.cover.url }}{% endif %}"
+                                     alt="Предварительный просмотр обложки"
+                                     style="max-width: 100%; margin-top: 10px; display: {% if form.instance.cover %}block{% else %}none{% endif %};">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="id_image">{{ form.image.label_tag }}</label>
+                                {{ form.image }}
+                                {% if form.image.errors %}
+                                    <div class="alert alert-danger">{{ form.image.errors }}</div>
+                                {% endif %}
+                                <img id="imagePreview" src="{% if form.instance.image %}{{ form.instance.image.url }}{% endif %}"
+                                     alt="Предварительный просмотр изображения"
+                                     style="max-width: 100%; margin-top: 10px; display: {% if form.instance.image %}block{% else %}none{% endif %};">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label" for="id_slug">{{ form.slug.label_tag }}</label>
+                                {{ form.slug }}
+                                {% if form.slug.errors %}
+                                    <div class="alert alert-danger">{{ form.slug.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <hr>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label class="form-label" for="id_title">{{ form.title.label_tag }}</label>
+                                        {{ form.title }}
+                                        {% if form.title.errors %}
+                                            <div class="alert alert-danger">{{ form.title.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label class="form-label" for="id_content">{{ form.content.label_tag }}</label>
+                                        {{ form.content }}
+                                        {% if form.content.errors %}
+                                            <div class="alert alert-danger">{{ form.content.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label class="form-label" for="id_propertytitle">{{ form.propertytitle.label_tag }}</label>
+                                        {{ form.propertytitle }}
+                                        {% if form.propertytitle.errors %}
+                                            <div class="alert alert-danger">{{ form.propertytitle.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label class="form-label" for="id_propertydescription">{{ form.propertydescription.label_tag }}</label>
+                                        {{ form.propertydescription }}
+                                        {% if form.propertydescription.errors %}
+                                            <div class="alert alert-danger">{{ form.propertydescription.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.assistants %}
+                            <div class="col-12">
+                                <label for="{{ form.assistants.id_for_label }}" class="form-label">{{ form.assistants.label }}</label>
+                                {{ form.assistants }}
+                                {% if form.assistants.errors %}
+                                    <div class="alert alert-danger">{{ form.assistants.errors }}</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-secondary me-2" id="saveAndExit" hx-vals='{"action": "exit"}'>Сохранить и выйти</button>
+                            <button type="submit" class="btn btn-primary" id="saveAndContinue" hx-vals='{"action": "continue"}'>Сохранить и продолжить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для обрезки -->
+<div id="cropperModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Обрезка изображения</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="cropperImage" src="" alt="Изображение для обрезки">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="cropButton">Обрезать</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block bootonfooter %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="{% static 'site/_generals/js/select2/select2.full.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/select2/select2-custom.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentCropper = null;
+    let currentInput = null;
+
+    function showPopupAndInitCropper(inputElement) {
+        const file = inputElement.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const cropperImage = document.getElementById('cropperImage');
+                cropperImage.src = event.target.result;
+                currentInput = inputElement;
+                $('#cropperModal').modal('show');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    ['id_cover', 'id_image'].forEach(inputId => {
+        const input = document.getElementById(inputId);
+        input.addEventListener('change', function(event) {
+            showPopupAndInitCropper(this);
+        });
+    });
+
+    $('#cropperModal').on('shown.bs.modal', function () {
+        const cropperImage = document.getElementById('cropperImage');
+        if (currentCropper) {
+            currentCropper.destroy();
+        }
+        currentCropper = new Cropper(cropperImage, {
+            aspectRatio: NaN,
+            viewMode: 1,
+            dragMode: 'move',
+            guides: true,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: true,
+        });
+    });
+
+    document.getElementById('cropButton').addEventListener('click', function() {
+        if (currentCropper) {
+            const canvas = currentCropper.getCroppedCanvas();
+            if (canvas) {
+                canvas.toBlob((blob) => {
+                    const file = currentInput.files[0];
+                    const croppedFile = new File([blob], file.name, { type: file.type });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedFile);
+                    currentInput.files = dataTransfer.files;
+
+                    const previewId = currentInput.id.replace('id_', '') + 'Preview';
+                    const preview = document.getElementById(previewId);
+                    preview.src = URL.createObjectURL(blob);
+                    preview.style.display = 'block';
+
+                    $('#cropperModal').modal('hide');
+                }, 'image/jpeg');
+            }
+        }
+    });
+
+    $('#cropperModal').on('hidden.bs.modal', function () {
+        if (currentCropper) {
+            currentCropper.destroy();
+            currentCropper = null;
+        }
+    });
+
+    // Initialize Select2
+    $('.js-example-basic-single').select2();
+    $('.js-example-basic-multiple').select2();
+
+    // Re-initialize Select2 after HTMX content swap
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'courseForm') {
+            $('.js-example-basic-single').select2();
+            $('.js-example-basic-multiple').select2();
+        }
+    });
+});
+</script>
+
+<style>
+#cropperModal .modal-dialog {
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
+
+#cropperModal .modal-content {
+    height: auto;
+    min-height: 100%;
+    border-radius: 0;
+}
+
+#cropperModal .modal-body {
+    padding: 0;
+    height: 80vh;
+    overflow: hidden;
+}
+
+#cropperImage {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.cropper-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+</style>
+{% endblock bootonfooter %}

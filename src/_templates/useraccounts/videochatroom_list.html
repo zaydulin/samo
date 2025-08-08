@@ -1,0 +1,148 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block headtitle %} редактирование профиля{% endblock headtitle %}
+{% block headdescription %}{% endblock headdescription %}
+{% block headkeywords %}{% endblock headkeywords %}
+{% block head %}
+    <style>
+        .fc-event {
+            cursor: pointer;
+        }
+    </style>
+    <link href="{% static 'site/_generals/css/vendors/calendar.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block content %}
+    <div class="flex wrapper">
+        <div class="page-content">
+            <main class="flex-grow p-6">
+                <!-- Page Title Start -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="md:flex hidden items-center gap-2.5 text-sm font-semibold">
+                    </div>
+                </div>
+                <!-- Page Title End -->
+                <div class="grid lg:grid-cols-4 gap-6">
+                    <div class="card" id="external-events" style="display: none;"></div>
+                    <div class="lg:col-span-4">
+                        <div class="card" style="padding: 10px;">
+                            <div class="calendar-default" id="calendar-container">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    {% for room in chatrooms %}
+        <button class="btn bg-primary text-white" style="display:none" id="{{room.slug}}" data-fc-target="default-modal-{{room.id}}" data-fc-type="modal" type="button"></button>
+        <div id="default-modal-{{room.id}}" class="w-full h-full mt-5 fixed top-0 left-0 z-50 transition-all duration-500 fc-modal hidden">
+            <div class="fc-modal-open:opacity-100 duration-500 opacity-0 ease-out transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto flex flex-col bg-white border shadow-sm rounded-md dark:bg-slate-800 dark:border-gray-700">
+                <div class="flex justify-between items-center py-2.5 px-4 border-b dark:border-gray-700">
+                    <h3 class="font-medium text-gray-800 dark:text-white text-lg">
+                        Комната {{room.name}}
+                    </h3>
+                    <button class="inline-flex flex-shrink-0 justify-center items-center h-8 w-8 dark:text-gray-200" data-fc-dismiss="" type="button">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+                <div class="px-4 py-8 overflow-y-auto">
+                    <table role="grid" class="gridjs-table" style="height: auto;">
+                        <thead class="gridjs-thead">
+                        <tr class="gridjs-tr">
+                            <th data-column-id="name" class="gridjs-th">
+                                <div class="gridjs-th-content">Время начала</div>
+                            </th>
+                            <th data-column-id="email" class="gridjs-th">
+                                <div class="gridjs-th-content">Время конца</div>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody class="gridjs-tbody">
+                        <tr class="gridjs-tr">
+                            <td data-column-id="name" class="gridjs-td">{{room.start_data}} в {{room.start_time}}</td>
+                            <td data-column-id="email" class="gridjs-td">{{room.end_data}} в {{room.end_time}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="flex justify-between items-center p-6">
+                        <a href="/lk/conferencedashboard/" class="btn bg-primary text-white">Редактировать</a>
+                        <div class="md:flex hidden items-center gap-2.5 text-sm font-semibold">
+                            <div class="flex items-center gap-2">
+                                <a href="{{room.get_absolute_url}}" class="btn bg-primary text-white" aria-current="page">Перейти</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock content %}
+{% block footer %}
+<script src="{% static 'admin_panel/libs/fullcalendar/index.global.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar-custom.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        // Получить сегодняшнюю дату в формате YYYY-MM-DD
+        var today = new Date().toISOString().split('T')[0];
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'today',
+                center: 'title',
+                right: 'prev,next'
+            },
+            initialDate: today,
+            editable: true,
+            selectable: true,
+            businessHours: true,
+            locale: 'ru',
+            dayMaxEvents: false,
+            events: function(fetchInfo, successCallback, failureCallback) {
+                fetch(`/schedulestream/events/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        var events = data.map(event => ({
+                            title: event.title,
+                            start: event.date + 'T' + event.time_start,
+                            end: event.date + 'T' + event.time_end,
+                            extendedProps: {
+                                description: event.description,
+                                time: formatTimeRange(event.time_start, event.time_end)
+                            }
+                        }));
+                        successCallback(events);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching events:', error);
+                        failureCallback(error);
+                    });
+            },
+            eventContent: function(arg) {
+                return {
+                    html: `
+                    <div class="fc-content">
+                        <div class="fc-time">${arg.event.extendedProps.time}</div>
+                    </div>
+                `
+                };
+            },
+            eventClick: function(info) {
+                showEventInModal(info.event);
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+{% endblock footer %}

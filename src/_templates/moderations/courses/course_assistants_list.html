@@ -1,0 +1,468 @@
+{% extends 'moderations/base.html' %}
+{% load static i18n %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+<style>
+    li.qwiz:hover{
+        background: #f7f7f7;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+        padding: 10px;
+    }
+    span.title {
+        height: 42px;
+        padding-left: 10px;
+        padding-top: 10px;
+    }
+    .main-title {
+        color: #7366ff!important;
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+        font-size: 16px;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+    }
+    .float-end {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+    }
+    .float-end-task {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+        padding-top:10px;
+    }
+    ul.nav.main-menu.custom-scrollbar li {
+        display: flex;
+        width: 100%;
+    }
+    ul.nav.main-menu.custom-scrollbar > li > ul.nav.main-menu.custom-scrollbar {
+        padding-left: 10px;
+    }
+    span.float-end-task a svg {
+        color: #9f9f9f!important;
+    }
+    .cropper-container.cropper-bg {
+        height: 75vh !important;
+    }
+    img#cropperImage {
+        height: 70vh;
+        width: 59vh;
+    }
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select2.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div >
+                <div class="card checkout-cart">
+                    <div class="card-body basic-wizard important-validation">
+                        <div class="card-header justify-content-between" id="assistants-list">
+                            <form method="GET" action="{% url 'moderation:course_assistants_list' course.id %}" id="assistant-search-form">
+                                <div class="input-group mb-3">
+                                    <input
+                                            type="text"
+                                            name="q"
+                                            id="user-search"
+                                            value="{{ request.GET.q }}"
+                                            class="form-control"
+                                            placeholder="{% trans 'Поиск по ФИО' %}..."
+                                            autocomplete="off">
+                                </div>
+                            </form>
+                            <div id="search-results" class="mb-3" style="display: none;">
+                                <h5 class="card-title">{% trans 'Результаты поиска' %}</h5>
+                                <ul class="list-group" id="search-results-list">
+
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row pt-3 " id="employeeList">
+
+                            {% for user in assistants %}
+                            <div class="col-xl-4 col-sm-6 col-xxl-3 col-ed-4 box-col-4">
+                                <div class="card social-profile">
+                                    <div class="card-body">
+                                        <div class="social-img-wrap">
+                                            <div class="social-img">
+                                                <img src="{{ user.author.avatar.url }}" alt="profile">
+                                            </div>
+                                            <div class="edit-icon">
+                                                <svg>
+                                                    <use href="{% static 'assets/svg/icon-sprite.svg#profile-check' %}"></use>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="social-details">
+                                            <h5 class="mb-1">
+                                                <a href="#">{{ user.name }}</a>
+                                            </h5>
+                                            <span class="c-o-light">
+                            <a href="{% url 'moderation:courses' %}?username={{ user.author.username }}">@{{ user.author.username }}</a>
+                        </span>
+                                            <ul class="card-social">
+                                                <li>
+                                                    <span class="c-o-light edit-assistant" data-assistant-id="{{ user.id }}">Изменить</span>
+                                                </li>
+                                                <li>
+                                                    <span class="c-o-light delete-assistant" data-assistant-id="{{ user.id }}">Удалить</span>
+                                                </li>
+                                            </ul>
+                                            <div id="edit-assistant-form-{{ user.id }}" style="display:none">
+                                                <label for="bookmark_{{ user.id }}">Добавлять в библиотеку:</label>
+                                                <input type="checkbox" id="bookmark_{{ user.id }}" name="bookmark_as"
+                                                       {% if user.bookmark_as %}checked{% endif %}>
+                                                <button type="button" class="btn btn-primary">Применить</button>
+                                                <button type="button" class="btn btn-sm btn-danger cancel-edit">Отмена</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/select2/select2.full.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/select2/select2-custom.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const employeeList = document.getElementById('employeeList');
+
+        // Обработка клика по ссылке "Изменить"
+        employeeList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-assistant')) {
+                const assistantId = e.target.getAttribute('data-assistant-id');
+                const form = document.getElementById(`edit-assistant-form-${assistantId}`);
+                form.style.display = 'block';  // Показываем форму
+            }
+
+            // Обработка клика по кнопке "Применить"
+            if (e.target.classList.contains('btn-primary')) {
+                const assistantId = e.target.closest('.social-details').querySelector('input[type="checkbox"]').id.split('_')[1];
+                updateBookmark(assistantId);
+            }
+
+            // Обработка клика по кнопке "Отмена"
+            if (e.target.classList.contains('cancel-edit')) {
+                const assistantId = e.target.closest('.social-details').querySelector('input[type="checkbox"]').id.split('_')[1];
+                const form = document.getElementById(`edit-assistant-form-${assistantId}`);
+                form.style.display = 'none';  // Скрываем форму
+            }
+        });
+
+        // Функция для отправки данных на сервер
+        function updateBookmark(assistantId) {
+            const bookmarkChecked = document.getElementById(`bookmark_${assistantId}`).checked;
+            const courseId = "{{course.id}}";  // Получаем ID курса из шаблона
+
+            fetch(`/course/${courseId}/assistants/${assistantId}/update/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `bookmark_as=${bookmarkChecked ? 'on' : 'off'}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Изменения сохранены');
+                        // Скрываем форму после успешного сохранения
+                        const form = document.getElementById(`edit-assistant-form-${assistantId}`);
+                        form.style.display = 'none';
+                    } else {
+                        alert('Ошибка при сохранении изменений');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Функция для получения CSRF токена
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('user-search');
+        const searchResults = document.getElementById('search-results');
+        const searchResultsList = document.getElementById('search-results-list');
+        const employeeList = document.getElementById('employeeList');
+
+        let debounceTimer;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const query = this.value.trim();
+                if (query.length > 2) {
+                    fetchResults(query);
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            }, 300);
+        });
+
+        function fetchResults(query) {
+            fetch(`{% url 'moderation:course_assistants_list' course.id %}?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function displayResults(results) {
+            searchResultsList.innerHTML = '';
+            if (results.length > 0) {
+                results.forEach(user => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `
+                    ${user.name} (@${user.username})
+                    <button class="btn btn-sm btn-primary add-assistant" data-user-id="${user.id}">
+                        Добавить
+                    </button>
+                `;
+                    searchResultsList.appendChild(li);
+                });
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.style.display = 'none';
+            }
+        }
+
+        // Event delegation for "Add" buttons
+        searchResultsList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-assistant')) {
+                const userId = e.target.dataset.userId;
+                addAssistant(userId);
+            }
+        });
+
+        function addAssistant(userId) {
+            fetch(`{% url 'moderation:course_assistant_create' course.id %}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `author_id=${userId}&bookmark_as=off`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    updateAssistantsList(data.assistants);
+                    searchResults.style.display = 'none';
+                    searchInput.value = '';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateAssistantsList(assistants) {
+            employeeList.innerHTML = '';
+            assistants.forEach(assistant => {
+                const assistantHtml = `
+                <div class="col-xl-4 col-sm-6 col-xxl-3 col-ed-4 box-col-4">
+                    <div class="card social-profile">
+                        <div class="card-body">
+                            <div class="social-img-wrap">
+                                <div class="social-img">
+                                    <img src="${assistant.avatar_url || '{% static "path/to/default/avatar.png" %}'}" alt="profile">
+                                </div>
+                                <div class="edit-icon">
+                                    <svg>
+                                        <use href="{% static 'assets/svg/icon-sprite.svg#profile-check' %}"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="social-details">
+                                <h5 class="mb-1">
+                                    <a href="#">${assistant.name}</a>
+                                </h5>
+                                <span class="c-o-light">
+                                    <a href="{% url 'moderation:courses' %}?username=${assistant.username}">@${assistant.username}</a>
+                                </span>
+                                <ul class="card-social">
+                                    <li>
+                                        <span class="c-o-light">Изменить</span>
+                                    </li>
+                                    <li>
+                                        <span class="c-o-light delete-assistant" data-assistant-id="${assistant.id}">Удалить</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+                employeeList.innerHTML += assistantHtml;
+            });
+        }
+
+        // Event delegation for "Delete" buttons
+        employeeList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('delete-assistant')) {
+                const assistantId = e.target.dataset.assistantId;
+                deleteAssistant(assistantId);
+            }
+        });
+
+        function deleteAssistant(assistantId) {
+            if (confirm('Вы уверены, что хотите удалить этого ассистента?')) {
+                fetch(`/course/{{course.id}}/assistants/${assistantId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Удаляем ассистента из DOM
+                            document.querySelector(`[data-assistant-id="${assistantId}"]`).closest('.box-col-4').remove();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+<style>
+    form#assistant-search-form {
+        width: 100%;
+    }
+</style>
+
+{% endblock bootonfooter %}

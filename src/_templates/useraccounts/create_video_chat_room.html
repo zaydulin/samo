@@ -1,0 +1,227 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+    <style>
+        /* Основные стили для всех полей ввода */
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%; /* Поля во всю ширину */
+            border-radius: 12px; /* Скруглённые углы */
+            border: 1px solid #7366ff; /* Цвет бордера */
+            padding: 10px; /* Внутренний отступ */
+            box-sizing: border-box; /* Учитываем padding в ширине */
+            background-color: white; /* Белый фон */
+            font-size: 14px; /* Размер шрифта */
+            color: #333; /* Цвет текста */
+        }
+
+        /* Кастомное поле для загрузки файлов */
+        input[type="file"] {
+            display: none; /* Скрываем стандартный инпут */
+        }
+
+        .custom-file-upload {
+            display: block;
+            width: 100%; /* Во всю ширину */
+            text-align: center; /* Текст по центру */
+            padding: 10px; /* Внутренние отступы */
+            background-color: white; /* Белый фон */
+            border: 1px solid #7366ff; /* Бордер с нужным цветом */
+            border-radius: 12px; /* Скруглённые углы */
+            color: #7366ff; /* Цвет текста */
+            font-weight: 500; /* Толщина текста */
+            cursor: pointer; /* Указатель при наведении */
+            box-sizing: border-box; /* Учитываем padding */
+            transition: background-color 0.3s, color 0.3s; /* Плавные эффекты при наведении */
+        }
+
+        .custom-file-upload:hover {
+            background-color: #7366ff; /* Заливка при наведении */
+            color: white; /* Цвет текста при наведении */
+        }
+
+        /* Стили для обёртки */
+        .form-group {
+            margin-bottom: 1.5rem; /* Отступ снизу */
+        }
+
+        /* Стили кнопок */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background-color: #7366ff;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #5b50d2; /* Цвет фона при наведении */
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        /* Карточка */
+        .card {
+            background-color: white;
+            border: 1px solid #f0f0f0;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #7366ff;
+            color: white;
+            padding: 16px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        /* Грид для формы */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .lg\:grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .lg\:grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* Для поля длительности */
+        .form-group .input-wrapper {
+            margin-top: 0.5rem; /* Убираем отступ сверху для поля длительности */
+        }
+    </style>
+ <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Получаем все инпуты типа 'file'
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+
+            fileInputs.forEach(function(input) {
+                // Находим элемент <span>, который будет отображать название файла
+                const label = input.previousElementSibling.querySelector('span');
+
+                // Слушаем изменение файла
+                input.addEventListener('change', function() {
+                    // Если файл выбран, показываем его название
+                    if (input.files.length > 0) {
+                        label.innerHTML = input.files[0].name;  // Устанавливаем имя файла как текст в span
+                    } else {
+                        // Если файл не выбран, восстанавливаем текст по умолчанию
+                        label.innerHTML = label.getAttribute('data-default-text');  // Восстановление текста по умолчанию
+                    }
+                });
+
+                // Добавляем атрибут для текста по умолчанию
+                if (label && !label.hasAttribute('data-default-text')) {
+                    label.setAttribute('data-default-text', label.innerHTML);  // Сохраняем текст по умолчанию
+                }
+            });
+        });
+    </script>
+{% endblock head %}
+
+{% block content %}
+    <div class="card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.errors }}
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h4 class="card-title">Форма создания комнаты</h4>
+                    <button type="submit" class="btn btn-sm bg-primary text-white rounded-e-none">Создать комнату</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="card-body">
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="id_logo" class="text-gray-800 text-sm font-medium">Логотип</label>
+                            <label class="custom-file-upload" for="id_logo">
+                                <span id="file-name-logo">Выберите логотип</span>
+                            </label>
+                            {{ form.logo }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_banner" class="text-gray-800 text-sm font-medium">Баннер</label>
+                            <label class="custom-file-upload" for="id_banner">
+                                <span id="file-name-banner">Выберите баннер</span>
+                            </label>
+                            {{ form.banner }}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_cover" class="text-gray-800 text-sm font-medium">Обложка</label>
+                            <label class="custom-file-upload" for="id_cover">
+                                <span id="file-name-cover">Выберите обложку</span>
+                            </label>
+                            {{ form.cover }}
+                        </div>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="id_name" class="text-gray-800 text-sm font-medium">Название</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_type" class="text-gray-800 text-sm font-medium">Тип</label>
+                            {{ form.type }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_descriptions" class="text-gray-800 text-sm font-medium">Описание</label>
+                        {{ form.descriptions }}
+                    </div>
+                    <div class="grid lg:grid-cols-4 gap-6">
+                        <div class="form-group">
+                            <label for="id_start_data" class="text-gray-800 text-sm font-medium">Дата</label>
+                            {{ form.start_data }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_start_time" class="text-gray-800 text-sm font-medium">Время</label>
+                            {{ form.start_time }}
+                        </div>
+                        <div class="form-group input-wrapper">
+                            <label for="id_time" class="text-gray-800 text-sm font-medium">Длительность (мин)</label>
+                            <div class="w-full">{{ form.time }}</div> <!-- Добавляем класс w-full для этой формы -->
+                        </div>
+
+                        <div class="form-group input-wrapper">
+                            <label for="id_count_participants" class="text-gray-800 text-sm font-medium">Количество
+                                (участников)</label>
+                            <div class="w-full">{{ form.count_participants }}</div>
+                            <!-- Добавляем класс w-full для этой формы -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+{% endblock content %}

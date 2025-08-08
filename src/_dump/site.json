@@ -1,0 +1,34 @@
+[
+  {
+    "model": "sites.site",
+    "pk": 1,
+    "fields": {
+      "domain": "127.0.0.1:8000",
+      "name": "127.0.0.1:8000"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 2,
+    "fields": {
+      "domain": "127.0.0.1:9000",
+      "name": "127.0.0.1:9000"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 3,
+    "fields": {
+      "domain": "127.0.0.1:9001",
+      "name": "127.0.0.1:9001"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 4,
+    "fields": {
+      "domain": "127.0.0.1:9002",
+      "name": "127.0.0.1:9002"
+    }
+  }
+]

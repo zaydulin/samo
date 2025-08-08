@@ -1,0 +1,308 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+
+<style>
+    .dropdown-menu {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+    }
+
+    .hover-color {
+        color: black; /* базовый цвет */
+        text-decoration: none; /* убирает подчеркивание */
+    }
+
+    .hover-color:hover {
+        color: #7366ff; /* цвет при наведении */
+    }
+
+    .hover-color i {
+        transition: color 0.3s; /* плавный переход для иконки */
+    }
+
+    .hover-color:hover i {
+        color: #7366ff; /* цвет иконки при наведении */
+    }
+
+    .nav-item.dropdown {
+        max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+    }
+
+    .no-bg {
+        background-color: transparent !important; /* Убирает фон */
+        box-shadow: none !important; /* Убирает тени */
+    }
+
+    .dropdown-toggle::after {
+        display: none; /* Убирает стрелочку */
+    }
+
+    .ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused p {
+        margin-bottom: 16px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+
+    .ck-blurred.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline p {
+        margin-bottom: 16px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0 !important;
+    }
+    .card-full-height {
+        height: 100%; /* Карточка займет всю высоту родителя */
+        display: flex;
+        flex-direction: column; /* Выровнять элементы по вертикали */
+    }
+
+    /* Добавляем отступы между элементами списка */
+    .list-group-item {
+        margin-bottom: 10px; /* Расстояние между конференциями */
+    }
+
+    /* Убираем отступ для последнего элемента */
+    .list-group-item:last-child {
+        margin-bottom: 0;
+    }
+     #conference-list-container,
+    #event-details-container {
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    .fade-out {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+<link href="{% static 'site/_generals/css/vendors/calendar.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block content %}
+<div id="course-id" data-course-id="{{ course.id }}"></div>
+<div class="user-profile">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader"
+                     style="background: url({% if course.cover %}{{ course.cover.url }}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>{{ course.name }}</a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Список конференций / Детали события -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card card-full-height" style="padding: 10px;">
+
+                <div id="conference-list-container">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="text-center mb-0">Список конференций</h5>
+                        <a href="{% url 'useraccount:conference_add' course.id %}" class="btn btn-primary mt-1">Создать
+                            конференцию</a>
+                    </div>
+                    <ul class="list-group" style="margin-top: 5%;">
+                        {% for room in chatrooms %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ room.get_absolute_url }}" class="hover-color">
+                                {% if room.name %}
+                                {{ room.name }}
+                                {% else %}
+                                Конференция #{{ forloop.counter }}
+                                {% endif %}
+                            </a>
+                            {% if room.start_data %}
+                            <span class="badge bg-primary text-white">
+                            {{ room.start_data|date:"d.m" }} <i class="fa fa-clock ms-3"></i> {{ room.start_time|time:"H:i" }}
+                        </span>
+                            {% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center">Нет конференций</li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+
+                <div id="event-details-container" class="d-none">
+                    <!-- Детали события будут динамически загружаться сюда -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Календарь -->
+        <div class="col-lg-8 col-md-12">
+
+            <div class="card" style="padding: 10px;">
+
+                <div class="calendar-default" id="calendar-container">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="conference-base-url" value="{% url 'useraccount:video_chat_root' slug='PLACEHOLDER' %}">
+
+{% endblock content %}
+{% block footer %}
+<script src="{% static 'admin_panel/libs/fullcalendar/index.global.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar-custom.js' %}"></script>
+<script>
+    function formatTimeRange(startTime, endTime) {
+        // Преобразует время в удобный формат: HH:MM - HH:MM
+        return `${startTime} - ${endTime}`;
+    }
+
+    function showEventInModal(event) {
+    const conferenceListContainer = document.getElementById('conference-list-container');
+    const eventDetailsContainer = document.getElementById('event-details-container');
+
+    // Анимация исчезновения списка конференций
+    conferenceListContainer.classList.add('fade-out');
+
+    // Небольшая задержка перед сменой контента
+    setTimeout(() => {
+        conferenceListContainer.classList.add('d-none');
+        eventDetailsContainer.classList.remove('d-none');
+
+        // Заполнение деталей события
+        eventDetailsContainer.innerHTML = `
+            <div class="event-details">
+                <h2>${event.title}</h2>
+                <div class="event-info">
+                    <p>Время: ${event.extendedProps.time}</p>
+                    <p>Описание: ${
+                    event.extendedProps.description
+                        ? (event.extendedProps.description.length > 1500
+                        ? event.extendedProps.description.substring(0, 1500) + '...'
+                        : event.extendedProps.description)
+                    : 'Описание не предоставлено'
+                    }</p>
+                </div>
+                <div class="event-actions">
+                    <a  class="btn btn-primary" onclick="returnToConferenceList()">Назад к списку</a>
+                    <button id="go-to-conference" class="btn btn-success" data-room-slug="${event.extendedProps.roomSlug}">Перейти в конференцию</button>
+                </div>
+            </div>
+        `;
+
+        // Обработчик для кнопки "Перейти в конференцию"
+        document.getElementById('go-to-conference').addEventListener('click', (e) => {
+    const roomSlug = e.target.getAttribute('data-room-slug');
+    const baseUrl = document.getElementById('conference-base-url').value;
+    const conferenceUrl = baseUrl.replace('PLACEHOLDER', roomSlug);
+    window.location.href = conferenceUrl;
+});
+
+        // Анимация появления деталей события
+        eventDetailsContainer.classList.add('fade-in');
+    }, 300);
+}
+
+    function returnToConferenceList() {
+        const conferenceListContainer = document.getElementById('conference-list-container');
+        const eventDetailsContainer = document.getElementById('event-details-container');
+
+        // Анимация исчезновения деталей события
+        eventDetailsContainer.classList.remove('fade-in');
+        eventDetailsContainer.classList.add('fade-out');
+
+        // Небольшая задержка перед сменой контента
+        setTimeout(() => {
+            eventDetailsContainer.classList.add('d-none');
+            conferenceListContainer.classList.remove('d-none');
+
+            // Анимация появления списка конференций
+            conferenceListContainer.classList.remove('fade-out');
+            conferenceListContainer.classList.add('fade-in');
+        }, 300);
+    }
+
+    // Модифицированный существующий код календаря
+    document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+
+    // Получить сегодняшнюю дату в формате YYYY-MM-DD
+    var today = new Date().toISOString().split('T')[0];
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        headerToolbar: {
+            left: 'today',
+            center: 'title',
+            right: 'prev,next'
+        },
+        initialDate: today,
+        editable: true,
+        selectable: true,
+        businessHours: true,
+        locale: 'ru',
+        dayMaxEvents: true,
+        eventOverlap: true,
+        events: function (fetchInfo, successCallback, failureCallback) {
+            const courseId = document.getElementById('course-id').dataset.courseId;
+            fetch(`/conferences/${courseId}/events/`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var events = data.map(event => ({
+                        title: event.title,
+                        start: event.date + 'T' + event.time_start,
+                        end: event.date + 'T' + event.time_end,
+                        extendedProps: {
+                            description: event.description,
+                            time: formatTimeRange(event.time_start, event.time_end),
+                            roomSlug: event.room_slug  // Используем slug
+                        }
+                    }));
+                    successCallback(events);
+                })
+                .catch(error => {
+                    console.error('Error fetching events:', error);
+                    failureCallback(error);
+                });
+        },
+        eventContent: function (arg) {
+            return {
+                html: `
+                    <div class="event-time">
+                        ${arg.event.extendedProps.time}
+                    </div>
+                `
+            };
+        },
+        eventClick: function (info) {
+            showEventInModal(info.event);
+        }
+    });
+
+    calendar.render();
+});
+</script>
+
+{% endblock footer %}

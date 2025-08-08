@@ -1,0 +1,145 @@
+{% load static %}
+<script src="{% static 'site/_generals/js/playerjs/playerjs.js' %}"></script>
+<div class="card checkout-cart">
+    <div class="card-body basic-wizard important-validation" id="msform">
+        <div class="card-header d-flex justify-content-between">
+            <h5>{{themes.name}}</h5>
+        </div>
+        <div class="col-sm-12">
+            {{themes.description|safe}}
+        </div>
+        {% if files %}
+        <div class="col-sm-12">
+            <h6 class="mt-4 mb-2">Текущие файлы:</h6>
+            <ul id="current-files" class="files-list">
+                {% for file in files %}
+                <li class="file-item mb-2">
+                    <div class="d-flex">
+                        <svg style="height: 50px; width: 50px; padding-right: 5px;">
+                            {% if file.type == 1 %}
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-video"></use>
+                            {% elif file.type == 2 %}
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-audio"></use>
+                            {% else %}
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#doc-file"></use>
+                            {% endif %}
+                        </svg>
+                        <div style="width: -webkit-fill-available;">
+                            <h6 class="file-name">{{ file.name }}</h6>
+                            <p class="mb-0 c-o-light">{{ file.create|date:"d/m/Y" }}</p>
+                            {% if file.type == 1 %}
+                            {% if file.link == True %}
+                            <video controls>
+                                <source src="{{ file.files.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            {% else %}
+                            Видео не загружено на хостинг
+                            {% endif %}
+                            {% elif file.type == 2 %}
+                            <audio controls="controls">
+                                <source src="{{ file.files.url }}" type="audio/mpeg" />
+                                Your browser does not support the audio element.
+                            </audio>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<style>
+    h6.file-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+        min-width: 300px;
+    }
+</style>
+<!-- JavaScript (place this in your base template or at the bottom of the page) -->
+<script src="{% static 'site/_generals/js/playerjs/playerjs.js' %}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        console.log("loadThemeContent");
+
+        $(document).on('click', 'a[for="views-themes"]', function(e) {
+            e.preventDefault();
+            var themeId = $(this).data('theme-id');
+            console.log("Clicked on theme with ID:", themeId);
+            loadThemeContent(themeId);
+        });
+
+        function loadThemeContent(themeId) {
+            console.log("Loading theme content for ID:", themeId);
+            $.ajax({
+                url: '{% url "moderation:theme_detail" %}',
+                data: {
+                    'theme_id': themeId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    console.log("Received data:", data);
+
+                    const viewContainer = $('#views-themes');
+
+                    // Вставляем HTML содержимого
+                    viewContainer.html(data.html);
+
+                    // Показываем контейнер просмотра
+                    viewContainer.removeClass('form-none');
+
+                    // Скрываем остальные формы
+                    $('#form-list > div').not(viewContainer).addClass('form-none');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading theme:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+                    alert("Произошла ошибка при загрузке темы. Пожалуйста, попробуйте еще раз.");
+                }
+            });
+        }
+
+    });
+</script>
+
+<!--Плеер-->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Функция инициализации плеера
+    function initPlayerjs() {
+        var videos = document.querySelectorAll('video');
+        console.log('Найдено видео для инициализации:', videos.length);
+
+        videos.forEach(function(video, index) {
+            var source = video.querySelector('source');
+            if (source) {
+                var playerDiv = document.createElement('div');
+                playerDiv.id = 'custom-player-' + index;
+
+                video.parentNode.replaceChild(playerDiv, video);
+
+                if (window.Playerjs) {
+                    console.log('Инициализация Playerjs для', source.src);
+                    new Playerjs({
+                        id: playerDiv.id,
+                        file: source.src,
+                        width: 600,
+                    });
+                }
+            }
+        });
+    }
+
+    // Перехватываем все клики по кнопкам с data-theme-id
+    $(document).on('click', 'a[data-theme-id]', function(e) {
+        // Ждем немного после загрузки контента
+        setTimeout(initPlayerjs, 100);
+    });
+});
+</script>

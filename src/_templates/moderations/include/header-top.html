@@ -1,0 +1,242 @@
+{% load static user_tags i18n %}
+
+<div class="page-header">
+    <div class="header-wrapper row m-0">
+        <form class="form-inline search-full col" action="{% url 'moderation:groups' %}#" method="get">
+            <div class="form-group w-100">
+                <div class="Typeahead Typeahead--twitterUsers">
+                    <div class="u-posRelative">
+                        <input class="demo-input Typeahead-input form-control-plaintext w-100" type="text" placeholder="Search Anything Here..." name="q" title="" autofocus>
+                        <div class="spinner-border Typeahead-spinner" role="status"><span class="sr-only">Loading...</span></div><i class="close-search" data-feather="x"></i>
+                    </div>
+                    <div class="Typeahead-menu"></div>
+                </div>
+            </div>
+        </form>
+        <div class="header-logo-wrapper col-auto p-0">
+            <div class="logo-wrapper">
+                <a href="{% url 'moderation:groups' %}">
+                    <img class="img-fluid for-light" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo.png' %}{% endif %}" alt="">
+                    <img class="img-fluid for-dark" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo_dark.png' %}{% endif %}" alt="">
+                </a>
+            </div>
+            <div class="toggle-sidebar">
+                <i class="status_toggle middle sidebar-toggle" data-feather="align-center"></i>
+            </div>
+        </div>
+        <div class="left-header col-xxl-5 col-xl-6 col-lg-5 col-md-4 col-sm-3 p-0">
+            <button class="btn bg-light-primary font-primary"  style="padding: 5px 10px;">
+                <span class="common-align" style="height: 20px;width: auto;">
+                     <svg style="height: 20px; width: 20px;">
+                          <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stop-watch"></use>
+                     </svg>
+                    <span class="f-light f-w-500 timer" data-date="Nov 02, 2025 02:10:04">
+                        <span>
+                        </span>
+                        <span>
+                            <span class="minutes me-1">01</span>
+                            <span>:</span>
+                        </span>
+                        <span>
+                            <span class="seconds">52</span>
+                        </span>
+                        {% now "Y-m-d" as current_date %}
+{% with current_day_sessions=sessions_by_day|dictsort:"day"|last %}
+    {% if current_day_sessions.day == current_date %}
+        {{ current_day_sessions.total_time }}
+    {% else %}
+        0
+    {% endif %}
+{% endwith %}
+                    </span>
+                </span>
+            </button>
+        </div>
+        <div class="nav-right col-xxl-7 col-xl-6 col-md-7 col-8 pull-right right-header p-0 ms-auto">
+            <ul class="nav-menus">
+                <li class="language-nav">
+                    <form action="{% url 'set_language' %}" method="post" id="language-form" >
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ redirect_to }}">
+                        <select name="language" id="language-select" style="display: none;">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% get_language_info_list for LANGUAGES as languages %}
+                            {% for language in languages %}
+                            <option class="language-option" value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                                {{ language.code }}
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <div class="translate_wrapper">
+                            <div class="current_lang">
+                                <div class="lang">
+                                    <i class="flag-icon flag-icon-{{ LANGUAGE_CODE }}"></i>
+                                    <span class="lang-txt">{{ LANGUAGE_CODE }}
+                                </span>
+                                </div>
+                            </div>
+                            <div class="more_lang">
+                                {% for language in languages %}
+                                <div class="lang {% if language.code == LANGUAGE_CODE %}selected{% endif %}" data-value="{{ language.code }}">
+                                    <i class="flag-icon flag-icon-{{ language.code }}"></i>
+                                    <span class="lang-txt">{{ language.name_local }}
+                                        <span>({{ language.code }})</span>
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <input type="submit" style="display:none;" value="Go">
+                    </form>
+                    <!-- JavaScript для переключения языка -->
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const currentLang = document.querySelector('.current_lang');
+                            const moreLang = document.querySelector('.more_lang');
+                            const languageSelect = document.getElementById('language-select');
+
+                            // Показать/скрыть список языков при клике
+                            currentLang.addEventListener('click', () => {
+                                moreLang.style.display = moreLang.style.display === 'block' ? 'none' : 'block';
+                            });
+
+                            // Выбор языка и отправка формы
+                            document.querySelectorAll('.more_lang .lang').forEach(lang => {
+                                lang.addEventListener('click', function () {
+                                    const selectedLang = this.getAttribute('data-value');
+
+                                    // Установить выбранный язык в select
+                                    languageSelect.value = selectedLang;
+
+                                    // Обновить отображение текущего языка
+                                    const flagIcon = this.querySelector('.flag-icon').className;
+                                    const langTxt = this.querySelector('.lang-txt').innerHTML;
+                                    currentLang.querySelector('.flag-icon').className = flagIcon;
+                                    currentLang.querySelector('.lang-txt').innerHTML = langTxt;
+
+                                    // Скрыть меню и отправить форму
+                                    moreLang.style.display = 'none';
+                                    document.getElementById('language-form').submit();
+                                });
+                            });
+
+                            // Закрыть меню при клике вне области
+                            document.addEventListener('click', function (e) {
+                                if (!currentLang.contains(e.target) && !moreLang.contains(e.target)) {
+                                    moreLang.style.display = 'none';
+                                }
+                            });
+                        });
+                    </script>
+
+                </li>
+                <li class="fullscreen-body">
+                    <span>
+                      <svg id="maximize-screen">
+                        <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#full-screen"></use>
+                      </svg>
+                    </span>
+                </li>
+                <li>
+                    <div class="mode">
+                        <svg>
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#moon"></use>
+                        </svg>
+                    </div>
+                </li>
+                <li class="onhover-dropdown">
+                    <div class="notification-box">
+                        <svg>
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#notification"></use>
+                        </svg>
+                        <span class="badge rounded-pill badge-success">{% get_notifications_count request.user %} </span>
+                    </div>
+                    <div class="onhover-show-div notification-dropdown">
+                        <h6 class="f-18 mb-0 dropdown-title">Уведомления </h6>
+                        <ul>
+                            {% get_unread_notifications user as notifications %}
+                            {% for notification in notifications %}
+                            <li class="{% if notification.status == 1 %}b-l-primary{% elif notification.status == 2 %}b-l-success{% elif notification.status == 3 %}b-l-secondary{% else %}b-l-warning{%endif%}  border-4 toast default-show-toast align-items-center text-light border-0 fade show" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                                <div class="d-flex justify-content-between">
+                                    <div class="toast-body">
+                                        <p>{{ notification.message|slice:":100" }}{% if notification.message|length > 100 %}...{% endif %}</p>
+                                    </div>
+                                    <button class="btn-close btn-close-white me-2 m-auto" type="button" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <p>Нет уведомлений.</p>
+                            {% endfor %}
+                            <a href="{% url 'moderation:user_notifications' %}">Все уведомлений.</a>
+                        </ul>
+                    </div>
+                </li>
+                <li class="profile-nav onhover-dropdown pe-0 py-0">
+                    <div class="d-flex profile-media">
+                        <img class="b-r-10" src="{{ user.avatar.url }}" height="30px" alt="">
+                        <div class="flex-grow-1">
+                            <span>{{ user.username }}</span>
+                        </div>
+                    </div>
+                    <ul class="profile-dropdown onhover-show-div">
+                        <li>
+                            <a href="{% url 'useraccount:edit_profile' %}">
+                                <i data-feather="user"></i>
+                                <span>Профиль </span>
+                            </a>
+                        </li>
+                       {% if request.user.type == 2 or  request.user.type == 1 %}
+                        <li>
+                            <a href="{% url 'moderation:dashboard_moder' %}">
+                                <i data-feather="mail"></i>
+                                <span>Чаты</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% if request.user.type == 2 %}
+                        <li>
+                            <a href="{% url 'moderation:landing_list' %}">
+                                <i data-feather="users"></i>
+                                <span>Модерация</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="{% url 'useraccount:notebook_list' %}">
+                                <i data-feather="file-text"></i>
+                                <span>Записи</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'useraccount:logout' %}">
+                                <i data-feather="log-in"> </i>
+                                <span>Выйти</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <script class="result-template" type="text/x-handlebars-template">
+            <div class="ProfileCard u-cf">
+                <div class="ProfileCard-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-airplay m-0">
+                        <path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"></path>
+                        <polygon points="12 15 17 21 7 21 12 15"></polygon>
+                    </svg>
+                </div>
+                <div class="ProfileCard-details">
+                    <div class="ProfileCard-realName">{{name}}</div>
+                </div>
+            </div>
+        </script>
+        <script class="empty-template" type="text/x-handlebars-template">
+            <div class="EmptyMessage">
+                Your search turned up 0 results. This most likely means the backend is down, yikes!
+            </div>
+        </script>
+    </div>
+</div>

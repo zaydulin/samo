@@ -1,0 +1,255 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+{% endblock head %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <h5>Курсов <span class="c-o-light">({{ courses.count }})</span></h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="row g-3 m-b-20">
+            {% for course in courses %}
+
+            <div class="col-xxl-4 col-sm-6 box-col-6 inbox-data">
+                <div class="card mb-0 h-100">
+                    <div class="wishlist-box card-body">
+                        <div>
+                            <div class="wishlist-image">
+                                {% if course.price <= 0 and not course.has_courseuser %}
+                                <a href="{% url 'moderation:start_free_course' course.id %}">
+                                    <img src="{% if course.image %}{{ course.image.url }}{% else %}{% static 'site/_generals/images/dashboard-2/order/sub-product/16.png' %}{% endif %}" alt="purse">
+                                </a>
+                                {% elif course.has_courseuser %}
+                                <a href="{% url 'moderation:coursepassing' course.id %}">
+                                    <img src="{% if course.image %}{{ course.image.url }}{% else %}{% static 'site/_generals/images/dashboard-2/order/sub-product/16.png' %}{% endif %}" alt="purse">
+                                </a>
+                                {% elif course.id in user_courses %}
+                                <a href="{% url 'moderation:course' course.slug %}">
+                                    <img src="{% if course.image %}{{ course.image.url }}{% else %}{% static 'site/_generals/images/dashboard-2/order/sub-product/16.png' %}{% endif %}" alt="purse">
+                                </a>
+                                {% else %}
+                                <a href="{% url 'moderation:course' course.slug %}">
+                                    <img src="{% if course.image %}{{ course.image.url }}{% else %}{% static 'site/_generals/images/dashboard-2/order/sub-product/16.png' %}{% endif %}" alt="purse">
+                                </a>
+                                {% endif %}
+                                <div class="wishlist-close-btn" data-bookmark-list="{{course.id}}">
+                                    <button
+                                            class="btn trash-3 bookmark-btn {% if course.is_bookmarked %}bookmarked{% endif %}"
+                                            data-type="bookmark"
+                                            data-object-id="{{ course.id }}">
+                                        <i class="fa-solid fa-star" style="color:{% if course.is_bookmarked %}#ff6f6f;{% else %}#b3b3b3{% endif %}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="wishlist-footer">
+                                <span class="brand-name">
+                                  {% for category in course.category.all%}
+                                  {{category.name}}
+                                {% endfor %}
+                                </span>
+                                {% if course.price <= 0 and not course.has_courseuser %}
+                                <a href="{% url 'moderation:start_free_course' course.id %}">
+                                    <h6>{{course.name}}</h6>
+                                </a>
+                                <h6 class="price">
+                                    {{course.price}}
+                                </h6>
+                                <a class="btn bg-primary btn-hover-effect" href="{% url 'moderation:start_free_course' course.id %}">
+                                    <i class="fa-solid fa-play me-2"></i>
+                                    Пройти бесплатно
+                                </a>
+                                {% elif course.has_courseuser %}
+                                <a href="{% url 'moderation:coursepassing' course.id %}">
+                                    <h6>{{course.name}}</h6>
+                                </a>
+                                <h6 class="price">
+                                    {{course.price}}
+                                </h6>
+                                <a class="btn bg-success btn-hover-effect" href="{% url 'moderation:coursepassing' course.id %}">
+                                    <i class="fa-solid fa-check me-2"></i>
+                                    Продолжить обучение
+                                </a>
+                                {% elif course.id in user_courses %}
+                                <a href="{% url 'moderation:course' course.slug %}">
+                                    <h6>{{course.name}}</h6>
+                                </a>
+                                <h6 class="price">
+                                    {{course.price}}
+                                </h6>
+                                <a class="btn bg-primary btn-hover-effect" href="#" data-bs-toggle="modal" data-bs-target="#paymentModal{{ course.id }}">
+                                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                    Завершить оплату
+                                </a>
+                                {% else %}
+                                 <a href="{% url 'moderation:course' course.slug %}">
+                                    <h6>{{course.name}}</h6>
+                                </a>
+                                <h6 class="price">
+                                    {{course.price}}
+                                </h6>
+                                <a class="btn bg-primary btn-hover-effect" href="#" data-bs-toggle="modal" data-bs-target="#paymentModal{{ course.id }}">
+                                    <i class="fa-solid fa-cart-shopping me-2"></i>
+                                    Купить за {{ course.price }} руб.
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% for course in courses %}
+<div class="modal fade modal-bookmark" id="paymentModal{{ course.id }}" tabindex="-1"
+     aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Оплата курса: {{ course.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Описание:</strong> {{ course.description|safe }}</p>
+                <p><strong>Цена:</strong> {{ course.price }} руб.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <form action="{% url 'moderation:course_payment' course.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Оплатить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}
+{% block footer %}
+<script>
+    // Ждем, пока DOM будет полностью загружен
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM загружен, инициализация скрипта закладок курсов");
+        initBookmarkButtons();
+    });
+
+    function initBookmarkButtons() {
+        console.log("Инициализация кнопок закладок курсов");
+
+        const bookmarkButtons = document.querySelectorAll('button[data-type="bookmark"]');
+        console.log(`Найдено кнопок закладок: ${bookmarkButtons.length}`);
+
+        bookmarkButtons.forEach((button, index) => {
+            console.log(`Кнопка ${index + 1}:`, button.outerHTML);
+
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                console.log('Кнопка закладки курса нажата:', this);
+                toggleBookmark(this);
+            });
+        });
+    }
+
+    function toggleBookmark(button) {
+        console.log('Обработка закладки для курса:', button);
+        const objectId = button.dataset.objectId;
+        const isBookmarked = button.classList.contains('bookmarked');
+        const url = isBookmarked ? "{% url 'useraccount:remove_bookmark' %}" : "{% url 'useraccount:add_bookmark' %}" ;
+
+        console.log(`Отправка запроса на ${url} для курса с id=${objectId}`);
+
+        // Получаем CSRF токен
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken
+            },
+            body: `content_type=course&object_id=${objectId}`
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Network response was not ok');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Ответ сервера:', data);
+                if (data.status === 'success') {
+                    button.classList.toggle('bookmarked');
+                    updateButtonIcon(button);
+                    updateBookmarkCounter(isBookmarked);
+                } else {
+                    console.error('Ошибка при обновлении закладки курса:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса:', error);
+                alert('Произошла ошибка при обновлении закладки. Пожалуйста, попробуйте еще раз.');
+            });
+    }
+
+    function updateButtonIcon(button) {
+        const icon = button.querySelector('i');
+        if (button.classList.contains('bookmarked')) {
+            icon.style.color = '#ff6f6f';
+        } else {
+            icon.style.color = '#b3b3b3';
+        }
+    }
+
+    function updateBookmarkCounter(wasBookmarked) {
+        const counter = document.querySelector('#bookmark-counter');
+        if (counter) {
+            let count = parseInt(counter.textContent, 10);
+            count = wasBookmarked ? count - 1 : count + 1;
+            counter.textContent = count;
+        }
+    }
+
+    // Функция для получения CSRF токена из cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Дополнительная функция для обновления UI после успешного добавления/удаления закладки
+    function updateUI(button, isBookmarked) {
+        button.classList.toggle('bookmarked', isBookmarked);
+        const icon = button.querySelector('i');
+        icon.style.color = isBookmarked ? '#ff6f6f' : '#b3b3b3';
+
+        const text = button.querySelector('.bookmark-text');
+        if (text) {
+            text.textContent = isBookmarked ? 'Убрать из закладок' : 'Добавить в закладки';
+        }
+    }
+
+    console.log("Скрипт закладок курсов загружен и готов к использованию");
+</script>
+{% endblock footer %}

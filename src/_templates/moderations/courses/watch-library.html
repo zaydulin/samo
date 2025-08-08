@@ -1,0 +1,540 @@
+<style>
+    .alert {
+        height: 60px;
+    }
+</style>
+
+
+<div class="container mt-3">
+    <h3 class="text-center">Библиотека</h3>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="library-tab" data-bs-toggle="tab" data-bs-target="#library" type="button" role="tab" aria-controls="library" aria-selected="true">Библиотека</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="selected-tab" data-bs-toggle="tab" data-bs-target="#selected" type="button" role="tab" aria-controls="selected" aria-selected="false">Выбранное</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="library" role="tabpanel" aria-labelledby="library-tab">
+            <h3 class="text-center">Выберите свои элементы:</h3>
+            <div class="form-group">
+                <input type="text" class="form-control" id="searchInput" placeholder="Поиск по названию модуля">
+            </div>
+            <span class="title"> Ваши последние изменения: </span>
+             {% for module in modules %}
+                <div id="ModulePosition-{{ module.id }}">
+                    <div class="form-group d-flex alert alert-dark" style="background-color: #333333;
+    border-color: #333333;">
+                        <div class="checkbox checkbox-dark">
+
+
+                        <input class="form-check-input ml-0 mt-2" type="checkbox" id="Module-{{ module.id }}"
+                               data-module-name="{{ module.name }}"
+                               data-module-id="{{ module.id }}"
+                               data-module-description="{{ module.description }}"
+                               data-module-status="{{ module.status }}"
+                               data-module-point="{{ module.point }}"
+                               onchange="updateSelected()">
+                        <label class="form-check-label ml-4 mt-1 mb-0" for="Module-{{ module.id }}">{{ module.name }}</label>
+                            </div>
+                        <div class="ml-auto">
+                            {% if module.modulescourse.all.count > 0 %}
+                            <button class="btn btn-link" style="color: white" type="button" data-bs-toggle="collapse" data-bs-target="#LectionPosition-{{ module.id }}">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Лекции -->
+                    <div class="collapse ml-3" id="LectionPosition-{{ module.id }}">
+                        {% for lecture in module.modulescourse.all %}
+                        <div class="form-group d-flex alert alert-info" style="background-color: #7366ff!important;
+    border-color: #7366ff!important;">
+                            <div class="checkbox checkbox-dark">
+                                <input class="form-check-input ml-1 mt-2" type="checkbox" name="lection"
+                                       id="Lecture-{{ lecture.id }}-{{ module.id }}"
+                                       data-lection-id="{{ lecture.id }}"
+                                       data-lection-module="{{ module.id }}"
+                                       data-lection-name="{{ lecture.name }}"
+                                       data-lection-point-status="{{ lecture.status }}"
+                                       data-lection-point="{{ lecture.point }}"
+                                       data-lection-access-type="{{ lecture.access_type }}">
+                                <label class="form-check-label ml-4 mt-1 mb-0" for="Lecture-{{ lecture.id }}-{{ module.id }}">{{ lecture.name }}</label>
+                            </div>
+                            {% if lecture.quizzes.all.count > 0 %}
+                            <div class="ml-auto">
+                                <button class="btn btn-link" style="color: white" type="button" data-bs-toggle="collapse" data-bs-target="#QwizPosition-{{ lecture.id }}">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Вопросы -->
+                        <div class="collapse ml-3" id="QwizPosition-{{ lecture.id }}">
+                            {% for question in lecture.quizzes.all %}
+                            <div class="form-group d-flex alert alert-warning" style="background-color:  #838383!important;
+    border-color:  #838383!important;">
+                                  <div class="checkbox checkbox-dark">
+                                <input class="form-check-input ml-1 mt-2" type="checkbox" id="Qwiz-{{ lecture.id }}-{{ question.id }}"
+                                       data-qwiz-id="{{ question.id }}"
+                                       data-qwiz-type="{{ question.type }}"
+                                       data-qwiz-themes="{{ lecture.id }}"
+                                       data-qwiz-name="{{ question.name }}"
+                                       data-qwiz-point="{{ question.point }}"
+                                       data-qwiz-status="{{ question.status }}">
+                                <label class="form-check-label ml-4 mt-1 mb-0" for="Qwiz-{{ lecture.id }}-{{ question.id }}">{{ question.name }}</label>
+
+                            </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+        </div>
+        <!-- Selected Items Tab -->
+        <div class="tab-pane fade" id="selected" role="tabpanel" aria-labelledby="selected-tab">
+            <div class="mt-3">
+                <h3 class="text-center">Выбранные элементы:</h3>
+                <div id="selectedItems" class="list-group">
+                    <!-- Сюда будут динамически добавляться выбранные элементы -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    initializeCheckboxHandlersModule();
+    initializeCheckboxHandlersLections();
+    initializeCheckboxHandlersQwiz();
+    initializeCheckboxHandlersQuestion();
+    initializeSearch();
+});
+  function updateParentModuleState(element) {
+    console.log('deleted')
+}
+
+function updateParentLectionState(element) {
+    const lectionContainer = element.closest('[id^="LectionPosition-"]');
+    if (!lectionContainer) return;
+
+    const lectionCheckbox = lectionContainer.querySelector('[data-lection-id]');
+    const allQwizCheckboxes = lectionContainer.querySelectorAll('[data-qwiz-id]');
+
+    updateParentState(lectionCheckbox, allQwizCheckboxes);
+}
+
+function updateParentQwizState(element) {
+    const qwizContainer = element.closest('[id^="QuestionPosition-"]');
+    if (!qwizContainer) return;
+
+    const qwizCheckbox = qwizContainer.parentElement.querySelector('[data-qwiz-id]');
+    const allQuestionCheckboxes = qwizContainer.querySelectorAll('[data-question-id]');
+
+    updateParentState(qwizCheckbox, allQuestionCheckboxes);
+}
+
+function initializeCheckboxHandlersModule() {
+    // Обработчики для модулей
+    document.querySelectorAll('[data-module-id]').forEach(moduleCheckbox => {
+        moduleCheckbox.addEventListener('change', function() {
+            const moduleId = this.getAttribute('data-module-id');
+            const lectionsContainer = document.querySelector(`#LectionPosition-${moduleId}`);
+
+            if (lectionsContainer) {
+                // Обновляем все лекции в модуле
+                const lectionCheckboxes = lectionsContainer.querySelectorAll('input[data-lection-id]');
+                lectionCheckboxes.forEach(lectionCheckbox => {
+                    lectionCheckbox.checked = this.checked;
+
+                    // Обновляем все вопросы в лекции
+                    const lectionId = lectionCheckbox.getAttribute('data-lection-id');
+                    const qwizsContainer = document.querySelector(`#QwizPosition-${lectionId}`);
+                    if (qwizsContainer) {
+                        const qwizCheckboxes = qwizsContainer.querySelectorAll('input[data-qwiz-id]');
+                        qwizCheckboxes.forEach(qwizCheckbox => {
+                            qwizCheckbox.checked = this.checked;
+
+                            // Обновляем все тесты в вопросе
+                            const qwizId = qwizCheckbox.getAttribute('data-qwiz-id');
+                            const questionsContainer = document.querySelector(`#QuestionPosition-${qwizId}`);
+                            if (questionsContainer) {
+                                const questionCheckboxes = questionsContainer.querySelectorAll('input[data-question-id]');
+                                questionCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
+                            }
+                        });
+                    }
+                });
+            }
+            updateSelected();
+        });
+    });
+}
+
+function initializeCheckboxHandlersLections() {
+    // Обработчики для лекций
+
+    // Делегируем обработчик на родительский контейнер
+    document.body.addEventListener('change', function (event) {
+        // Проверяем, что событие произошло на элементе с атрибутом data-lection-id
+        if (event.target.matches('[data-lection-id]')) {
+            const lectionCheckbox = event.target;
+            const lectionId = lectionCheckbox.getAttribute('data-lection-id');
+            const qwizsContainer = document.querySelector(`#QwizPosition-${lectionId}`);
+            if (qwizsContainer) {
+                const qwizCheckboxes = qwizsContainer.querySelectorAll('input[data-qwiz-id]');
+                qwizCheckboxes.forEach(qwizCheckbox => {
+                    qwizCheckbox.checked = lectionCheckbox.checked;
+
+                    const qwizId = qwizCheckbox.getAttribute('data-qwiz-id');
+                    const questionsContainer = document.querySelector(`#QuestionPosition-${qwizId}`);
+                    if (questionsContainer) {
+                        const questionCheckboxes = questionsContainer.querySelectorAll('input[data-question-id]');
+                        questionCheckboxes.forEach(checkbox => checkbox.checked = lectionCheckbox.checked);
+                    }
+                });
+            }
+            updateSelected();
+        }
+    });
+
+
+}
+
+function initializeCheckboxHandlersQwiz() {
+    document.body.addEventListener('change', function(event) {
+        if (event.target.matches('[data-qwiz-id]')) {
+            const qwizCheckbox = event.target;
+            const qwizId = qwizCheckbox.getAttribute('data-qwiz-id');
+            const questionsContainer = document.querySelector(`#QuestionPosition-${qwizId}`);
+
+            if (questionsContainer) {
+                const questionCheckboxes = questionsContainer.querySelectorAll('input[data-question-id]');
+                questionCheckboxes.forEach(checkbox => checkbox.checked = qwizCheckbox.checked);
+            }
+            updateParentLectionState(qwizCheckbox);
+            updateParentModuleState(qwizCheckbox);
+            updateSelected();
+        }
+    });
+}
+
+function initializeCheckboxHandlersQuestion() {
+    document.body.addEventListener('change', function(event) {
+        if (event.target.matches('[data-question-id]')) {
+            const questionCheckbox = event.target;
+            updateParentQwizState(questionCheckbox);
+            updateParentLectionState(questionCheckbox);
+            updateParentModuleState(questionCheckbox);
+            updateSelected();
+        }
+    });
+}
+
+
+function updateParentState(parentCheckbox, childCheckboxes) {
+    console.log('deleted')
+}
+
+function updateSelected() {
+    const selectedItemsDiv = document.getElementById('selectedItems');
+    selectedItemsDiv.innerHTML = '';
+
+    const checkedItems = [
+        ...document.querySelectorAll('[data-module-id]:checked'),
+        ...document.querySelectorAll('[data-lection-id]:checked'),
+        ...document.querySelectorAll('[data-qwiz-id]:checked'),
+        ...document.querySelectorAll('[data-question-id]:checked')
+    ];
+
+    checkedItems.forEach(item => {
+        const listItem = createSelectedItem(item);
+        if (listItem) selectedItemsDiv.appendChild(listItem);
+    });
+}
+
+function createSelectedItem(checkbox) {
+    const getItemType = (checkbox) => {
+        if (checkbox.hasAttribute('data-module-id')) return { type: 'module', icon: '📚', margin: '0' };
+        if (checkbox.hasAttribute('data-lection-id')) return { type: 'lecture', icon: '📖', margin: '2rem' };
+        if (checkbox.hasAttribute('data-qwiz-id')) return { type: 'quiz', icon: '❓', margin: '4rem' };
+        if (checkbox.hasAttribute('data-question-id')) return { type: 'question', icon: '✓', margin: '6rem' };
+        return null;
+    };
+
+    const lectionId = checkbox.getAttribute('data-lection-id') || '';
+    const qwizId = checkbox.getAttribute('data-qwiz-id') || '';
+    const moduleId = checkbox.getAttribute('data-module-id') || '';
+    const csrfToken =  '{{ csrf_token }}'
+    const itemType = getItemType(checkbox);
+    if (!itemType) return null;
+
+    const label = checkbox.nextElementSibling?.textContent.trim() || 'Без названия';
+
+    const listItem = document.createElement('div');
+    const courseName = '{{ course.name|escapejs }}';
+    listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+    listItem.setAttribute('draggable', 'true');
+    listItem.setAttribute('data-item-id', checkbox.id);
+
+    // Определение, что показывать в модальном окне
+    let modalContent = '';
+
+    if (checkbox.id.startsWith('Qwiz-')) {
+        modalContent = `<h5>Добавьте тест ${label}</h5>`;
+                modalContent += `<input type="hidden" name="test_id" value="${qwizId}">`;
+        modalContent += `<select class="form-control" name="lection_for_qwiz_id">
+                <option value="">Выберите лекцию</option>`;
+        {% for module in modules_with_themes %}
+            {% for theme in module.modulescourse.all %}
+                modalContent += `<option value="{{ theme.id }}">{{ theme.name }}</option>`;
+            {% endfor %}
+        {% endfor %}
+        modalContent += `</select>`;
+    } else if (checkbox.id.startsWith('Lecture-')) {
+        modalContent = `<h5>Добавить лекцию ${label}</h5>`;
+        modalContent += `<input type="hidden" name="addlection_id" value="${lectionId}">`;
+        modalContent += `<select class="form-control" name="module_id">
+                <option value="">Выберите модуль</option>`;
+        {% for module in modules_with_themes %}
+            modalContent += `<option value="{{ module.id }}">{{ module.name }}</option>`;
+        {% endfor %}
+        modalContent += `</select>`;
+        modalContent += `<div class="checkbox checkbox-dark">
+                                <input class="form-check-input ml-1 mt-2" type="checkbox" name="addtolectiontests" id="addtolectiontests">
+                                <label class="form-check-label ml-4 mt-1 mb-0" for="addtolectiontests">Добавить тесты из этой лекции</label>
+                           </div>`;
+
+    } else if (checkbox.id.startsWith('Module-')) {
+        modalContent = `<h5>Добавить модуль ${label} ?</h5>`;
+        modalContent += `<input type="hidden" name="add_module" value="${moduleId}">`;
+        modalContent += `<div class="checkbox checkbox-dark">
+                                <input class="form-check-input ml-1 mt-2" type="checkbox" name="addtomodulelection" id="addtomodulelection">
+                                <label class="form-check-label ml-4 mt-1 mb-0" for="addtomodulelection">Добавить лекции из этого модуля</label>
+                           </div>`;
+        modalContent += `<div class="checkbox checkbox-dark">
+                                <input class="form-check-input ml-1 mt-2" type="checkbox" name="addtomoduletests" id="addtomoduletests">
+                                <label class="form-check-label ml-4 mt-1 mb-0" for="addtomoduletests">Добавить тесты для лекции</label>
+                           </div>`;
+    }
+
+    listItem.innerHTML = `
+        <div class="d-flex align-items-center" style="margin-left: ${itemType.margin}">
+            <span class="me-2">${itemType.icon}</span>
+            <span>${label}</span>
+        </div>
+
+        <button class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#tooltipmodal-${checkbox.id}">Добавить к текущему курсу</button>
+        <div class="modal fade" id="tooltipmodal-${checkbox.id}" tabindex="-1" role="dialog" aria-labelledby="tooltipmodal-${checkbox.id}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" style="--bs-modal-width: 900px;" role="document">
+            <div class="modal-content">
+              <form method="post" id="libraryform-${checkbox.id}" action="{% url 'moderation:libraryupdates' %}">
+              <div class="modal-header">
+                <h5 class="modal-title">Добавить в курс ${courseName}</h5>
+                <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                ${modalContent}
+                <hr>
+                <h5>Новое название(не обязательно)</h5>
+                <input type="text" class="form-control" name="new_name" placeholder="Новое название">
+                <input type="hidden" name="course_id" value="{{course.id}}">
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary" type="submit">Сохранить</button>
+              </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="removeSelectedItem('${checkbox.id}')">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    // Добавляем обработчик отправки формы
+    setTimeout(() => {
+        const form = document.getElementById(`libraryform-${checkbox.id}`);
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Останавливаем стандартное поведение формы
+
+            const formData = new FormData(form); // Собираем данные формы
+            const response = await fetch(form.action || '{% url  "moderation:libraryupdates" %}', { // Укажите URL для отправки
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrfToken  // Добавляем CSRF-токен в заголовки
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showAlert('Элемент успешно добавлен!', 'success'); // Вызываем вашу функцию showAlert
+                const modal = bootstrap.Modal.getInstance(document.getElementById(`tooltipmodal-${checkbox.id}`));
+                modal.hide(); // Закрываем модальное окно
+                $('#themeslist').load(location.href + ' #themeslist > *');
+            } else {
+                showAlert('Ошибка при добавлении элемента.', 'danger');
+            }
+        });
+    }, 0); // Используем setTimeout для корректной обработки динамического контента
+
+    return listItem;
+}
+
+
+function removeSelectedItem(checkboxId) {
+    const checkbox = document.getElementById(checkboxId);
+    console.log(checkbox)
+    if (checkbox) {
+        checkbox.checked = false;
+        const event = new Event('change');
+        checkbox.dispatchEvent(event);
+    }
+}
+
+function initializeSearch() {
+    let timeout;
+
+    document.body.addEventListener('input', function (event) {
+        if (event.target.matches('#searchInput')) {
+            clearTimeout(timeout);
+
+            timeout = setTimeout(function () {
+                let searchTerm = event.target.value.toLowerCase();
+
+                document.querySelectorAll('[id^="ModulePosition-"]').forEach(function (module) {
+                    let moduleId = module.id.split('-')[1];
+                    let moduleName = module.querySelector(`#Module-${moduleId}`).dataset.moduleName.toLowerCase();
+                    let isModuleVisible = moduleName.includes(searchTerm);
+
+                    let lecturesVisible = false; // флаг для видимости хотя бы одной лекции внутри модуля
+
+                    // Лекции внутри модуля
+                    module.querySelectorAll('.form-group.d-flex.alert-info').forEach(function (lecture) {
+                        let lectureId = lecture.querySelector('input').id.split('-')[1];
+                        let lectureName = lecture.querySelector('input').dataset.lectionName.toLowerCase();
+                        let isLectureVisible = lectureName.includes(searchTerm);
+                        // Если лекция подходит, показываем её
+                        if (isLectureVisible) {
+                            lecture.style.removeProperty('display'); // лекция видимая
+                        } else {
+                            lecture.style.setProperty('display', 'none', 'important'); // скрываем лекцию
+                        }
+
+                        if (isLectureVisible) {
+                            lecturesVisible = true; // Есть хотя бы одна подходящая лекция
+                        }
+                    });
+
+                    // Управляем видимостью модуля
+                    if (isModuleVisible || lecturesVisible) {
+                        module.style.removeProperty('display'); // показываем модуль
+                    } else {
+                        module.style.setProperty('display', 'none', 'important'); // скрываем модуль
+                    }
+
+                    // Если модуль найден, делаем все его лекции видимыми
+                    if (isModuleVisible) {
+                        module.querySelectorAll('.form-group.d-flex.alert-info').forEach(function (lecture) {
+                            lecture.style.removeProperty('display'); // все лекции становятся видимыми
+                        });
+                    }
+
+                    // Управление состоянием collapse
+                    module.querySelectorAll('.collapse').forEach(function (collapse) {
+                        let lectureId = collapse.id.split('-')[1];
+                        let relatedLecture = module.querySelector(`#LectionPosition-${lectureId}`);
+
+                        if (relatedLecture && relatedLecture.style.display !== 'none' && (isModuleVisible || lecturesVisible)) {
+                            // Открываем collapse для видимой лекции и видимого модуля
+                            new bootstrap.Collapse(collapse, { toggle: false }).show();
+                        } else {
+                            // Закрываем collapse, если лекция скрыта или модуль скрыт
+                            new bootstrap.Collapse(collapse, { toggle: false }).hide();
+                        }
+                    });
+                });
+
+                // Если строка поиска пуста, возвращаем все элементы в их исходное состояние
+                if (searchTerm === "") {
+                    document.querySelectorAll('[id^="ModulePosition-"]').forEach(function (module) {
+                        // Сбрасываем display для модулей и лекций
+                        module.style.removeProperty('display');
+
+                        module.querySelectorAll('.form-group.d-flex.alert-info').forEach(function (lecture) {
+                            lecture.style.removeProperty('display');
+                        });
+
+                        // Управляем состоянием collapse без изменения состояния
+                        module.querySelectorAll('.collapse').forEach(function (collapse) {
+                            // Просто сбрасываем состояние collapse, не открываем
+                            collapse.classList.remove('show');
+                        });
+                    });
+                     document.querySelectorAll('[id^="LectionPosition-"]').forEach(function (lection) {
+                            // Сбрасываем display для лекций
+
+
+                            // Убираем display:none для лекций
+                            lection.style.removeProperty('display');
+
+                            setTimeout(function() {
+                                   console.log(lection);
+                                   lection.classList.remove('show');
+                            }, 300);
+
+                        });
+
+                }
+
+            }, 800); // Задержка в 800 миллисекунд после завершения ввода
+        }
+    });
+}
+
+function initializeDragAndDrop() {
+    let draggedItem = null;
+
+    document.addEventListener('dragstart', function(e) {
+        if (e.target.classList.contains('list-group-item')) {
+            draggedItem = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+        }
+    });
+
+    document.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        if (e.target.classList.contains('list-group-item')) {
+            e.dataTransfer.dropEffect = 'move';
+        }
+    });
+
+    document.addEventListener('drop', function(e) {
+        e.preventDefault();
+        const target = e.target.closest('.list-group-item');
+
+        if (draggedItem && target && draggedItem !== target) {
+            const selectedItemsDiv = document.getElementById('selectedItems');
+            const items = Array.from(selectedItemsDiv.children);
+
+            const draggedIndex = items.indexOf(draggedItem);
+            const targetIndex = items.indexOf(target);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                if (draggedIndex < targetIndex) {
+                    target.parentNode.insertBefore(draggedItem, target.nextSibling);
+                } else {
+                    target.parentNode.insertBefore(draggedItem, target);
+                }
+            }
+        }
+    });
+}
+</script>

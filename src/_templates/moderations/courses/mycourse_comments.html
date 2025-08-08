@@ -1,0 +1,220 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/jquery.dataTables.css' %}">
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header card-no-border text-end">
+                            <div class="card-header-right-icon">
+
+                            </div>
+                        </div>
+                        <div class="card-body px-0 pt-0">
+                            <div class="list-product ">
+                                <div class="recent-table table-responsive custom-scrollbar">
+                                    <table class="table" >
+                                        <thead>
+                                        <tr>
+                                            <th> <span class="f-light f-w-600">Автор</span></th>
+                                            <th> <span class="f-light f-w-600">Описание</span></th>
+                                            <th> <span class="f-light f-w-600">Тип</span></th>
+                                            <th> <span class="f-light f-w-600">Удалить</span></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for comment in comments %}
+                                        <tr class="product-removes inbox-data"  id="comment-{{ comment.id }}">
+                                            <td>
+                                                <div class="product-names">
+                                                    <div class="light-product-box">
+                                                        <img class="img-fluid" src="{{ comment.user.avatar.url }}" alt="t-shirt">
+                                                    </div>
+                                                    <p>{{ comment.user.username }}</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <p class="f-light">
+                                                    {{ comment.content }}
+                                                </p>
+                                            </td>
+                                            <td> <span class="badge badge-light-primary">Нейтральный</span></td>
+                                            <td>
+                                                <div class="common-align gap-2 justify-content-start">
+                                                    <a class="square-white delete-comment" data-comment-id="{{ comment.id }}">
+                                                        <svg>
+                                                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#trash1"></use>
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/custom_category.js' %}"></script>
+<script>
+$(document).ready(function() {
+    var csrftoken = '{{ csrf_token }}';
+
+    $('.delete-comment').click(function(e) {
+        e.preventDefault();
+        var commentId = $(this).data('comment-id');
+
+        if (confirm('Вы уверены, что хотите удалить этот комментарий?')) {
+            $.ajax({
+                url: '/delete-comment/' + commentId + '/',
+                type: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#comment-' + commentId).fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Произошла ошибка при удалении комментария.');
+                }
+            });
+        }
+    });
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+{% endblock bootonfooter %}

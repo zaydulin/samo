@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>View Stream</title>
+</head>
+<body>
+    <h1>View Stream</h1>
+    <video id="remoteVideo" autoplay></video>
+    <script>
+        async function startViewing(userId) {
+            const peerConnection = new RTCPeerConnection();
+            peerConnection.ontrack = event => {
+                const video = document.getElementById('remoteVideo');
+                video.srcObject = event.streams[0];
+            };
+
+            const response = await fetch(`/conference/view/${userId}/`, {
+                method: 'GET'
+            });
+            const data = await response.json();
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription({ sdp: data.sdp, type: 'offer' }));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            await fetch(`/conference/view/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sdp: answer.sdp })
+            });
+        }
+
+        const userId = window.location.pathname.split('/')[3];
+        startViewing(userId);
+    </script>
+</body>
+</html>

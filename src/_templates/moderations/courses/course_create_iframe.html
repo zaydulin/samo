@@ -1,0 +1,1763 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+<style>
+    li.qwiz:hover{
+        background: #f7f7f7;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+        padding: 10px;
+    }
+    span.title {
+        height: 42px;
+        padding-left: 10px;
+        padding-top: 10px;
+    }
+    .main-title {
+        color: #7366ff!important;
+        font-weight: 500;
+        margin-bottom: 5px;
+        display: block;
+        font-size: 16px;
+    }
+    ul.nav.main-menu.custom-scrollbar {
+        width: 100%;
+    }
+    .float-end {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+    }
+    .float-end-task {
+        position: absolute;
+        right: 0;
+        padding-right: 20px;
+        padding-top:10px;
+    }
+    ul.nav.main-menu.custom-scrollbar li {
+        display: flex;
+        width: 100%;
+    }
+    ul.nav.main-menu.custom-scrollbar > li > ul.nav.main-menu.custom-scrollbar {
+        padding-left: 10px;
+    }
+    span.float-end-task a svg {
+        color: #9f9f9f!important;
+    }
+    .cropper-container.cropper-bg {
+        height: 75vh !important;
+    }
+    img#cropperImage {
+        height: 70vh;
+        width: 59vh;
+    }
+</style>
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select2.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+
+<style>
+
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a id="views-course-name">
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="row">
+                <div class="col-xl-3 box-col-6">
+                    <div class="md-sidebar">
+                        <div class="md-sidebar-aside job-left-aside custom-scrollbar">
+                            <div class="email-left-aside">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="common-align gap-2 justify-content-end">
+                                                    <a class="square-white" href="#!" for="watch-library" id="loadLibrary"  title="Библиотека">
+                                                        <i class="fa fa-th-large"></i>
+                                                    </a>
+                                                    <a class="square-white" href="#!" for="views-curse" title="Посмотреть">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    <a class="square-white" href="#!" for="create-module" title="Новый модуль">
+                                                        <i class="fa fa-plus-circle"></i>
+                                                    </a>
+                                                    <a class="square-white" href="#!" for="create-themes" title="Новую лекцию">
+                                                        <i class="fa fa-plus"></i>
+                                                    </a>
+                                                    <a class="square-white" for="create-curse" href="#!" title="Изменить">
+                                                        <i class="fa fa-pen"></i>
+                                                    </a>
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#DelModal" title="Удалить">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Themes List -->
+                                <div id="themeslist">
+                                    {% include 'moderations/courses/themes_list.html' %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-9 col-md-12 box-col-12">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div id="form-list">
+                                <div id="create-curse">
+                                    {% include 'moderations/courses/add_course_form.html' %}
+                                </div>
+                                <div id="views-curse" class="form-none">
+                                    {% include 'moderations/courses/views_course.html' %}
+                                </div>
+                                <div id="create-themes" class="form-none">
+                                    {% include 'moderations/courses/add_themes_form.html' %}
+                                </div>
+                                <div id="edit-themes" class="form-none">
+                                    {% include 'moderations/courses/edit_theme_form.html' %}
+                                </div>
+                                <div id="create-module" class="form-none">
+                                    {% include 'moderations/courses/add_module_form.html' %}
+                                </div>
+                                 <div id="views-themes" class="form-none">
+                                    {% include 'moderations/courses/views-themes.html' %}
+                                </div>
+                                <div id="views-qwiz" class="form-none">
+                                    {% include 'moderations/courses/views-qwiz.html' %}
+                                </div>
+                                <div id="qwiz-add" class="form-none">
+                                    {% include 'moderations/courses/add_qwiz.html' %}
+                                </div>
+                                <div id="qwiz-edit" class="form-none">
+                                    {% include 'moderations/courses/edit_qwiz.html' %}
+                                </div>
+                                <div id="watch-library" class="form-none">
+                                    {% include 'moderations/courses/watch-library.html' %}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно для обрезки -->
+<div id="cropperModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Обрезка изображения</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="cropperImage" src="" alt="Изображение для обрезки">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="cropButton">Обрезать</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно для обрезки -->
+<div class="modal fade modal-bookmark" id="DelModal" tabindex="-1" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Вы уверены что курс требуется удалить?</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Все данные будут безвозвратно удалены, включая лекции и тесты.</p>
+
+                {% if user == course.author %}
+                <form method="post" id="delete-course-form" action="{% url 'moderation:delete_course' course.id %}">
+                    {% csrf_token %}
+                    <button type="button" id="confirm-delete-btn" class="btn btn-danger">Удалить курс</button>
+                    <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Отмена</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/select2/select2.full.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/select2/select2-custom.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+<!--Подгрузка библиотеки-->
+ <script>
+                                    document.getElementById('loadLibrary').addEventListener('click', function (event) {
+                                        event.preventDefault();
+
+                                        // Отправка AJAX-запроса на сервер
+                                        fetch("{% url 'moderation:get_modules' %}?course_id={{course.id}}", {
+                                            method: 'GET',
+                                        })
+                                        .then(response => response.text()) // Получаем HTML в виде текста
+                                        .then(html => {
+                                            // Вставляем содержимое в элемент #watch-library
+                                            document.getElementById('watch-library').innerHTML = html;
+                                            // Отображаем элемент, если он был скрыт
+                                            document.getElementById('watch-library').classList.remove('form-none');
+                                        })
+                                        .catch(error => {
+                                            console.error('Ошибка загрузки:', error);
+                                        });
+                                    });
+                                </script>
+<!--Удаление курса-->
+<script>
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+    if (confirm('Вы уверены, что хотите удалить этот курс?')) {
+        const form = document.getElementById('delete-course-form');
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' // Для обозначения AJAX-запроса
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url; // Редирект при успехе
+            } else if (data.error) {
+                alert(data.error); // Показ ошибки, если есть
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при удалении курса:', error);
+            alert('Произошла ошибка при удалении курса. Пожалуйста, попробуйте снова.');
+        });
+    }
+});
+</script>
+
+<!-- Обрезчик-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentCropper = null;
+        let currentInput = null;
+
+        function showPopupAndInitCropper(inputElement) {
+            const file = inputElement.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const cropperImage = document.getElementById('cropperImage');
+                    cropperImage.src = event.target.result;
+                    currentInput = inputElement;
+                    $('#cropperModal').modal('show'); // Убедитесь, что jQuery и Bootstrap.js загружены
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function initializeImageUploadHandlers() {
+            ['id_cover', 'id_image'].forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('change', function(event) {
+                        showPopupAndInitCropper(this);
+                    });
+                }
+            });
+        }
+
+        // Инициализация модального окна
+        $('#cropperModal').on('shown.bs.modal', function () {
+            const cropperImage = document.getElementById('cropperImage');
+            if (currentCropper) {
+                currentCropper.destroy();
+            }
+            currentCropper = new Cropper(cropperImage, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                dragMode: 'move',
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+            });
+        });
+
+        // Обработчик кнопки обрезки
+        document.getElementById('cropButton').addEventListener('click', function() {
+            if (currentCropper) {
+                const canvas = currentCropper.getCroppedCanvas();
+                if (canvas) {
+                    canvas.toBlob((blob) => {
+                        const file = currentInput.files[0];
+                        const croppedFile = new File([blob], file.name, { type: file.type });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(croppedFile);
+                        currentInput.files = dataTransfer.files;
+
+                        const previewId = currentInput.id.replace('id_', '') + 'Preview';
+                        const preview = document.getElementById(previewId);
+                        preview.src = URL.createObjectURL(blob);
+                        preview.style.display = 'block';
+
+                        $('#cropperModal').modal('hide');
+                    }, 'image/jpeg');
+                }
+            }
+        });
+
+        // Очистка при закрытии модального окна
+        $('#cropperModal').on('hidden.bs.modal', function () {
+            if (currentCropper) {
+                currentCropper.destroy();
+                currentCropper = null;
+            }
+        });
+
+        // Остальной код...
+
+        // Инициализация всех обработчиков при загрузке страницы
+        initializeImageUploadHandlers();
+        // Другие инициализации...
+    });
+
+    // Глобальная функция обновления формы
+    function refreshForm() {
+        initializeSelect2();
+        initializeFormHandlers();
+        initializeImageUploadHandlers();
+    }
+</script>
+
+<!--Предпросмотр картинок-->
+<script>
+    function previewImage(input, previewId) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(previewId).src = e.target.result;
+                document.getElementById(previewId).style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    document.getElementById('id_cover').addEventListener('change', function() {
+        previewImage(this, 'coverPreview');
+    });
+
+    document.getElementById('id_image').addEventListener('change', function() {
+        previewImage(this, 'imagePreview');
+    });
+</script>
+
+<!-- Инициализация CKEditor для редактирования и Форы  -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formList = document.getElementById('form-list');
+    const links = document.querySelectorAll('a[for]');
+    let editorEditThemes;
+    let isEditorInitializedEdit = false;
+
+    links.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('for');
+            const targetForm = document.getElementById(targetId);
+
+            if (targetForm && formList.contains(targetForm)) {
+                Array.from(formList.children).forEach(child => {
+                    if (child.id !== targetId) {
+                        child.classList.add('form-none');
+                    }
+                });
+
+                targetForm.classList.remove('form-none');
+
+
+            }
+        });
+    });
+
+    function initializeCKEditorEditThemes() {
+        const descriptionElement = document.querySelector("#id_description_form_edit");
+
+        if (descriptionElement && !editorEditThemes) {
+            ClassicEditor
+                .create(document.querySelector('#id_description_form_edit'), {
+                    extraPlugins: ['UploadAdapter'],
+                    ckfinder: {
+                        uploadUrl: '/ckeditor/upload/', // URL для загрузки изображений
+                        headers: {
+                            'X-CSRFToken': `{{csrf_token}}`  // Добавляем CSRF-токен
+                        }
+                    }
+                })
+                .then(newEditor => {
+                    editorEditThemes = newEditor;
+                    console.log('CKEditor для редактирования успешно создан');
+
+                    const initialContent = document.querySelector('#id_description_themes_edit').value;
+                    editorEditThemes.setData(initialContent);
+
+                    editorEditThemes.model.document.on('change:data', () => {
+                        document.querySelector('#id_description_themes_edit').value = editorEditThemes.getData();
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка при инициализации CKEditor для редактирования:', error);
+                });
+        } else {
+            console.error('Описание элемента для CKEditor не найдено в форме редактирования!');
+        }
+    }
+});
+</script>
+
+<!-- Перемещение квизов и лекций-->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    initializeEventDelegation();
+});
+
+let isMoving = false;
+
+// Делегирование событий для перемещения тем
+function initializeEventDelegation() {
+    const themesList = document.getElementById('themeslist');
+    const quizLists = document.querySelectorAll('.quiz-list');
+
+    // Делегирование событий для перемещения тем
+    themesList.addEventListener('click', (event) => {
+        const button = event.target.closest('.move-theme');
+        if (button && !isMoving) {
+            event.preventDefault();
+
+            const themeId = button.dataset.themesId;
+            const direction = button.querySelector('.fa-arrow-up') ? 'up' : 'down';
+            const position = button.dataset.themesPosition;
+            moveTheme(themeId, direction, position);
+        }
+    });
+
+    // Делегирование событий для перемещения квизов
+    quizLists.forEach(quizList => {
+        quizList.addEventListener('click', (event) => {
+            const button = event.target.closest('.move-quiz');
+            if (button && !isMoving) {
+                event.preventDefault();
+
+                const quizId = button.dataset.quizId;
+                const direction = button.dataset.direction;
+                const position = button.dataset.quizPosition;
+                moveQuiz(quizId, direction, position);
+            }
+        });
+    });
+}
+
+// Функция для перемещения темы
+function moveTheme(themeId, direction, position) {
+    if (isMoving) return;
+    isMoving = true;
+
+    console.log(`Move theme - ID: ${themeId}, Direction: ${direction}, Position: ${position}`);
+
+    const themeElement = document.getElementById(`theme-${themeId}`);
+    const moveButtons = themeElement.querySelectorAll('.move-theme');
+    moveButtons.forEach(btn => btn.style.pointerEvents = 'none');
+
+    fetch(`{% url 'moderation:move_theme' 11111 22222 33333 %}`.replace('11111', themeId).replace('22222', direction).replace('33333', position), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': `{{csrf_token}}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.text();
+    })
+    .then(html => {
+        // Обновляем список тем после перемещения
+        document.getElementById('themeslist').innerHTML = html;
+        // Переинициализируем делегирование событий
+        initializeEventDelegation();
+
+    })
+    .catch(error => {
+        console.error('Error moving theme:', error);
+        alert('Error moving theme. Please try again.');
+    })
+    .finally(() => {
+        moveButtons.forEach(btn => btn.style.pointerEvents = '');
+        isMoving = false;
+    });
+}
+
+// Функция для перемещения квиза
+function moveQuiz(quizId, direction, position) {
+    if (isMoving) return;
+    isMoving = true;
+
+    console.log(`Move quiz - ID: ${quizId}, Direction: ${direction}, Position: ${position}`);
+
+    const quizElement = document.getElementById(`quiz-item-${quizId}`);
+    const moveButtons = quizElement.querySelectorAll('.move-quiz');
+    moveButtons.forEach(btn => btn.style.pointerEvents = 'none');
+
+    fetch(`{% url 'moderation:move_qwiz' 11111 22222 33333 %}`.replace('11111', quizId).replace('22222', direction).replace('33333', position), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': `{{csrf_token}}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const quizList = quizElement.parentElement;
+
+            // Перемещаем элемент в DOM
+            if (direction === 'up' && quizElement.previousElementSibling) {
+                quizList.insertBefore(quizElement, quizElement.previousElementSibling);
+            } else if (direction === 'down' && quizElement.nextElementSibling) {
+                quizList.insertBefore(quizElement.nextElementSibling, quizElement);
+            }
+
+            // Обновляем позиции элементов на странице
+            updatePositions(data.quizzes);  // Передаем список новых позиций квизов
+        }
+    })
+    .catch(error => {
+        console.error('Error moving quiz:', error);
+        alert('Error moving quiz. Please try again.');
+    })
+    .finally(() => {
+        moveButtons.forEach(btn => btn.style.pointerEvents = '');
+        isMoving = false;
+    });
+}
+
+// Функция для обновления позиций на основе новых данных
+function updatePositions(quizzes) {
+    quizzes.forEach(quiz => {
+        const quizItem = document.getElementById(`quiz-item-${quiz.id}`);
+        if (quizItem) {
+            // Обновляем позицию кнопок перемещения
+            const moveButtons = quizItem.querySelectorAll('.move-quiz');
+            moveButtons.forEach(button => {
+                button.dataset.quizPosition = quiz.position;  // Обновляем data-quiz-position
+            });
+        }
+    });
+}
+
+
+// Функция для обновления позиций в атрибутах data-quiz-position и data-themes-position
+
+</script>
+<!-- Создание лекций -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const themesForm = document.getElementById("themesForm");
+    const loadingIndicator = document.getElementById("loading-indicator-themes");
+    let editorAddThemes;
+
+    function toggleFormVisibility(linkSelector, formListId) {
+        const links = document.querySelectorAll(linkSelector);
+        const formList = document.getElementById(formListId);
+
+        if (!formList) return;
+
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('for');
+                const targetForm = document.getElementById(targetId);
+
+                if (targetForm && formList.contains(targetForm)) {
+                    Array.from(formList.children).forEach(child => {
+                        if (child.id !== targetId) {
+                            child.classList.add('form-none');
+                        }
+                    });
+
+                    targetForm.classList.remove('form-none');
+                }
+            });
+        });
+    }
+
+    // Function to initialize CKEditor for creating themes
+    function initializeCKEditorAddThemes() {
+    if (editorAddThemes) {
+        console.log("CKEditor for creation already initialized");
+        return;
+    }
+
+    // Инициализация CKEditor для "Добавить описание"
+    ClassicEditor
+        .create(document.querySelector("#id_description_form_add"), {
+                    ckfinder: {
+                        uploadUrl: '/ckeditor/upload/' // Путь для загрузки изображений
+                    },
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', '|',
+                            'bulletedList', 'numberedList', 'blockQuote', '|',
+                            'insertTable', 'undo', 'redo', '|',
+                            'imageUpload'
+                        ]
+                    },
+                    image: {
+                        toolbar: [
+                            'imageTextAlternative',
+                            '|',
+                            'imageStyle:alignLeft',
+                            'imageStyle:alignCenter',
+                            'imageStyle:alignRight',
+                            '|',
+                            'resizeImage' // Возможность изменения размера
+                        ],
+                        resizeHandles: true // Перетаскивание для изменения размера
+                    }
+                })
+        .then(newEditor => {
+            editorAddThemes = newEditor;
+            console.log("CKEditor for description successfully initialized");
+
+            const hiddenTextarea = document.querySelector("#id_description_themes_add");
+            if (hiddenTextarea) {
+                editorAddThemes.setData(hiddenTextarea.value);
+                editorAddThemes.model.document.on("change:data", () => {
+                    hiddenTextarea.value = editorAddThemes.getData();
+                });
+            }
+            // Добавление обработчика для изменения размера изображений
+            addImageResizeFunctionality();
+        })
+        .catch(error => {
+            console.error("Error initializing CKEditor for description:", error);
+        });
+
+    // Инициализация CKEditor для "Добавить задание"
+    const homeWorkContainer = document.querySelector('#id_home_work_add_themes_form');
+    const homeWorkTextarea = document.querySelector('#id_home_work_add_themes');
+
+    if (homeWorkContainer && homeWorkTextarea) {
+        ClassicEditor
+            .create(homeWorkContainer, {
+                    ckfinder: {
+                        uploadUrl: '/ckeditor/upload/' // Путь для загрузки изображений
+                    },
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', '|',
+                            'bulletedList', 'numberedList', 'blockQuote', '|',
+                            'insertTable', 'undo', 'redo', '|',
+                            'imageUpload'
+                        ]
+                    },
+                    image: {
+                        toolbar: [
+                            'imageTextAlternative',
+                            '|',
+                            'imageStyle:alignLeft',
+                            'imageStyle:alignCenter',
+                            'imageStyle:alignRight',
+                            '|',
+                            'resizeImage' // Возможность изменения размера
+                        ],
+                        resizeHandles: true // Перетаскивание для изменения размера
+                    }
+                })
+            .then(newEditor => {
+                console.log("CKEditor for home work successfully initialized");
+
+                // Устанавливаем начальные данные
+                newEditor.setData(homeWorkTextarea.value);
+
+                // Синхронизация данных
+                newEditor.model.document.on('change:data', () => {
+                    homeWorkTextarea.value = newEditor.getData();
+                });
+                // Добавление обработчика для изменения размера изображений
+                addImageResizeFunctionality();
+            })
+            .catch(error => console.error('Error initializing CKEditor for home work:', error));
+    }
+}
+
+    function addImageResizeFunctionality() {
+        const editorContainer = document.querySelector('.ck-editor__editable');
+
+        editorContainer.addEventListener('click', (event) => {
+            const target = event.target;
+
+            // Проверяем, что кликнули на изображение
+            if (target.tagName === 'IMG') {
+                // Сохраняем начальные размеры изображения
+                const initialWidth = target.width;
+                const initialHeight = target.height;
+
+                // Добавляем маркеры для изменения размера
+                createResizeHandles(target, initialWidth, initialHeight);
+            }
+        });
+    }
+
+        // Инициализация других элементов страницы
+    function initializePageElements() {
+        toggleElementDisplay('id_point_status_themes', 'point-show-add');
+        toggleElementDisplay('id_attempts_status_themes_add', 'id_attempts_show_add');
+        toggleElementDisplay('id_home_work_status_themes_add','id_home_work_show_add');
+
+    }
+        function toggleElementDisplay(checkboxId, targetId) {
+            const checkbox = document.getElementById(checkboxId);
+            const target = document.getElementById(targetId);
+
+            if (checkbox && target) {
+                // Устанавливаем начальное состояние
+                target.style.display = checkbox.checked ? 'block' : 'none';
+
+                // Добавляем обработчик события только один раз
+                checkbox.addEventListener('change', () => {
+                    target.style.display = checkbox.checked ? 'block' : 'none';
+                });
+            } else {
+                console.error(`Элементы с ID ${checkboxId} или ${targetId} не найдены`);
+            }
+        }
+
+    // Initialize CKEditor on page load
+    initializeCKEditorAddThemes();
+    initializePageElements();
+
+    // Universal function to initialize elements within themeslist
+    function initializeThemesListElements() {
+        const themesList = document.getElementById('themeslist');
+
+        if (themesList) {
+            themesList.querySelectorAll('.custom-button').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    console.log("Button clicked:", button);
+                });
+            });
+
+            themesList.querySelectorAll('.custom-input').forEach(input => {
+                console.log("Input field found:", input);
+            });
+
+            console.log("Themes list elements have been initialized.");
+        }
+    }
+
+    // Initialize themeslist elements on page load
+    initializeThemesListElements();
+
+    // Функция для отображения уведомлений
+    function showAlert(message, type) {
+        // Создаем элемент div для отображения уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили из вашего CSS
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px'; // Из CSS
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out'; // Из CSS
+
+        // Добавляем элемент на страницу (например, в начало body)
+        document.body.prepend(alertDiv);
+
+        // Удаляем элемент через 3 секунды
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Handle form submission for themesForm with AJAX
+    themesForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        loadingIndicator.style.display = "block";
+
+        if (editorAddThemes) {
+            const editorData = editorAddThemes.getData();
+            document.querySelector("#id_description_themes_add").value = editorData;
+        }
+
+        const formData = new FormData(themesForm);
+        $.ajax({
+            type: 'POST',
+            url: themesForm.action,
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $('#loading-indicator-themes').show();
+            },
+            success: function(response) {
+                $('#loading-indicator-themes').hide();
+                 showAlert('Лекция добавлена', 'success');
+                $('#themeslist').load(location.href + ' #themeslist > *', function() {
+                    initializeThemesListElements(); // Reinitialize themeslist elements after loading
+                    initializePageElements();
+                });
+                toggleFormVisibility('a[for]', 'form-list');
+                initializePageElements();
+                // Clear the form inputs after successful submission
+                themesForm.reset(); // This will reset text inputs, checkboxes, and selects
+                // Reset CKEditor content
+                if (editorAddThemes) {
+                    editorAddThemes.setData(''); // Clear CKEditor data
+                }
+                // Optionally, reset any additional elements if needed
+                document.querySelectorAll('.alert-danger').forEach(alert => {
+                    alert.style.display = 'none'; // Hide any error messages after submission
+                });
+            },
+            error: function(response) {
+                console.log(response);
+                showAlert('Ошибка при создании лекции', 'danger');
+                $('#loading-indicator-themes').hide();
+            }
+        });
+    });
+
+
+    function toggleElementDisplay(checkboxId, targetId) {
+        const checkbox = document.getElementById(checkboxId);
+        const target = document.getElementById(targetId);
+
+        if (checkbox && target) {
+            // Устанавливаем начальное состояние
+            target.style.display = checkbox.checked ? 'block' : 'none';
+
+            // Добавляем обработчик события только один раз
+            checkbox.addEventListener('change', () => {
+                target.style.display = checkbox.checked ? 'block' : 'none';
+            });
+        } else {
+            console.error(`Элементы с ID ${checkboxId} или ${targetId} не найдены`);
+        }
+    }
+});
+</script>
+
+<!--Обновление модулей в создании лекций-->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const createButton = document.querySelector('a[for="create-themes"]');  // Находим кнопку по атрибуту 'for'
+
+    createButton.addEventListener('click', function (event) {
+        event.preventDefault(); // Предотвращаем стандартное поведение ссылки
+
+        // Получаем селект для выбора модуля
+        const moduleSelect = document.getElementById('id_module_themes');
+
+        // Выполняем запрос на сервер для получения обновленного списка модулей
+        fetch(`{% url 'moderation:create_theme' course.id %}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Сеть отвечает с ошибкой: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Очищаем текущие опции селекта
+                moduleSelect.innerHTML = '';
+
+                // Добавляем новые опции из данных
+                data.modules.forEach(module => {
+                    const option = document.createElement('option');
+                    option.value = module.id; // ID модуля
+                    option.textContent = module.name; // Имя модуля
+                    moduleSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Ошибка при получении модулей:', error));
+    });
+});
+</script>
+<script>
+    $(document).ready(function() {
+        console.log("Initializing createQwizForm");
+
+        // Событие для открытия формы создания квиза
+        $(document).on('click', 'a[for="qwiz-add"]', function(e) {
+            e.preventDefault();
+            var themeId = $(this).data('themes-id-qwiz');
+            console.log("Clicked on add quiz for theme ID:", themeId);
+
+        });
+
+        function createQwizForm(themeId) {
+            console.log("Loading create quiz form for theme ID:", themeId);
+
+            var formData = new FormData($('#qwizForm')[0]);
+
+            $.ajax({
+                type: 'POST',
+                url: `{% url 'moderation:create_qwiz' %}`,
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $('#loading-indicator').show();
+                },
+                success: function(response) {
+                    $('#loading-indicator').hide();
+                    showAlert('Задание добавлено', 'success');
+
+                    // Обновляем themeslist
+                    $('#themeslist').load(location.href + ' #themeslist > *', function() {
+                        // Повторная инициализация обработчиков событий после загрузки содержимого
+                        $(document).on('click', '[data-themes-id-qwiz]', function() {
+                            var themeId = $(this).data('themes-id-qwiz');
+                            $('#themeId').val(themeId);
+                        });
+                    });
+
+                    // Управление классами видимости
+                    $('#qwiz-add').removeClass('form-none'); // Показываем форму создания квиза
+                    $('#form-list > div').not('#qwiz-add').addClass('form-none'); // Скрываем остальные формы
+
+                    // Очищаем форму и скрываем блоки вопросов, если они видны
+                    $('#qwizForm')[0].reset();
+                    $('.question-contain-type-2, .question-contain-type-3, .question-contain-type-4, .question-contain-type-5').hide();
+                },
+                error: function(response) {
+                    console.log(response);
+                    // Управление классами видимости
+                    $('#qwiz-add').removeClass('form-none'); // Показываем форму создания квиза
+                    $('#form-list > div').not('#qwiz-add').addClass('form-none'); // Скрываем остальные формы
+
+
+                    showAlert('Ошибка при создании задания', 'danger');
+                    $('#loading-indicator').hide();
+                }
+            });
+        }
+    });
+</script>
+
+
+<!--Создание квизов (заданий)-->
+<script>
+    $(document).ready(function() {
+    // Функция инициализации CKEditor
+    function initCKEditor(element, targetTextarea) {
+        return ClassicEditor
+            .create(element, {
+                toolbar: ['bold', '|',  ],
+                placeholder: 'Введите текст с пропусками...',
+
+            })
+            .then(editor => {
+                editor.model.document.on('change:data', () => {
+                    const data = editor.getData();
+                    $(targetTextarea).val(data);
+                });
+                return editor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+
+    // Объект для хранения экземпляров CKEditor
+    const editors = {};
+
+    // Функция создания нового редактора для вопроса type 5
+    function createNewEditor(index) {
+        const editorElement = document.querySelector(`#qwiz_description_ckeditor_type_5_${index}`);
+        const targetTextarea = `#qwiz_description_type_5_${index}`;
+
+        if (editorElement) {
+            initCKEditor(editorElement, targetTextarea).then(editor => {
+                editors[`editor_${index}`] = editor;
+            });
+        }
+    }
+
+    // Функция для скрытия всех блоков вопросов
+    function hideAllQuestionContainers() {
+        $('.question-contain-type-2').hide();
+        $('#add-question-type-2').hide();
+        $('.question-contain-type-3').hide();
+        $('#add-question-type-3').hide();
+        $('.question-contain-type-4').hide();
+        $('#add-question-type-4').hide();
+        $('.question-contain-type-5').hide();
+        $('#add-question-type-5').hide();
+        $('.question-contain-type-6').hide();
+        $('#add-question-type-6').hide();
+    }
+
+    // Инициализация первого редактора при загрузке страницы
+    createNewEditor(0);
+ // Инициализация первого редактора только если выбран тип 5
+    function initializeFirstEditor() {
+        const selectedType = $('#qwizType').val();
+        if (selectedType === '5') {
+            createNewEditor(0);
+        }
+    }
+
+    // Запускаем инициализацию при загрузке страницы
+    initializeFirstEditor();
+
+    // Обработчик изменения значения в поле qwizType
+    $('#qwizType').on('change', function() {
+        var selectedType = $(this).val();
+
+        // Скрываем все контейнеры
+        hideAllQuestionContainers();
+
+        // Удаляем все существующие экземпляры CKEditor
+        Object.values(editors).forEach(editor => {
+            if (editor) {
+                editor.destroy()
+                    .catch(error => console.error(error));
+            }
+        });
+        // Очищаем объект редакторов
+        Object.keys(editors).forEach(key => delete editors[key]);
+
+        // Показываем нужный контейнер
+        if (selectedType == '2') {
+            $('.question-contain-type-2').css('display', 'block');
+            $('#add-question-type-2').css('display', 'block');
+        } else if (selectedType == '3') {
+            $('.question-contain-type-3').css('display', 'block');
+            $('#add-question-type-3').css('display', 'block');
+        } else if (selectedType == '4') {
+            $('.question-contain-type-4').css('display', 'block');
+            $('#add-question-type-4').css('display', 'block');
+        } else if (selectedType == '5') {
+            $('.question-contain-type-5').css('display', 'block');
+            $('#add-question-type-5').css('display', 'block');
+
+            // Небольшая задержка для уверенности, что DOM обновился
+            setTimeout(() => {
+                createNewEditor(0);
+            }, 100);
+        } else if (selectedType == '6') {
+             $('.question-contain-type-6').css('display', 'block');
+            $('#add-question-type-6').css('display', 'block');
+
+        }
+    });
+
+    // Функция для отображения уведомлений
+    function showAlert(message, type) {
+        // Создаем элемент div для отображения уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили из вашего CSS
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px'; // Из CSS
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out'; // Из CSS
+
+        // Добавляем элемент на страницу (например, в начало body)
+        document.body.prepend(alertDiv);
+
+        // Удаляем элемент через 3 секунды
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+
+    // Отправка формы через AJAX
+    $('#saveqwizForm').on('click', function(event) {
+    event.preventDefault();
+
+    // Обновляем значения всех текстовых полей перед отправкой
+    Object.values(editors).forEach(editor => {
+        if (editor) {
+            const editorData = editor.getData();
+            const editorIndex = editor.sourceElement.id.split('_').pop();
+            $(`#qwiz_description_type_5_${editorIndex}`).val(editorData);
+        }
+    });
+
+    var formData = new FormData($('#qwizForm')[0]);
+
+    $.ajax({
+        type: 'POST',
+        url: `{% url 'moderation:create_qwiz' %}`,
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+            $('#loading-indicator').show();
+        },
+        success: function(response) {
+            $('#loading-indicator').hide();
+            showAlert('Задание добавлено', 'success');
+            $('#themeslist').load(location.href + ' #themeslist > *', function() {
+                // Повторная инициализация обработчиков событий после загрузки содержимого
+                $(document).on('click', '[data-themes-id-qwiz]', function() {
+                    var themeId = $(this).data('themes-id-qwiz');
+                    $('#themeId').val(themeId);
+                });
+            });
+
+            // Дополнительно: очищаем форму и скрываем блоки вопросов, если они видны
+            $('#qwizForm')[0].reset();
+            $('.question-contain-type-2, .question-contain-type-3, .question-contain-type-4, .question-contain-type-5').hide();
+        },
+        error: function(response) {
+            console.log(response);
+            showAlert('Ошибка при создании задания', 'danger');
+            $('#loading-indicator').hide();
+        }
+    });
+});
+
+    // Установка темы при нажатии на кнопку
+    $(document).on('click', '[data-themes-id-qwiz]', function() {
+        var themeId = $(this).data('themes-id-qwiz');
+        $('#themeId').val(themeId);
+    });
+
+    // Добавление вопросов для типа "Тесты" (type 2)
+    $('#add-question-type-2').on('click', function() {
+        var index = $('.question-type-2').length;
+
+        var newQuestion = `
+        <div class="row question-type-2 mb-3">
+            <div class="col-sm-8">
+                <input type="text" id="qwiz_title_type_2_${index}" name="qwiz_title_type_2[]" class="form-control" placeholder="Вариант  ответа" >
+                <div class="alert-danger" id="alert-qwiz_title_type_2_${index}"></div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-check-size">
+                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                    <div class="btn btn-outline-success-2x">
+                      <div class="checkbox checkbox-success">
+                        <input type="hidden" name="qwiz_right_answer_type_2[]" value="off">
+                        <input id="qwiz_right_answer_type_2_${index}"  type="checkbox"  name="qwiz_right_answer_type_2[]">
+                        <label class="mb-0" for="qwiz_right_answer_type_2_${index}">Правильный ответ</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert-danger" id="alert-qwiz_right_answer_type_2_${index}"></div>
+            </div>
+            <div class="col-sm-12 mt-2">
+                    <button type="button" class="btn btn-danger delete-question-type-2" style="float: right;"><i class="fa fa-trash"></i> Удалить</button>
+                </div>
+        </div>
+        `;
+
+        $('.question-container-type-2').append(newQuestion);
+    });
+
+    // Удаление вопросов типа 2
+    $(document).on('click', '.delete-question-type-2', function() {
+        $(this).closest('.question-type-2').remove();
+    });
+
+    // Добавление вопросов для типа "Тесты с картинками" (type 3)
+    // Обработка кнопки "Добавить вариант"
+$('#add-question-type-3').on('click', function () {
+    var index = $('.question-type-3').length; // Получаем текущий индекс
+
+    var newQuestion = `
+        <div class="row question-type-3 mb-3">
+            <div class="col-sm-2">
+                <label for="image-qwiz-type-3_${index}" style="height: 100%;display: flex;justify-content: center;align-items: center;" class="btn b-ln-height btn-outline-primary">
+                    <i class="fa-solid fa-upload"></i>
+                    <img id="preview-image-qwiz-type-3_${index}" src="" alt="Предварительный просмотр изображения" style="display: none; width: 100%; height: auto;">
+                </label>
+                <input type="file" name="image-qwiz-type-3[]" style="display: none" id="image-qwiz-type-3_${index}" class="form-control">
+                <div class="alert-danger" id="alert-image-qwiz-type-3_${index}"></div>
+            </div>
+            <div class="col-sm-6">
+                <input type="text" id="qwiz_title_type_3_${index}" name="qwiz_title_type_3[]" class="form-control" placeholder="Подпись к картинке" value="">
+            </div>
+            <div class="col-sm-4">
+                <div class="alert-danger" id="alert-qwiz_title_type_3_${index}"></div>
+                <div class="form-check-size">
+                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                        <div class="btn btn-outline-success-2x">
+                            <div class="checkbox checkbox-success">
+                                <input type="hidden" name="qwiz_right_answer_type_3[]" value="off">
+                                <input id="qwiz_right_answer_type_3_${index}" type="checkbox" name="qwiz_right_answer_type_3[]" name="type">
+                                <label class="mb-0" for="qwiz_right_answer_type_3_${index}">Правильный ответ</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert-danger" id="alert-qwiz_right_answer_type_3_${index}"></div>
+            </div>
+            <div class="col-sm-12 mt-2">
+                <button type="button" class="btn btn-danger delete-question-type-3" style="float: right;">
+                    <i class="fa fa-trash"></i> Удалить
+                </button>
+            </div>
+        </div>
+    `;
+
+    $('.question-container-type-3').append(newQuestion); // Добавляем новую строку
+});
+
+    // Удаление вопросов типа 3
+    $(document).on('click', '.delete-question-type-3', function() {
+        $(this).closest('.question-type-3').remove();
+    });
+
+    // Добавление вопросов для типа "Выборка" (type 4)
+    $('#add-question-type-4').on('click', function() {
+        var index = $('.question-type-4').length;
+
+        var newQuestion = `
+        <div class="row question-type-4 mb-3">
+            <div class="col-sm-6">
+                <label for="qwiz_title_type_4_${index}_1">Ответ 1:</label>
+                <input type="text" id="qwiz_title_type_4_${index}_1" name="qwiz_title_type_4_1[]" class="form-control" placeholder="Ответ" >
+                <div class="alert-danger" id="alert-qwiz_title_type_4_${index}_1"></div>
+                <label class="form-label" for="qwiz_right_answer_type_4_${index}_1">Правильный ответ</label>
+                <div class="form-check-size">
+                    <div class="form-check form-switch form-check-inline">
+                        <select id="qwiz_right_answer_type_4_${index}_1" class="form-control" name="qwiz_right_answer_type_4_1[]">
+                            <option value="1">Слева</option>
+                            <option value="2">Справа</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-danger" id="alert-qwiz_right_answer_type_4_${index}_1"></div>
+            </div>
+            <div class="col-sm-6">
+                <label for="qwiz_title_type_4_${index}_2">Ответ 2:</label>
+                <input type="text" id="qwiz_title_type_4_${index}_2" name="qwiz_title_type_4_2[]" class="form-control" placeholder="Ответ" >
+                <div class="alert-danger" id="alert-qwiz_right_answer_type_4_${index}_2"></div>
+            </div>
+            <div class="col-sm-12 mt-2">
+                <button type="button" class="btn btn-danger delete-question-type-4" style="float: right;"><i class="fa fa-trash"></i> Удалить</button>
+            </div>
+        </div>
+        `;
+
+        $('.question-container-type-4').append(newQuestion);
+    });
+
+    // Удаление вопросов типа 4
+    $(document).on('click', '.delete-question-type-4', function() {
+        $(this).closest('.question-type-4').remove();
+    });
+    let hintCounter = 0;
+    let questionCounter = 0;
+    // Добавление вопросов для типа "Заполните пропуск" (type 5)
+    $('#add-question-type-5').on('click', function() {
+        var index = $('.question-type-5').length;
+
+        var newQuestion = `
+            <div class="row question-type-5 mb-3">
+                <div class="col-sm-12">
+                    <button type="button" class="btn btn-primary add-hint">Добавить подсказку</button>
+                    <div class="input-container mt-3">
+                        <!-- Новые поля input будут добавляться сюда -->
+                    </div>
+                </div>
+                <div class="col-sm-12 pt-3">
+                    <label class="form-label" for="qwiz_description_type_5_${index}">Введите текст. Выделите жирным слова,вместо которых будет пропуск.</label>
+                    <textarea name="qwiz_description_type_5[]" id="qwiz_description_type_5_${index}" class="form-control" style="display: none;"></textarea>
+                    <textarea name="qwiz_description_ckeditor_type_5_[]" id="qwiz_description_ckeditor_type_5_${index}" class="form-control" style="display: none;"></textarea>
+                    <div class="alert-danger" id="alert-qwiz_description_type_5_${index}"></div>
+                </div>
+                <div class="col-sm-12 pt-3">
+                    <button type="button" class="btn btn-danger delete-question-type-5" data-editor-index="${index}" style="float: right;">
+                        <i class="fa fa-trash"></i> Удалить
+                    </button>
+                </div>
+
+            </div>
+        `;
+        questionCounter++;
+        $('.question-container-type-5').append(newQuestion);
+        createNewEditor(index);
+    });
+    // Глобальный счётчик для всех подсказок на странице
+
+   // Обработчик для кнопки с ID 'add-hint' (статическая кнопка, загружается с HTML)
+document.getElementById('add-hint').addEventListener('click', function () {
+    const inputContainer = document.getElementById('input-container'); // Контейнер для подсказок
+
+    // Создаем новый input
+    const newInput = `
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" class="form-control me-2" style="width: 300px;" placeholder="Введите подсказку" name="hint_0">
+            <div class="btn-group btn-option" data-bs-toggle="buttons">
+                <div class="btn btn-outline-success-2x">
+                    <div class="checkbox checkbox-success">
+                        <!-- Убираем скрытое поле "off" и изменяем его значение динамически -->
+                        <input type="checkbox" id="qwiz_right_answer_type_5_${hintCounter}" >
+                        <label class="mb-0" for="qwiz_right_answer_type_5_${hintCounter}">Правильный ответ</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-hint" style="margin-left: 10px;">Удалить</button>
+        </div>
+    `;
+
+    // Увеличиваем счётчик
+    hintCounter++;
+
+    // Добавляем input в контейнер
+    inputContainer.insertAdjacentHTML('beforeend', newInput);
+
+    // Добавляем обработчик для кнопки удаления
+    const removeButtons = document.querySelectorAll('.remove-hint');
+    removeButtons[removeButtons.length - 1].addEventListener('click', function () {
+        this.parentElement.remove(); // Удаляем родительский div подсказки
+    });
+
+    // Добавляем обработчик для изменения значения скрытого поля в зависимости от состояния чекбокса
+    const checkbox = document.getElementById(`qwiz_right_answer_type_5_${hintCounter - 1}`);
+
+    // Создаем скрытое поле для каждого чекбокса
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = `qwiz_right_answer_type_5_0`;
+    hiddenInput.value = 'off'; // Изначально скрытое поле содержит 'off'
+    checkbox.parentElement.insertBefore(hiddenInput, checkbox); // Вставляем скрытое поле перед чекбоксом
+
+    // Обработчик для изменения значения скрытого поля на 'on' или 'off'
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            hiddenInput.value = 'on'; // Если чекбокс выбран, скрытое поле становится 'on'
+        } else {
+            hiddenInput.value = 'off'; // Если чекбокс не выбран, скрытое поле становится 'off'
+        }
+    });
+});
+
+
+    // Обработчик для кнопки 'add-hint', созданной динамически
+    $(document).on('click', '.add-hint', function () {
+    const inputContainer = $(this).closest('.col-sm-12').find('.input-container');
+
+    console.log('Dynamic add-hint button clicked!');
+
+    // Создаем новый input для подсказки и чекбокса
+    const newInput = `
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" class="form-control me-2" style="width: 300px;" placeholder="Введите подсказку" name="hint_${questionCounter}">
+            <div class="btn-group btn-option" data-bs-toggle="buttons">
+                <div class="btn btn-outline-success-2x">
+                    <div class="checkbox checkbox-success">
+                        <!-- Убираем hidden поле "off", оно будет заменено динамически -->
+                        <input type="hidden" id="qwiz_right_answer_type_5_${questionCounter}" name="qwiz_right_answer_type_5_${questionCounter}" value="off">
+                        <input type="checkbox" id="qwiz_right_answer_type_5_${hintCounter}" >
+                        <label class="mb-0" for="qwiz_right_answer_type_5_${hintCounter}">Правильный ответ</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-hint" style="margin-left: 10px;">Удалить</button>
+        </div>
+    `;
+
+    hintCounter++;  // Увеличиваем счетчик для подсказок
+
+    // Добавляем новый input в контейнер
+    inputContainer.append(newInput);
+
+    // Обработчик для удаления подсказки
+    $(inputContainer)
+        .find('.remove-hint')
+        .last()
+        .on('click', function () {
+            $(this).closest('.d-flex').remove();
+        });
+
+    // Добавляем обработчик для изменения значения скрытого поля
+    $(`#qwiz_right_answer_type_5_${questionCounter}`).on('change', function () {
+        const hiddenInput = $(this).closest('.d-flex').find('input[type="hidden"]');
+        if ($(this).prop('checked')) {
+            hiddenInput.val('on');  // Если чекбокс выбран, скрытое поле становится "on"
+        } else {
+            hiddenInput.val('off'); // Если чекбокс не выбран, скрытое поле становится "off"
+        }
+    });
+});
+
+
+// Делегируем обработчик для удаления подсказки
+    $(document).on('click', '.remove-hint', function() {
+    $(this).closest('.d-flex').remove(); // Удаляем всю строку с input и кнопкой
+});
+
+    // Удаление вопросов типа 5
+    $(document).on('click', '.delete-question-type-5', function() {
+        const index = $(this).data('editor-index');
+
+        // Уничтожаем экземпляр CKEditor перед удалением DOM-элемента
+        if (editors[`editor_${index}`]) {
+            editors[`editor_${index}`].destroy()
+                .then(() => {
+                    delete editors[`editor_${index}`];
+                    $(this).closest('.question-type-5').remove();
+                })
+                .catch(error => {
+                    console.error('Ошибка при удалении редактора:', error);
+                    // Всё равно удаляем DOM-элемент в случае ошибки
+                    $(this).closest('.question-type-5').remove();
+                });
+        } else {
+            $(this).closest('.question-type-5').remove();
+        }
+    });
+
+    // Предварительный просмотр изображений
+    $(document).on('change', 'input[type="file"]', function (e) {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        var label = $(this).prev('label'); // Лейбл, в который загружается превью
+        var preview = label.find('img'); // Превью внутри лейбла
+
+        reader.onloadend = function () {
+            preview.attr('src', reader.result).show(); // Показываем превью
+            label.find('i').hide(); // Скрываем иконку
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            preview.hide(); // Прячем превью, если файл удален
+            label.find('i').show(); // Показываем иконку
+        }
+    });
+
+});
+
+</script>
+
+<!--Удаление заданий-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const themesList = document.getElementById('themeslist');
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px';
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.body.prepend(alertDiv);
+
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    if (themesList) {
+        themesList.addEventListener('submit', function (event) {
+            const form = event.target.closest('form[id^="delete-quiz-"]');
+            if (form) {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+                const quizId = form.id.split('-')[2]; // Получаем ID квиза
+                const quizItem = document.getElementById(`quiz-item-${quizId}`); // Элемент списка
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.action,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'block';
+                    },
+                    success: function (response) {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'none';
+
+                        if (response.success) {
+                            showAlert('Квиз успешно удален', 'success');
+
+                            // Удаляем HTML элемента квиза
+                            if (quizItem) quizItem.remove();
+                        } else {
+                            showAlert('Ошибка при удалении квиза', 'danger');
+                        }
+                    },
+                    error: function () {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'none';
+
+                        console.error('Ошибка при удалении');
+                        showAlert('Произошла ошибка при удалении', 'danger');
+                    }
+                });
+            }
+        });
+    } else {
+        console.warn('Контейнер themeslist не найден.');
+    }
+});
+</script>
+
+<!--Удаление лекций-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const themesList = document.getElementById('themeslist');
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px';
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.body.prepend(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    if (themesList) {
+        themesList.addEventListener('submit', function (event) {
+            const form = event.target;
+
+            if (form && form.id.startsWith('delete-theme-')) {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.action,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        $('#loading-indicator').show();
+                    },
+                    success: function (response) {
+                        $('#loading-indicator').hide();
+
+                        if (response.success) {
+                            showAlert('Тема успешно удалена', 'success');
+
+                            // Удаляем элемент темы из списка
+                            const themeElement = document.getElementById(`theme-${form.id.split('-')[2]}`);
+                            if (themeElement) {
+                                themeElement.remove();
+                            }
+                        } else {
+                            showAlert('Ошибка при удалении темы', 'danger');
+                        }
+                    },
+                    error: function (response) {
+                        $('#loading-indicator').hide();
+                        console.error('Ошибка:', response);
+                        showAlert('Произошла ошибка при удалении', 'danger');
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+
+<!--Удаление модулей-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const themesList = document.getElementById('themeslist');
+
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px';
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.body.prepend(alertDiv);
+
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    if (themesList) {
+        themesList.addEventListener('submit', function (event) {
+            const form = event.target.closest('form[id^="delete-module-"]');
+            if (form) {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+                const moduleId = form.id.split('-')[2]; // Получаем ID модуля
+                const moduleItem = document.getElementById(`module-item-${moduleId}`); // Элемент списка
+                const moduleContainer = document.getElementById(`module-${moduleId}`); // Контейнер модуля
+
+                $.ajax({
+                    type: 'POST',
+                    url: form.action,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'block';
+                    },
+                    success: function (response) {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'none';
+
+                        if (response.success) {
+                            showAlert('Модуль успешно удален', 'success');
+
+                            // Удаляем HTML элемента модуля и его контейнера
+                            if (moduleItem) moduleItem.remove();
+                            if (moduleContainer) moduleContainer.remove();
+                        } else {
+                            showAlert('Ошибка при удалении модуля', 'danger');
+                        }
+                    },
+                    error: function () {
+                        const loader = document.getElementById('loading-indicator');
+                        if (loader) loader.style.display = 'none';
+
+                        console.error('Ошибка при удалении');
+                        showAlert('Произошла ошибка при удалении', 'danger');
+                    }
+                });
+            }
+        });
+    } else {
+        console.warn('Контейнер themeslist не найден.');
+    }
+});
+</script>
+
+<style>
+    textarea#id_description_themes_add {
+        display: none;
+    }
+    textarea#id_description_themes {
+        display: none;
+    }
+    .form-none {
+        display: none;
+    }
+    .ck-rounded-corners .ck.ck-editor__main>.ck-editor__editable, .ck.ck-editor__main>.ck-editor__editable.ck-rounded-corners {
+        min-height: 130px;
+    }
+</style>
+
+{% endblock bootonfooter %}

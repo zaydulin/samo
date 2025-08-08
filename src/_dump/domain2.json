@@ -1,0 +1,26 @@
+[
+  {
+    "model": "sites.site",
+    "pk": 1,
+    "fields": {
+      "domain": "ms-voron.works-all.ru",
+      "name": "ms-voron.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 2,
+    "fields": {
+      "domain": "lk-voron.works-all.ru",
+      "name": "lk-voron.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 3,
+    "fields": {
+      "domain": "voron.works-all.ru",
+      "name": "voron.works-all.ru"
+    }
+  }
+]

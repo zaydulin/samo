@@ -1,0 +1,112 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>{% trans 'Заказ' %} # {{ order.key }}</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'moderation:accounting' %}">{% trans "Бухгалтерия" %}</a></li>
+            <li class="breadcrumb-item active">{% trans "Заказ" %}</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+                    <div class="col-lg-12">
+
+                        <div class="card mt-3">
+                            <div class="card-header"><strong>{{ order.created_timestamp }}</strong> <span class="float-right">
+                                    <strong>{% trans 'Статус' %}:</strong> {{ order.get_status_display }}</span> </div>
+                            <div class="card-body">
+                                <div class="row mb-5">
+                                    <div class="mt-4 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                                        <h4>{% trans 'Пользователь' %}:</h4>
+                                        <div> <strong>{{ order.user }}</strong> </div>
+                                        <div>{% trans 'Имя' %}: {{ order.customer_name}}</div>
+                                        <div>{% trans 'Фамилия' %}: {{ order.customer_surname }}</div>
+                                        <div>{% trans 'Email' %}: {{ order.customer_email }}</div>
+                                        <div>{% trans 'Телефон' %}: {{ order.phone_number }}</div>
+                                    </div>
+                                    <div class="mt-4 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                                        <h4>{% trans 'Компания' %}:</h4>
+                                        <div> <strong>{{ order.company.name }}</strong> </div>
+                                        <div>{% trans 'Владелец' %}: {{ order.company.owner }}</div>
+                                        <div>{% trans 'Email' %}: {{ order.company.email }}</div>
+                                        <div>{% trans 'Телефон' %}: {{ order.company.phone }}</div>
+                                    </div>
+                                    <div class="mt-4 col-xl-6 col-lg-6 col-md-12 col-sm-12 d-flex justify-content-lg-end justify-content-xs-end">
+                                        <div class="row">
+											<div class="col-sm-9">
+                                                {% if order.company.image %}
+                                                    <div class="brand-logo mb-3">
+                                                        <img class="logo-abbr me-2" width="150" src="{{ order.company.image.url}}" alt="">
+                                                    </div>
+                                                {% else %}
+                                                    <div class="brand-logo mb-3">
+                                                        <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:150px;background: #fff;align-content: center;text-align: center;">
+                                                            <h5 style="color: #ababab">{% trans "Изображения нет" %}</h5>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+<!--                                <div class="table-responsive">-->
+<!--                                    <table class="table table-striped">-->
+<!--                                        <thead>-->
+<!--                                            <tr>-->
+<!--                                                <th class="center">#</th>-->
+<!--                                                <th>Item</th>-->
+<!--                                                <th>Description</th>-->
+<!--                                                <th class="right">Unit Cost</th>-->
+<!--                                                <th class="center">Qty</th>-->
+<!--                                                <th class="right">Total</th>-->
+<!--                                            </tr>-->
+<!--                                        </thead>-->
+<!--                                        <tbody>-->
+
+<!--                                            <tr>-->
+<!--                                                <td class="center">1</td>-->
+<!--                                                <td class="left strong">Origin License</td>-->
+<!--                                                <td class="left">Extended License</td>-->
+<!--                                                <td class="right">$999,00</td>-->
+<!--                                                <td class="center">1</td>-->
+<!--                                                <td class="right">$999,00</td>-->
+<!--                                            </tr>-->
+
+<!--                                        </tbody>-->
+<!--                                    </table>-->
+<!--                                </div>-->
+                                <div class="row">
+                                    <div class="col-lg-4 col-sm-5"> </div>
+                                    <div class="col-lg-4 col-sm-5 ms-auto">
+                                        <table class="table table-clear">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="left"><strong>Сумма</strong></td>
+                                                    <td class="right"><strong>{{ order.amount }}</strong><br>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+{% endblock content %}

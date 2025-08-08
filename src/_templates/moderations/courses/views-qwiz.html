@@ -1,0 +1,177 @@
+    <div class="card checkout-cart">
+        <div class="card-body basic-wizard important-validation" id="msform">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Просмотр теста</h5>
+            </div>
+            <div class="row g-3 custom-input mt-1">
+                <!-- Заголовок -->
+                <div class="col-sm-6">
+                    <label class="form-label">Название</label>
+                    <h6 class="mb-2">{{ qwiz.name }}</h6>
+                </div>
+
+                <!-- Тип теста -->
+                <div class="col-sm-4">
+                    <label class="form-label">Тип</label>
+                    <h6 class="mb-2">{{ qwiz.get_type_display }}</h6>
+                </div>
+                <div class="col-sm-2" id="id_point_show_edit">
+                    <label class="form-label">Баллы</label>
+                    <h6 class="mb-2">{{ qwiz.point }}</h6>
+                </div>
+
+<!--                &lt;!&ndash; Описание &ndash;&gt;-->
+<!--                <div class="col-sm-12">-->
+<!--                    <label class="form-label" for="id_description_editqwiz">Описание</label>-->
+<!--                    <textarea name="description" id="id_description_editqwiz" class="form-none" style="display: none;">{{ qwiz.description }}</textarea>-->
+<!--                    <div id="id_description_editqwiz_form"></div>-->
+<!--                    <div class="alert-danger" id="alert-description_editqwiz"></div>-->
+<!--                </div>-->
+                {% if qwiz.type == 2 %}
+                <!-- Вопросы типа "Тесты" -->
+                <div id="editqwiz-type-2" class="editquestion-contain-type-2" {% if qwiz.type == 2 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <hr>
+                    <div class="editquestion-container-type-2">
+                        {% for question in questions %}
+                        {% if question %}
+                        <div class="row question-type-2 mb-3" id="question-{{ question.id }}">
+                            <div class="col-sm-8">
+                                <label class="form-label">Заголовок:</label>
+                                <h6 class="mb-2">{{ question.title }}</h6>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Ответ</label>
+                                <h6 class="mb-2">{{ question.get_right_answer_display }}</h6>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif qwiz.type == 3 %}
+                <!-- Вопросы типа "Тесты с картинками" -->
+                <div id="editqwiz-type-3" class="editquestion-contain-type-3" {% if qwiz.type == 3 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <hr>
+                    <div class="editquestion-container-type-3">
+                        {% for question in questions %}
+                        {% if question %}
+                        <div class="row question-type-3 mb-3" id="question-{{ question.id }}">
+                            <div class="col-2">
+                                <label class="form-label">Изображение</label>
+                                <img id="preview-image-editqwiz-type-3_{{ question.id }}" src="{{ question.image.url }}" alt="Предварительный просмотр изображения" style="max-width: 100%;height: a margin-top: 10px;">
+                            </div>
+                            <div class="col-sm-6">
+                                <h6 class="mb-2">{{ question.title }}</h6>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Ответ</label>
+                                <h6 class="mb-2">{{ question.get_right_answer_display }}</h6>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif qwiz.type == 4 %}
+                <!-- Вопросы типа выборка-->
+                <div id="editqwiz-type-4" class="editquestion-contain-type-4" {% if qwiz.type == 4 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <hr>
+                    <div class="editquestion-container-type-4">
+                        {% for question in questions %}
+                        {% if question %}
+                        <div class="row question-type-4 mb-3" id="question-{{ question.id }}">
+                            <div class="col-sm-5">
+                                 <label class="form-label">Заголовок 1:</label>
+                                <h6 class="mb-2">{{ question.title }}</h6>
+                            </div>
+                            <div class="col-sm-5">
+                                 <label class="form-label">Заголовок 2:</label>
+                                <h6 class="mb-2">{{ question.second_title }}</h6>
+                            </div>
+                            <div class="col-sm-2">
+                                <label class="form-label">Правильный ответ:</label>
+                                <div class="form-check-size">
+                                    <div class="form-check form-switch form-check-inline">
+                                        {% if question.right_answer == 2 %}
+                                        <h6 class="mb-2">Справа</h6>
+                                        {% else %}
+                                        <h6 class="mb-2">Слева</h6>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% elif qwiz.type == 5 %}
+                <!-- Редактирование вопросов типа "Заполните пропуск" -->
+                <div id="editqwiz-type-5" class="editquestion-contain-type-5" {% if qwiz.type == 5 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <hr>
+                    <div class="editquestion-container-type-5">
+                        {% for question in questions %}
+                        {% if question %}
+                        <div class="row editquestion-type-5 mb-3" id="question-{{ question.id }}">
+                            <div class="col-sm-12">
+                                <label class="form-label">Пропущенное слово:</label>
+                                <h6 class="mb-2">{{ question.description|safe }}</h6>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+<script>
+    $(document).ready(function() {
+        console.log("jQuery is loaded and ready");
+
+        $(document).on('click', 'a[for="views-qwiz"]', function(e) {
+            e.preventDefault();
+            var qwizId = $(this).data('qwiz-id');
+            console.log("Clicked on qwiz with ID:", qwizId);
+            loadQwizContent(qwizId);
+        });
+
+        function loadQwizContent(qwizId) {
+            console.log("Loading theme content for ID:", qwizId);
+            $.ajax({
+                url: '{% url "moderation:qwiz_detail" %}',
+                data: {
+                    'qwiz_id': qwizId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    console.log("Received data:", data);
+                    $('#views-qwiz').html(data.html);
+                    const viewContainer = $('#views-qwiz');
+
+                    // Вставляем HTML содержимого
+                    viewContainer.html(data.html);
+
+                    // Показываем контейнер просмотра
+                    viewContainer.removeClass('form-none');
+
+                    // Скрываем остальные формы
+                    $('#form-list > div').not(viewContainer).addClass('form-none');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading theme:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+                    alert("Произошла ошибка при загрузке qwiz. Пожалуйста, попробуйте еще раз.");
+                }
+            });
+        }
+    });
+</script>

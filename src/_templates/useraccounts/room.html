@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Conference Room</title>
+</head>
+<body>
+<!-- Список активных видеопотоков -->
+{% for stream in streams %}
+<!-- Передача предложения на фронтенд -->
+<input id="offer" type="hidden" value="{{ offer }}">
+
+<video id="localVideo" autoplay playsinline></video>
+<script>
+    // Инициализация WebRTC соединения
+    const rtcPeer = new RTCPeerConnection();
+
+    // Передача локального видеопотока
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            const localVideo = document.getElementById('localVideo');
+            localVideo.srcObject = stream;
+
+            stream.getTracks().forEach(track => rtcPeer.addTrack(track, stream));
+        })
+        .catch(error => console.error('Error accessing media devices:', error));
+
+    // Отправка предложения на сервер
+    fetch('/room/', {
+        method: 'POST',
+        body: JSON.stringify({ sdp: rtcPeer.localDescription.sdp }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Обработка ответа от сервера
+        const remoteDesc = new RTCSessionDescription(data.sdp);
+        rtcPeer.setRemoteDescription(remoteDesc);
+    });
+</script>
+{% endfor %}
+
+<!-- Передача предложения на фронтенд -->
+<input id="offer" type="hidden" value="{{ offer }}">
+
+<video id="localVideo" autoplay playsinline></video>
+<script>
+    // Инициализация WebRTC соединения
+    const rtcPeer = new RTCPeerConnection();
+
+    // Передача локального видеопотока
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            const localVideo = document.getElementById('localVideo');
+            localVideo.srcObject = stream;
+
+            stream.getTracks().forEach(track => rtcPeer.addTrack(track, stream));
+        })
+        .catch(error => console.error('Error accessing media devices:', error));
+
+    // Отправка предложения на сервер
+    fetch('/room/', {
+        method: 'POST',
+        body: JSON.stringify({ sdp: rtcPeer.localDescription.sdp }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Обработка ответа от сервера
+        const remoteDesc = new RTCSessionDescription(data.sdp);
+        rtcPeer.setRemoteDescription(remoteDesc);
+    });
+</script>
+</body>
+</html>

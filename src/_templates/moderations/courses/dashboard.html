@@ -1,0 +1,424 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/jquery.dataTables.css' %}">
+<style>
+  .offcanvas {
+    position: fixed;
+    top: 0;
+    right: -40%;
+    width: 40%;
+    height: 100%;
+    background-color: #f8f9fa;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease-in-out;
+    z-index: 1050;
+    padding: 2rem;
+  }
+
+  .offcanvas.show {
+    right: 0;
+  }
+
+  .offcanvas-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .main-star-rating .star-box i, .main-star-rating .star-box1 i {
+    font-size: large !important;
+    cursor: auto;
+  }
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="row widget-grid" style="padding-left: calc(var(--bs-gutter-x)* .5);padding-right: 0px">
+          <div class="col-xl-3 col-sm-6 box-col-3">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round warning">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ reviews_count }}">{{ reviews_count }}</span></h4><span class="f-light">Отзывов</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xl-12">
+                  <div class="card widget-1">
+                    <div class="card-body">
+                      <div class="widget-content">
+                        <div class="widget-round primary">
+                          <div class="bg-round">
+                            <svg>
+                              <use href="../assets/svg/icon-sprite.svg#c-customer"> </use>
+                            </svg>
+                            <svg class="half-circle svg-fill">
+                              <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          <h4> <span class="counter" data-target="{{ comments_count }}">{{ comments_count }}</span></h4><span class="f-light">Комментариев</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 box-col-3">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round warning">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ users_count }}">{{ users_count }}</span></h4><span class="f-light">Учеников</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xl-12">
+                  <div class="card widget-1">
+                    <div class="card-body">
+                      <div class="widget-content">
+                        <div class="widget-round primary">
+                          <div class="bg-round">
+                            <svg>
+                              <use href="../assets/svg/icon-sprite.svg#c-customer"> </use>
+                            </svg>
+                            <svg class="half-circle svg-fill">
+                              <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          <h4> <span class="counter" data-target="{{ assistents_count }}">{{ assistents_count }}</span></h4><span class="f-light">Разработчиков</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 box-col-3">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round warning">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ finished_count }}">{{ finished_count }}</span></h4><span class="f-light">Прошедших курсы</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xl-12">
+                  <div class="card widget-1">
+                    <div class="card-body">
+                      <div class="widget-content">
+                        <div class="widget-round primary">
+                          <div class="bg-round">
+                            <svg>
+                              <use href="../assets/svg/icon-sprite.svg#c-customer"> </use>
+                            </svg>
+                            <svg class="half-circle svg-fill">
+                              <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          <h4> <span class="counter" data-target="{{ gained_count }}">{{ gained_count }}</span></h4><span class="f-light">Получено сертификатов</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-sm-6 box-col-3">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round warning">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ modules_count }}">{{ modules_count }}</span></h4><span class="f-light">Модулей</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xl-12">
+                  <div class="card widget-1">
+                    <div class="card-body">
+                      <div class="widget-content">
+                        <div class="widget-round primary">
+                          <div class="bg-round">
+                            <svg>
+                              <use href="../assets/svg/icon-sprite.svg#c-customer"> </use>
+                            </svg>
+                            <svg class="half-circle svg-fill">
+                              <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          <h4> <span class="counter" data-target="{{ lecture_count }}">{{ lecture_count }}</span></h4><span class="f-light">Лекиций</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-sm-6 box-col-6">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round success">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ seminar_count }}">{{ seminar_count }}</span></h4><span class="f-light">Семинаров</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-sm-6 box-col-6">
+            <div class="row">
+              <div class="col-xl-12">
+                <div class="card widget-1">
+                  <div class="card-body">
+                    <div class="widget-content">
+                      <div class="widget-round success">
+                        <div class="bg-round">
+                          <svg>
+                            <use href="../assets/svg/icon-sprite.svg#c-revenue"> </use>
+                          </svg>
+                          <svg class="half-circle svg-fill">
+                            <use href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4><span class="counter" data-target="{{ test_count }}">{{ test_count }}</span></h4><span class="f-light">Тестов</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-md-6 ord-xl-6 ord-md-6 box-ord-6">
+            <div class="card activity-log notification main-timeline">
+              <div class="card-header card-no-border">
+                <div class="header-top">
+                  <h5>Последние комментарии</h5>
+                </div>
+              </div>
+              <div class="card-body pt-0 dark-timeline basic-timeline">
+                <ul>
+                  {% for comment in comments|slice:"3" %}
+                  <li class="d-flex">
+                    <div class="timeline-dot-primary"></div>
+                    <div class="w-100 ms-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <p class="mb-0 f-16 f-w-500">{{ comment.user.name }}</p><span class="c-light">{{ comment.create|date:"H:i" }}</span>
+                      </div>
+                      <p class="mb-0 f-light pb-1">{{ comment.content }}</p>
+                      <p class="date-content p-0">{{ comment.create|date:"d M Y" }}</p>
+                    </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-md-6 ord-xl-6 ord-md-6 box-ord-6">
+            <div class="card activity-log notification main-timeline">
+              <div class="card-header card-no-border">
+                <div class="header-top">
+                  <h5>Последние отзывы</h5>
+                </div>
+              </div>
+              <div class="card-body pt-0 dark-timeline basic-timeline">
+                <ul>
+                  {% for review in reviews|slice:"3" %}
+                  <li class="d-flex">
+                    <div class="timeline-dot-primary"></div>
+                    <div class="w-100 ms-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <p class="mb-0 f-16 f-w-500">{{ review.user.name }}</p>
+                        <div class="main-star-rating common-f-start">
+                            <div class="common-flex star-box">
+                                {% for i in "12345" %}
+                                    {% if i|add:0 <= review.estimate %}
+                                        <i class="fa-solid fa-star active"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <span class="c-light">{{ review.create|date:"H:i" }}</span>
+                      </div>
+                      <p class="mb-0 f-light pb-1">{{ review.content }}</p>
+                      <p class="date-content p-0">{{ review.create|date:"d M Y" }}</p>
+                    </div>
+                  </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/custom_category.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+{% endblock bootonfooter %}

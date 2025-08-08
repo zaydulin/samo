@@ -1,0 +1,26 @@
+Сайт
+python manage.py runserver
+=========================================
+Партнерка
+python manage.py runserver 127.0.0.1:9000
+=========================================
+Курсы
+python manage.py runserver 127.0.0.1:9001
+=========================================
+Модерка
+python manage.py runserver 127.0.0.1:9002
+=========================================
+Личный кабинет пользователя
+python manage.py runserver 127.0.0.1:9003
+=========================================
+python manage.py loaddata _dump/site.json
+python manage.py loaddata _dump/users.json
+==========================================
+python manage.py migrate --database=default
+python manage.py migrate --database=ecommerce_db
+python manage.py migrate --database=parsing_info_db
+
+python manage.py dumpdata --database=ecommerce_db ecommerce.products > _dump/ecommere.json
+
+
+

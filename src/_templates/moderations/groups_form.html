@@ -1,0 +1,114 @@
+{% extends 'moderations/base_moderation.html' %}
+{% load static i18n  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    img.h-20.rounded-md {
+    height: 60px;
+}
+</style>
+{% endblock head %}
+
+{% block content %}
+<div class="project-nav card">
+    <div class="card-body">
+        <form method="post" >
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.name }}
+            </div>
+            <div class="mb-3">
+                <h5 class="mb-4">{% trans 'Выберите пользователей' %}</h5>
+                <div class="relative lg:col-span-4 xl:col-span-3">
+                    <input
+                            type="text"
+                            name="q"
+                            id="user-search"
+                            value="{{ request.GET.q }}"
+                            class="ltr:pl-8 rtl:pr-8 search form-input border-slate-200 dark:border-zink-500 focus:outline-none focus:border-custom-500 disabled:bg-slate-100 dark:disabled:bg-zink-600 disabled:border-slate-300 dark:disabled:border-zink-500 dark:disabled:text-zink-200 disabled:text-slate-500 dark:text-zink-100 dark:bg-zink-700 dark:focus:border-custom-800 placeholder:text-slate-400 dark:placeholder:text-zink-200"
+                            placeholder="Поиск пользователей..."
+                            autocomplete="off">
+                    <i data-lucide="search" class="inline-block size-4 absolute ltr:left-2.5 rtl:right-2.5 top-2.5 text-slate-500 dark:text-zink-200 fill-slate-100 dark:fill-zink-600"></i>
+                </div>
+                <div id="user-list">
+                    <div style="display:none;">
+                        {{ csrf_token }}
+                    </div>
+                    {% include 'moderations/htmx/group_user_search.html' %}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <h5 class="mb-2">{% trans 'Выберите типы' %}</h5>
+                    <div class="row">
+                        {% for value, display in form.fields.types.choices %}
+                        <div class="col-4">
+                            <div class="form-check">
+                                <input type="checkbox" id="type_{{ value }}" name="types" value="{{ value }}" class="form-check-input"
+                                       {% if value|stringformat:"s" in selected_types %}checked{% endif %}>
+                                <label class="form-check-label" for="type_{{ value }}">{{ display }}</label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary rounded text-white">Сохранить</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var addBtn = document.getElementById('add');
+        var removeBtn = document.getElementById('remove');
+        var selected = document.getElementById('selected');
+        var available = document.getElementById('available');
+
+        addBtn.addEventListener('click', function() {
+            moveOptions(available, selected);
+        });
+
+        removeBtn.addEventListener('click', function() {
+            moveOptions(selected, available);
+        });
+
+        function moveOptions(fromSelect, toSelect) {
+            var options = Array.from(fromSelect.selectedOptions);
+            options.forEach(function(option) {
+                fromSelect.removeChild(option);
+                toSelect.appendChild(option);
+            });
+        }
+    });
+</script>
+<style>
+    .avatar-img{
+        height: 50px;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    console.log(jQuery);
+
+    $('#user-search').on('input', function () {
+        let query = $(this).val();
+        $.ajax({
+            url: "{% url 'moderation:groups_create' %}",
+            data: {
+                'q': query
+            },
+            success: function (data) {
+                $('#user-list').html(data.html);
+            }
+        });
+    });
+</script>
+{% endblock content %}

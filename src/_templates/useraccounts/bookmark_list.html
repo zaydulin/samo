@@ -1,0 +1,138 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="container-fluid">
+    <div class="email-wrap bookmark-wrap">
+        <div class="row main-bookmark">
+            <div class="col-xl-12 col-md-12 box-col-12">
+                <div class="email-right-aside bookmark-tabcontent">
+                    <div class=" email-body radius-left">
+                        <div class="ps-0">
+                            <div class="tab-content">
+                                <div class=" mb-0">
+                                    <div class="card-body pb-0">
+                                        <div class="details-bookmark text-center">
+                                            <div class="row" id="bookmarkData">
+                                                {% if bookmarks %}
+                                                {% for bookmark in bookmarks %}
+                                                <div class="col-xxl-4 col-md-4 col-ed-4 col-sm-6">
+                                                    <div class="card card-with-border bookmark-card o-hidden" style="    height: 280px;">
+                                                        <div class="details-website">
+                                                            <img style="height:200px;width: auto" class="img-fluid" src="{% if bookmark.content_object.cover %}{{ bookmark.content_object.cover.url }}{% else %}{% static 'site/_generals/images/social-app/timeline-1.png' %}{% endif %}" alt="">
+                                                            <div class="favourite-icon favourite_0 favourite" onclick="setFavourite(0)">
+                                                                <a class="delete-bookmark" data-id="{{ bookmark.id }}">
+                                                                    <i class="fa-solid fa-star"></i>
+                                                                </a>
+                                                            </div>
+                                                            <div class="desciption-data">
+                                                                <div class="title-bookmark">
+                                                                    <h6 class="title_0">{{ bookmark.content_object.name }}</h6>
+                                                                    <p class="weburl_0">{{ bookmark.content_object.description|slice:":255"|safe }} </p>
+                                                                    <div class="hover-block">
+                                                                        <ul>
+                                                                            <li>
+                                                                                <a href="{{ bookmark.content_object.get_absolute_url }}">
+                                                                                    <i data-feather="link"></i>
+                                                                                    Перейти
+                                                                                </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                    <div class="content-general">
+                                                                        <p class="desc_0">{{ bookmark.content_object.description|slice:":255"|safe }}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                                {% else %}
+                                                <p>У вас пока нет закладок.</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Container-fluid Ends-->
+
+{% endblock content %}
+{% block footer %}
+
+<script src="{% static 'site/_generals/js/bookmark/jquery.validate.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/bookmark/custom.js' %}"></script>
+<style>
+    a.delete-bookmark {
+        cursor: pointer;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+    $('.delete-bookmark').on('click', function() {
+        var bookmarkId = $(this).data('id');
+        var csrftoken = getCookie('csrftoken');
+        var $row = $(this).closest('.col-xxl-4'); // Находим ближайший родительский блок закладки
+
+        $.ajax({
+            url: '{% url "useraccount:delete_bookmarks" %}',
+            type: 'POST',
+            data: {
+                'bookmark_id': bookmarkId,
+                'csrfmiddlewaretoken': csrftoken
+            },
+            success: function(response) {
+                if (response.success) {
+                    $row.fadeOut(300, function() {
+                        $(this).remove();
+                        // Проверяем, остались ли еще закладки
+                        if ($('#bookmarkData .col-xxl-4').length === 0) {
+                            $('#bookmarkData').html('<p>У вас нет закладок.</p>');
+                        }
+                    });
+                } else {
+                    alert('Ошибка при удалении закладки: ' + response.error);
+                }
+            },
+            error: function() {
+                alert('Произошла ошибка при отправке запроса');
+            }
+        });
+    });
+
+    // Функция для получения CSRF-токена из cookies
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+
+</script>
+{% endblock footer %}

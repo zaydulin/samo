@@ -1,0 +1,34 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+{% endblock head %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card">
+        <div class="card-header" >
+            <h4 >Новое образщение в поддержку</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" >
+              {% csrf_token %}
+              <textarea style="height: 200px;" class="form-control" placeholder="Введите тему обращения для тикета" name="ticket_theme"></textarea>
+              <br>
+              <button type="submit" class="btn btn-success">Отправить обращение в поддержку</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

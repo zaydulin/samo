@@ -1,0 +1,42 @@
+[
+  {
+    "page": "home",
+    "fields": {
+      "top_slide_field":
+      {
+        "field": "Заголовок в слайде",
+        "info": "Built by geeks"
+      },
+      "top_slide_button_1_text_field":
+      {
+        "field": "Заголовок первой кнопки в слайде",
+        "info": "See Features"
+      },
+      "top_slide_button_1_link_field":
+      {
+        "top_slide_button_1_link_field": "ссылка первой кнопки в слайде",
+        "top_slide_button_1_link": "/home/"
+      }
+    }
+  },
+  {
+    "page": "about",
+    "fields": {
+      "top_cover_field":
+      {
+        "field": "Обложка",
+        "info": "/media/cover.png"
+      },
+      "top_slide_button_1_text_field":
+      {
+        "field": "Заголовок в обложке",
+        "info": "About Us"
+      },
+      "top_slide_button_1_link_field":
+      {
+        "top_slide_button_1_link_field": "Описание в обложке",
+        "top_slide_button_1_link": "Monstroid2 boasts clean and crispy design, bulletproof layout consistency and intuitive navigation. The template was created by top industry leaders in web design and user experience. Improve your audience engagement and loyalty with simple and user friendly tools offered by our template."
+      }
+    }
+  }
+]

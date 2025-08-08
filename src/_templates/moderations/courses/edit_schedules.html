@@ -1,0 +1,552 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/jquery.dataTables.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/select2/css/select2.min.css' %}">
+<style>
+    .offcanvas {
+        position: fixed;
+        top: 0;
+        right: -60%;
+        width: 60%;
+        height: 100%;
+        background-color: #f8f9fa;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease-in-out;
+        z-index: 1050;
+        padding: 2rem;
+    }
+
+    .offcanvas.show {
+        right: 0;
+    }
+
+    .offcanvas-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .hidden {
+        display: none;
+    }
+    .select2-container {
+        height: 38px !important;
+    }
+    .select2-container .select2-selection--single {
+        height: 38px !important;
+        display: block;
+        width: 100%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border: var(--bs-border-width) solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        margin-top: 7px;
+    }
+    .select2-container--open .select2-dropdown--above {
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border: var(--bs-border-width) solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+    }
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+{% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header card-no-border text-end">
+                            <div class="card-header-right-icon">
+                                <div style="float: left">
+                                    Дата создания : {% if schedules.created_at %} {{ schedules.created_at }} {% else %} только что {% endif %}
+                                </div>
+                                Создание расписания
+                            </div>
+                        </div>
+                        <div class="card-body px-0 pt-0">
+                            <form method="post" class="requisites-info" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-6 ">
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Обложка</h6>
+                                </div>
+                                {% if schedules.cover %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        {% if schedules.cover %}
+                                        <img src="{{schedules.cover.url}}" alt=""
+                                             style="max-height: 300px; max-width: 95%">
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                            <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.cover }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 ">
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Лого</h6>
+                                </div>
+                                {% if schedules.cover %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        {% if schedules.logo %}
+                                        <img src="{{schedules.logo.url}}" alt=""
+                                             style="max-height: 300px; max-width: 95%">
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width:80%;background: #fff;align-content: center;text-align: center;">
+                                            <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.logo }}
+                                </div>
+                            </div>
+                            <div class="row hidden">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Пользователи</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.users }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Лекция</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.themes }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-9">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Ссылка</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.link }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Дата</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.data }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Начало</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.time_start }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6 class="mb-2" style="width: max-content">Конец</h6>
+                                </div>
+                                <div class="mb-3">
+                                    {{ form.time_end }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 form-btn">
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        style=" margin-top: 10px; width: 150px">
+                                    Сохранить
+                                </button>
+                                <button id="right-offcanvas" type="button" class="btn btn-primary" style=" margin-top: 10px;">
+                                    Пользователи
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="offcanvas-backdrop fade hidden"></div>
+<div class="offcanvas">
+    <div class="offcanvas-close">&times;</div>
+    <div class="card-header">
+        <h3 style="margin-bottom: 30px;">Список всех пользователей</h3>
+    </div>
+    <div class="search-bar" style="display: flex; justify-content: space-between">
+        <input type="text" id="user-search" placeholder="Поиск пользователей..." class="form-control" style="width: fit-content!important;">
+        <form method="post" enctype="multipart/form-data" id="excel-upload-form">
+            {% csrf_token %}
+            {{ excel_form.excel_file }}
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('excel-file-input').click()"> Загрузить файл</button>
+            <span id="file-name" class="ml-2"></span>
+        </form>
+    </div>
+    <div class="table-responsive custom-scrollbar">
+        <table class="table">
+            <thead>
+            <tr class="border-bottom-primary">
+                <th>Пользователь</th>
+                <th>Email</th>
+                <th>Действия</th>
+                <th>Пароль</th>
+            </tr>
+            </thead>
+            <tbody id="user-table-body">
+            <!-- Пользователи будут добавлены сюда -->
+            </tbody>
+        </table>
+    </div>
+    <button id="load-more-users" class="btn btn-outline-primary">Показать больше</button>
+</div>
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/custom_category.js' %}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script src="{% static 'vendor/select2/js/select2.full.min.js' %}"></script>
+<script>
+let offset = 0;
+const limit = 20;
+const userTableBody = document.getElementById('user-table-body');
+const loadMoreButton = document.getElementById('load-more-users');
+const userSelect = document.getElementById('id_users');
+const courseId = `{{ course.id }}`; // Получаем ID курса из django template
+const getUsersUrl = "{% url 'moderation:get_users_by_course' '3ffd9528-5f62-4437-9ad5-456b2c11c28e' %}".replace('3ffd9528-5f62-4437-9ad5-456b2c11c28e', courseId);
+
+let query = ''; // Переменная для хранения текущего запроса
+
+// Функция для отправки пароля по email
+async function sendUserPassword(userId, buttonElement) {
+    try {
+        // Отправляем запрос на сервер
+        const response = await fetch(`{% url 'moderation:send_user_password' '3ffd9528-5f62-4437-9ad5-456b2c11c28e' %}`.replace('3ffd9528-5f62-4437-9ad5-456b2c11c28e', userId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': `{{ csrf_token }}`,
+            }
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            // Меняем кнопку на "Отправлено" и делаем её некликабельной
+            buttonElement.textContent = 'Отправлено';
+            buttonElement.classList.replace('btn-primary', 'btn-success');
+            buttonElement.disabled = true;
+        } else {
+            console.error('Ошибка при отправке:', result.message);
+            alert('Ошибка при отправке сообщения');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка при отправке сообщения');
+    }
+}
+// Функция для загрузки пользователей с учетом поиска
+async function loadUsers(customOffset = null) {
+    const effectiveOffset = customOffset !== null ? customOffset : offset;
+
+    // Получаем ID выбранных пользователей из select
+    const selectedUserIds = Array.from(userSelect.options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+
+    // Формируем URL запроса с добавлением selected_user_ids
+    const selectedUserIdsParam = selectedUserIds.map(id => `selected_user_ids=${id}`).join('&');
+    const searchUrl = `${getUsersUrl}?offset=${effectiveOffset}&limit=${limit}&query=${encodeURIComponent(query)}&${selectedUserIdsParam}`;
+
+    try {
+        const response = await fetch(searchUrl);
+        if (!response.ok) {
+            throw new Error('Ошибка при загрузке пользователей');
+        }
+
+        const users = await response.json();
+        console.log('Полученные пользователи:', users);
+
+        // Если это первый запрос (не подгрузка), очищаем таблицу
+        if (effectiveOffset === 0) {
+            userTableBody.innerHTML = '';
+        }
+
+        users.forEach(user => {
+            // Проверяем, есть ли пользователь в select
+            const isInSelect = selectedUserIds.includes(String(user.id));
+
+            const row = document.createElement('tr');
+            row.className = 'product-removes';
+            row.setAttribute('data-user-id', user.id);
+            row.innerHTML = `
+                <td>
+                    <div class="product-names">
+                        <div class="avatar">
+                            <img style="height: 80px!important; object-fit: cover" class="img-80 b-r-30" src="${user.avatar}" alt="${user.username}">
+                        </div>
+                        <p>${user.username}</p>
+                    </div>
+                </td>
+                <td>
+                    <div class="product-names">
+                        <p>${user.email}</p>
+                    </div>
+                </td>
+                <td>
+                    ${isInSelect ?
+                        `<button class="btn btn-outline-danger remove-user" onclick="removeUserFromSelect('${user.id}', this)">Исключить</button>` :
+                        `<button class="btn btn-outline-primary add-user" onclick="addUserToSelect('${user.id}', '${user.username}', this)">Добавить</button>`
+                    }
+                </td>
+                <td>
+                    <button class="btn btn-primary" onclick="sendUserPassword('${user.id}', this)">Отправить</button>
+                </td>
+            `;
+            userTableBody.appendChild(row);
+        });
+
+        if (customOffset === null && users.length > 0) {
+            offset += users.length;
+        }
+
+        loadMoreButton.style.display = users.length < limit ? 'none' : 'block';
+    } catch (error) {
+        console.error('Ошибка:', error);
+    }
+}
+// Обработчик для поля поиска
+document.getElementById('user-search').addEventListener('input', (event) => {
+    query = event.target.value;
+    offset = 0; // Сбрасываем offset для нового поиска
+    loadUsers(); // Загружаем пользователей с новым запросом
+});
+
+// Функция добавления пользователя в select
+function addUserToSelect(userId, username, buttonElement) {
+    const option = Array.from(userSelect.options).find(opt => opt.value === userId);
+
+    if (!option) {
+        const newOption = new Option(username, userId);
+        newOption.selected = true;
+        userSelect.add(newOption);
+    } else {
+        option.selected = true;
+    }
+
+    // Меняем кнопку на "Исключить"
+    buttonElement.outerHTML = `<button class="btn btn-outline-danger remove-user" onclick="removeUserFromSelect('${userId}', this)">Исключить</button>`;
+}
+
+// Функция удаления пользователя из select и изменения кнопки
+function removeUserFromSelect(userId, buttonElement) {
+    const option = Array.from(userSelect.options).find(opt => opt.value === userId);
+
+    if (option) {
+        option.selected = false;
+    }
+
+    const username = buttonElement.closest('tr').querySelector('.product-names p').textContent;
+
+    // Меняем кнопку на "Добавить"
+    buttonElement.outerHTML = `<button class="btn btn-outline-primary add-user" onclick="addUserToSelect('${userId}', '${username}', this)">Добавить</button>`;
+}
+
+// Обработчик клика по кнопке "Пользователи"
+document.getElementById('right-offcanvas').addEventListener('click', () => {
+    offset = 0;
+    userTableBody.innerHTML = '';
+    loadUsers();
+    openOffcanvas();
+});
+
+// Обработчик клика по кнопке "Показать больше"
+loadMoreButton.addEventListener('click', () => {
+    loadUsers();
+});
+
+// Функции для работы с offcanvas
+function openOffcanvas() {
+    const offcanvas = document.querySelector('.offcanvas');
+    const backdrop = document.querySelector('.offcanvas-backdrop');
+
+    if (offcanvas && backdrop) {
+        offcanvas.classList.add('show');
+        backdrop.classList.remove('hidden');
+        backdrop.classList.add('show');
+    }
+}
+
+function closeOffcanvas() {
+    const offcanvas = document.querySelector('.offcanvas');
+    const backdrop = document.querySelector('.offcanvas-backdrop');
+
+    if (offcanvas && backdrop) {
+        offcanvas.classList.remove('show');
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('show');
+    }
+}
+
+// Обработчики закрытия offcanvas
+document.addEventListener('DOMContentLoaded', () => {
+    offset = 0;
+    userTableBody.innerHTML = '';
+});
+
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('offcanvas-close') ||
+        event.target.classList.contains('offcanvas-backdrop')) {
+        closeOffcanvas();
+    }
+});
+</script>
+<script>
+    $(document).ready(function () {
+        $('#id_themes').select2({
+            placeholder: "Выберите лекцию",
+            allowClear: true // Позволяет очищать выбор
+        });
+    });
+</script>
+<script>
+        document.getElementById('excel-file-input').addEventListener('change', function() {
+            if (this.files.length > 0) {
+                // Показываем имя выбранного файла
+                document.getElementById('file-name').textContent = this.files[0].name;
+                // Автоматически отправляем форму
+                document.getElementById('excel-upload-form').submit();
+            }
+        });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+{% endblock bootonfooter %}

@@ -1,0 +1,449 @@
+{% extends 'moderations/base_moderation.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+
+<link href="{% static 'site/_generals/css/vendors/calendar.css' %}" rel="stylesheet">
+{% endblock head %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="container-fluid calendar-basic">
+    <div class="card">
+        <div class="card-body">
+            <div class="row" id="wrap">
+                <div class="col-xxl-3 box-col-12">
+                    <div class="card">
+                        <div class="card-header border-0">
+                            <div>
+                                <form id="monthForm" action="{% url 'useraccount:notebook_list' %}" method="GET">
+                                    <h4 class="font-w600 text-black fs-20 mb-1" for="month">Выберите месяц:</h4>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <select name="month" id="month" class="form-control">
+                                                {% for month_year in months_list %}
+                                                <option value="{{ month_year }}" {% if month_year == current_month_year %}selected{% endif %}>
+                                                    {{ month_year }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-4">
+                                            <button class="btn btn-primary mb-2" type="submit">Показать</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">Добавить запись</button>
+                        <div class="card-body" id="event-list">
+                            <!-- Dropdown для выбора месяца -->
+                            {% for notebook in notebooks_page %}
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div>
+                                    <div class="row justify-content-between align-items-center  mt-sm-4 mt-3">
+                                        <div class="col-2 fs-14">
+                                            <i class="fa fa-star" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="col-8 fs-14">
+                                            <a href="#" class="text-black">
+                                                {{ notebook.period|date:"d/m/Y"  }}
+                                            </a>
+                                        </div>
+                                        <div class="col-2 fs-14 text-end">
+                                            <button type="button" style="background: #ffffff00; border: 0px;"
+                                                    data-notebook-id="{{ notebook.id }}"
+                                                    data-notebook-name="{{ notebook.name }}"
+                                                    data-notebook-description="{{ notebook.description }}"
+                                                    data-notebook-period="{{ notebook.period }}"
+                                                    data-bs-toggle="modal" data-bs-target="#DeleteModalCenter">
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-between align-items-center  mt-sm-4 mt-3">
+                                    <div class="col-12 fs-14">
+                                        {{ notebook.name }}
+                                        <hr>
+                                        {{ notebook.description|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            <!-- Pagination links -->
+                            <div class="pagination">
+                                <span class="step-links">
+                                  {% if notebooks_page.has_previous %}
+                                    <a href="?month={{ current_month_year }}&page=1">&laquo; первый</a>
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.previous_page_number }}">предыдущий</a>
+                                  {% endif %}
+
+                                  <span class="current">
+                                    Страница {{ notebooks_page.number }} из {{ notebooks_page.paginator.num_pages }}.
+                                  </span>
+
+                                  {% if notebooks_page.has_next %}
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.next_page_number }}">следующий</a>
+                                    <a href="?month={{ current_month_year }}&page={{ notebooks_page.paginator.num_pages }}">последний &raquo;</a>
+                                  {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xxl-9 box-col-12">
+                    <div class="calendar-default" id="calendar-container">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Container-fluid Ends-->
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить запись</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <form method="post" action="{% url 'useraccount:notebook_list' %}">
+                <div class="modal-body">
+                    <!-- Форма для создания новой записи -->
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-9">
+                            {{ notebook_form.name }}
+                        </div>
+                        <div class="col-sm-3">
+                            {{ notebook_form.period }}
+                        </div>
+
+                        <div class="col-sm-12">
+                            {{ notebook_form.description }}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно для подтверждения удаления -->
+<div class="modal fade" id="DeleteModalCenter" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Удалить запись</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteNotebookForm" method="post" action="">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    <p id="notebookName"></p>
+                    <p id="notebookDescription"></p>
+                    <p id="notebookPeriod"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="InfoModalCenter">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body">
+                description
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block footer %}
+<!-- Required vendors -->
+
+<!-- calendar -->
+<script src="{% static 'site/_generals/js/calendar/fullcalendar.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/calendar/fullcalendar-custom.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        // Получить сегодняшнюю дату в формате YYYY-MM-DD
+        var today = new Date().toISOString().split('T')[0];
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'today',
+                center: 'title',
+                right: 'prev,next'
+            },
+            initialDate: today,
+            editable: true,
+            selectable: true,
+            businessHours: true,
+            locale: 'ru',
+            dayMaxEvents: false,
+            events: function(fetchInfo, successCallback, failureCallback) {
+                fetch('/ru/notebook/events/')
+                    .then(response => response.json())
+                    .then(data => successCallback(data))
+                    .catch(error => failureCallback(error));
+            },
+            eventContent: function(arg) {
+                var title = document.createElement('div');
+                title.innerHTML = arg.event.title;
+                return { domNodes: [title] };
+            },
+            eventClick: function(info) {
+                showEventInModal(info.event);
+            }
+        });
+
+        calendar.render();
+
+        function formatTimeRange(start, end) {
+            return start.substr(0, 5) + ' - ' + end.substr(0, 5);
+        }
+
+        function showEventInModal(event) {
+            var modal = document.getElementById('InfoModalCenter');
+            var modalTitle = modal.querySelector('.modal-title');
+            var modalBody = modal.querySelector('.modal-body');
+
+            modalTitle.textContent = event.title;
+
+            var content = `
+            <p><strong>Время:</strong> ${event.extendedProps.time}</p>
+            <p>${event.extendedProps.description || 'Описание отсутствует'}</p>
+        `;
+
+            modalBody.innerHTML = content;
+
+            modalBody.querySelectorAll('a').forEach(function(link) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
+
+            var bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Функция для обновления списка событий
+        function updateEventList(monthStr) {
+            // Формируем URL с параметром month
+
+
+            fetch(`/ru/notebooks/?month=${monthStr}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Указывает, что это AJAX-запрос
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    // Создаём временный элемент для парсинга HTML
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+
+                    // Измените этот селектор, если нужно
+                    var newEventList = doc.getElementById('event-list');
+
+                    if (newEventList) {
+                        var eventListElement = document.getElementById('event-list');
+                        // Заменяем содержимое
+                        eventListElement.innerHTML = newEventList.innerHTML;
+                    } else {
+                        console.error('Не удалось найти элемент #event-list в ответе');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching event list:', error);
+                });
+        }
+
+
+        // Обработчик события для формы фильтрации по месяцам
+        document.getElementById('monthForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var selectedMonthInput = document.getElementById('month').value;
+            if (!selectedMonthInput) {
+                alert('Пожалуйста, выберите месяц.');
+                return;
+            }
+
+            // Обновляем дату календаря
+            var [year, month] = selectedMonthInput.split('-');
+            var start = new Date(year, month - 1, 1);
+            calendar.gotoDate(start);
+
+            // Форматируем месяц для запроса (YYYY-MM)
+            var monthStr = selectedMonthInput;
+
+            // Обновляем список событий за выбранный месяц
+            updateEventList(monthStr);
+        });
+
+        // Если вы хотите добавить кнопку сброса фильтра (например, показать текущий месяц)
+        var resetButton = document.getElementById('resetMonthFilter');
+        if (resetButton) {
+            resetButton.addEventListener('click', function() {
+                // Установить выбранный месяц на текущий
+                var currentMonth = new Date();
+                var year = currentMonth.getFullYear();
+                var month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+                var selectedMonth = `${year}-${month}`;
+
+                // Обновить календарь
+                calendar.gotoDate(currentMonth);
+
+                // Обновить список событий за текущий месяц
+                updateEventList(selectedMonth);
+
+                // Сбросить значение в поле формы
+                document.getElementById('month').value = selectedMonth;
+            });
+        }
+    });
+
+
+</script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteButtons = document.querySelectorAll('button[data-bs-target="#DeleteModalCenter"]');
+
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var notebookId = button.getAttribute('data-notebook-id');
+                var notebookName = button.getAttribute('data-notebook-name');
+                var notebookDescription = button.getAttribute('data-notebook-description');
+                var notebookPeriod = button.getAttribute('data-notebook-period');
+
+                // Установка данных в модальное окно
+                document.getElementById('notebookName').textContent = 'Название: ' + notebookName;
+                document.getElementById('notebookDescription').textContent = 'Описание: ' + notebookDescription;
+                document.getElementById('notebookPeriod').textContent = 'Дата: ' + notebookPeriod;
+
+                // Установка action формы удаления
+                var deleteForm = document.getElementById('deleteNotebookForm');
+                deleteForm.action = '/ru/notebook/' + notebookId + '/delete/'; // Убедитесь, что здесь правильный URL
+            });
+        });
+
+        // Обработка успешного выполнения удаления
+        var deleteForm = document.getElementById('deleteNotebookForm');
+        deleteForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Отмена стандартной отправки формы
+
+            // Отправка запроса на удаление с помощью Fetch API
+            fetch(deleteForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}', // Убедитесь, что CSRF токен корректен
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Перезагрузка страницы после успешного удаления
+                        window.location.reload();
+                    } else {
+                        console.error('Ошибка при удалении записи:', response.statusText);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при выполнении запроса:', error);
+                });
+        });
+    });
+
+
+</script>
+
+{% endblock footer %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+
+        // Получить сегодняшнюю дату в формате YYYY-MM-DD
+        var today = new Date().toISOString().split('T')[0];
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            headerToolbar: {
+                left: 'today',
+                center: 'title',
+                right: 'prev,next'
+            },
+            initialDate: today,
+            editable: true,
+            selectable: true,
+            businessHours: true,
+            locale: 'ru',
+            dayMaxEvents: false,
+            events: function(fetchInfo, successCallback, failureCallback) {
+                fetch('ru/notebook/events/')
+                    .then(response => response.json())
+                    .then(data => successCallback(data))
+                    .catch(error => failureCallback(error));
+            },
+            eventContent: function(arg) {
+                var title = document.createElement('div');
+                title.innerHTML = arg.event.title;
+                return { domNodes: [title] };
+            },
+            eventClick: function(info) {
+                showEventInModal(info.event);
+            }
+        });
+
+        calendar.render();
+
+        function showEventInModal(event) {
+            var modal = document.getElementById('InfoModalCenter');
+            var modalTitle = modal.querySelector('.modal-title');
+            var modalBody = modal.querySelector('.modal-body');
+
+            // Устанавливаем заголовок
+            modalTitle.textContent = event.title;
+
+            // Устанавливаем содержимое, сохраняя HTML-разметку
+            modalBody.innerHTML = event.extendedProps.description || 'Описание отсутствует';
+
+            // Добавляем обработку ссылок, чтобы они открывались в новой вкладке
+            modalBody.querySelectorAll('a').forEach(function(link) {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
+
+            // Используем Bootstrap для открытия модального окна
+            var bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+    });
+</script>

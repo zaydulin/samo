@@ -1,0 +1,81 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load access_tag %}
+{% load static %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+<div class="container-fluid group-data-[content=boxed]:max-w-boxed mx-auto">
+    <div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'moderation:teacher_list' %}" id="search-form" class="d-flex align-items-center">
+            <h5 class="text-16 mb-0 me-3">{% trans 'Поиск по имени' %}</h5>
+            <div class="w-100 position-relative d-flex align-items-center">
+    <input
+        type="text"
+        name="q"
+        id="user-search"
+        value="{{ request.GET.q }}"
+        class="form-input w-100 ps-3 pe-3 py-2 border border-slate-300 rounded"
+        placeholder="{% trans 'Поиск по ФИО' %}..."
+        autocomplete="off"
+        style="border-radius: 12px; border: 1px solid #ced4da;">
+    <i class="fa fa-search ms-3 text-slate-500" style="font-size: 1.25rem;"></i>
+</div>
+        </form>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+    <div id="user-list">
+
+        {% include 'moderations/teacher_list_partial.html' %}
+
+    </div>
+        </div>
+        </div>
+</div>
+
+
+
+<script>
+$(document).ready(function () {
+    let timer = null;
+
+    $('#user-search').on('input', function () {
+        clearTimeout(timer);
+
+        const query = $(this).val();
+
+        timer = setTimeout(function () {
+            $.ajax({
+                url: "{% url 'moderation:teacher_list' %}",
+                type: 'GET',
+                data: {
+                    'q': query
+                },
+                dataType: 'html',
+                success: function (data) {
+                    $('#user-list').html(data);
+                    attachPopupHandlers();
+                    initDropdowns();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }, 300);
+    });
+
+
+    attachPopupHandlers();
+    initDropdowns();
+});
+</script>
+{% endblock content %}

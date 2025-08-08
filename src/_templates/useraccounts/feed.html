@@ -1,0 +1,127 @@
+{% extends 'moderations/base.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+
+
+     <div class="container-fluid" style="margin-right: auto; margin-left: 100px;" id="feed-container" data-has-more="{% if feed_items.has_next %}true{% else %}false{% endif %}">
+
+    {% for item in feed_items %}
+
+        <div class="col-md-9 box-col-9">
+            <div class="card">
+                <div class="blog-box blog-grid text-center">
+                    <div class="blog-details-main">
+                        <ul class="blog-social">
+                            <li><a href="{{ item.get_absolute_url }}">{{ item.author }}</a></li>
+                            <li><a href="{{ item.get_absolute_url }}">{{ item.create }}</a></li>
+                        </ul>
+                        <hr>
+                        <h6 class="blog-bottom-details">{{ item.description|safe }}</h6>
+                    </div>
+                    {% if item.previev %}
+                    <a href="{{ item.get_absolute_url }}">
+                        <img class="img-fluid top-radius-blog" style="padding: 15px; height: 400px;width: auto;" src="{{ item.previev.url }}" alt="">
+                    </a>
+                    {% endif %}
+                    <div class="blog-details-main">
+                        <ul class="blog-social">
+                            <li><a href="{{ item.get_absolute_url }}">{{ item.pageviews }} Просмотров</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+            </div>
+
+
+{% endblock content %}
+
+{% block footer %}
+<script>
+ let page = 2;
+let loading = false;
+let hasMorePages = document.querySelector("#feed-container").dataset.hasMore === "true";
+
+if (hasMorePages) {
+    window.addEventListener("scroll", () => {
+        if (loading || !hasMorePages) return;  // Останавливаем скрипт, если страниц больше нет
+
+        const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        if (scrollTop + clientHeight >= scrollHeight - 50) {
+            loading = true;
+            loadMore();
+        }
+    });
+}
+
+function loadMore() {
+    fetch(`?page=${page}&ajax=1`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.items.length) {
+                const container = document.getElementById("feed-container");
+                data.items.forEach(item => {
+                    let card = document.createElement("div");
+                    card.classList.add("col-md-9", "box-col-9");
+
+                    card.innerHTML = `
+                        <div class="card">
+                            <div class="blog-box blog-grid text-center">
+                                <div class="blog-details-main">
+                                    <ul class="blog-social">
+                                        <li><a href="${item.url}">${item.author}</a></li>
+                                        <li><a href="${item.url}">${item.create}</a></li>
+                                    </ul>
+                                    <hr>
+                                    <h6 class="blog-bottom-details"></h6>
+                                </div>
+                                ${item.previev ? `
+                                <a href="${item.url}">
+                                    <img class="img-fluid top-radius-blog" style="padding: 15px; height: 400px;width: auto;" src="${item.previev}" alt="">
+                                </a>` : ''}
+                                <div class="blog-details-main">
+                                    <ul class="blog-social">
+                                        <li><a href="${item.url}">${item.pageviews} Просмотров</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>`;
+
+                    // Устанавливаем HTML-контент безопасно
+                    card.querySelector(".blog-bottom-details").innerHTML = item.description;
+
+                    container.appendChild(card);
+                });
+
+                if (data.has_next) {
+                    page++;  // Увеличиваем номер страницы
+                } else {
+                    hasMorePages = false;  // Останавливаем загрузку, если страниц больше нет
+                    console.log("Все страницы загружены");
+                }
+                loading = false;
+            } else {
+                hasMorePages = false;  // Останавливаем загрузку, если нет новых данных
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при загрузке данных:", error);
+            loading = false;
+        });
+}
+
+</script>
+{% endblock footer %}

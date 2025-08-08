@@ -1,0 +1,270 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+
+                <div class="info">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <div class="text-md-start">
+                                        <div class="title">
+                                            <a>
+                                                {{course.name}}
+                                            </a>
+                                        </div>
+                                        <div class="desc">
+                                            {% if course.price <= 0 %}
+                                            <a class="btn bg-primary btn-hover-effect" href="#">
+                                                <i class="fa-solid fa-play me-2"></i>
+                                                Пройти бесплатно
+                                            </a>
+                                            {% elif course.has_courseuser %}
+                                            <a class="btn bg-success btn-hover-effect" href="#">
+                                                <i class="fa-solid fa-check me-2"></i>
+                                                Продолжить обучение
+                                            </a>
+                                            {% elif course.id in user_courses %}
+                                            <a class="btn bg-warning btn-hover-effect" href="#">
+                                                <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                                Завершить оплату
+                                            </a>
+                                            {% else %}
+                                            <a class="btn bg-primary btn-hover-effect" href="#">
+                                                <i class="fa-solid fa-cart-shopping me-2"></i>
+                                                Купить за {{ course.price }} руб.
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex" style="position: absolute; right: 0;">
+                                <div style="padding-right: 5px;" class="text-md-end border-right">
+                                    <div class="follow-num counter" data-target="{{ course.courserewievs_set.count }}">{{ course.courserewievs_set.count }}</div><span>Отзывов</span>
+                                </div>
+                                <div class="text-md-start" style="padding-left: 5px;">
+                                    <div class="follow-num counter" data-target="{{ course.coursecomments_set.count }}">{{ course.coursecomments_set.count }}</div><span>Комментариев</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <ul class="nav nav-tabs border-tab tabs-scoial" id="top-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:course' course.slug %}">Информация</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:coursecomment' course.slug %}">Комментарии</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'moderation:coursereviews' course.slug %}">Отзывы</a>
+                        </li>
+                      </ul>
+            </div>
+        </div>
+        <!-- user profile first-style end-->
+        <div class="col-xl-3 xl-40 col-lg-6 col-md-5 box-col-4">
+            <div class="default-according style-1 faq-accordion" id="accordionExample">
+                {% for theme in course.themescourse.all %}
+                <div class="card">
+                    <div class="card-header" id="heading{{ theme.id }}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-start collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ theme.id }}"
+                                    aria-expanded="false"
+                                    aria-controls="collapse{{ theme.id }}">
+                                {{ theme.name }}
+                            </button>
+                        </h2>
+                    </div>
+                    <div class="collapse" id="collapse{{ theme.id }}" aria-labelledby="headingv" data-bs-parent="#accordionExample" style="">
+                        <div class="card-body socialprofile filter-cards-view">
+                            <div class="card-body social-status filter-cards-view">
+                                {% for qwiz in theme.qwiz_set.all %}
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <span class="f-w-600 d-block">{{ qwiz.name }}</span>
+                                        <span class="d-block fw-normal">Вопросов: {{ qwiz.question_set.count }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-xl-9 xl-60 col-lg-6 col-md-7 box-col-8e">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="timeline-content" id="comments-container">
+                                <div class="social-chat" >
+                                    {% for comment in comments %}
+                                    {% if not comment.parent %}
+                                    <div class="your-msg" id="comment-{{ comment.id }}">
+                                        <div class="d-flex">
+                                            <img class="img-50 img-fluid m-r-20 rounded-circle" alt="" src="{{ comment.user.avatar.url }}">
+                                            <div class="flex-grow-1">
+                                                <span class="f-w-500">
+                                                    {{ comment.user.username }}
+                                                    <span>{{ comment.create|date:"d/m/Y" }}
+                                                        <i class="fa-solid fa-reply font-primary"  data-id="{{ comment.id }}"></i>
+                                                    </span>
+                                                </span>
+                                                <p>{{ comment.content }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% include 'moderations/comments_reply.html' with parent_comment=comment %}
+                                    {% endif %}
+                                    {% endfor %}
+
+                                    <!-- Пагинация -->
+                                    <div class="pagination">
+    <span class="page-links">
+        {% if comments.has_previous %}
+            <a href="?page={{ comments.previous_page_number }}">&#171; Предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ comments.number }} из {{ comments.paginator.num_pages }}.
+        </span>
+
+        {% if comments.has_next %}
+            <a href="?page={{ comments.next_page_number }}">Следующая &#187;</a>
+        {% endif %}
+    </span>
+                                    </div>
+                                </div>
+                                <div class="comments-box">
+                                    <div class="d-flex">
+                                        <img class="img-50 img-fluid m-r-20 rounded-circle" alt="" src="{{user.avatar.url}}">
+                                        <div class="flex-grow-1">
+                                            <form id="add-comment-form" method="post">
+                                                {% csrf_token %}
+                                                <div class="input-group text-box">
+                                                    <input class="form-control input-txt-bx" type="text" name="content" placeholder="Комментарий">
+                                                    <input class="form-control input-txt-bx" type="hidden" name="parent" value="">
+                                                    <input class="form-control input-txt-bx" type="hidden" name="course" value="{{ course.id }}">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-transparent submit-comment" type="button">
+                                                            <i class="fa-regular fa-face-smile"> Отправить</i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block footer %}
+<!-- Include jQuery from CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function checkJQuery() {
+        return typeof jQuery !== 'undefined';
+    }
+
+    function initializeCommentSystem() {
+        var $form = $('#add-comment-form');
+        var $submitButton = $form.find('.submit-comment');
+        var $commentsContainer = $('#comments-container');
+
+        if ($form.length === 0 || $submitButton.length === 0 || $commentsContainer.length === 0) {
+            return;
+        }
+
+        function logFormData() {
+            // Functionality previously logged form data
+            // You can implement alternative logging or handling here if needed
+        }
+
+        logFormData();
+
+        $submitButton.on('click', function(e) {
+            e.preventDefault();
+            logFormData();
+            var formData = {
+                content: $form.find('input[name="content"]').val(),
+                parent: $form.find('input[name="parent"]').val(),
+                course: $form.find('input[name="course"]').val(),
+                csrfmiddlewaretoken: $form.find('input[name="csrfmiddlewaretoken"]').val()
+            };
+
+            $.ajax({
+                url: '/create-comment/',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(response) {
+                    // Handle successful response
+                    refreshCommentsContainer();
+                },
+                error: function(xhr, status, error) {
+                    // Handle errors
+                    console.error('Error submitting comment:', error);
+                }
+            });
+        });
+
+        $(document).on('click', '.fa-reply', function() {
+            var commentId = $(this).data('id');
+            $form.find('input[name="parent"]').val(commentId);
+            $form.find('input[name="content"]').focus();
+            logFormData();
+        });
+
+        function refreshCommentsContainer() {
+            $commentsContainer.load(window.location.href + ' #comments-container > *', function() {
+                // This callback function runs after the content is loaded
+                console.log('Comments container refreshed');
+            });
+        }
+    }
+
+    if (checkJQuery()) {
+        $(document).ready(function() {
+            initializeCommentSystem();
+        });
+    } else {
+        console.error('jQuery is not loaded. Comment system initialization failed.');
+        // Handle the case where jQuery is not loaded
+    }
+
+
+</script>
+{% endblock footer %}

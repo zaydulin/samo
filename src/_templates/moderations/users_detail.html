@@ -1,0 +1,86 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    .user-profile-page .bordered-container {
+        border: 1px solid #d1d5db; /* Цвет рамки */
+        padding: 16px; /* Отступы внутри контейнера */
+        border-radius: 8px; /* Скругление углов рамки */
+    }
+
+</style>
+{% endblock head %}
+
+{% block content %}
+
+<div class="row container-fluid group-data-[content=boxed]:max-w-boxed mx-auto bordered-container user-profile-page">
+    <div class="flex flex-col gap-2 py-4 md:flex-row md:items-center print:hidden">
+    </div>
+    <div class=" col-5 mt-1 -ml-12 -mr-12 rounded card">
+        <div class="card-body !px-2.5">
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-12 2xl:grid-cols-12">
+                <div class="lg:col-span-2 2xl:col-span-1">
+                    <div class="ml-2 relative inline-block rounded-full shadow-md size-20 bg-slate-100 profile-user xl:size-28" >
+                        {% if users.avatar %}
+                        <img src="{{users.avatar.url}}" alt="" style="max-width: 100%;
+    height: 100%; " class="object-cover border-0 rounded-full img-thumbnail user-profile-image">
+                        {% endif %}
+                    </div>
+                </div><!--end col-->
+                <div class="lg:col-span-10 2xl:col-span-9">
+                    <div style="padding-left: 1.25rem;">
+                        <h5 class="mb-1">{{users.username}} <i data-lucide="badge-check" class="inline-block size-4 text-sky-500 fill-sky-100 dark:fill-custom-500/20"></i></h5>
+                        <div class="flex gap-3 mb-4">
+                            <p class="text-slate-500 dark:text-zink-200"><i data-lucide="user-circle" class="inline-block size-4 ltr:mr-1 rtl:ml-1 text-slate-500 dark:text-zink-200 fill-slate-100 dark:fill-zink-500"></i> {{user.get_type_display}}</p>
+                            <p class="text-slate-500 dark:text-zink-200"><i data-lucide="map-pin" class="inline-block size-4 ltr:mr-1 rtl:ml-1 text-slate-500 dark:text-zink-200 fill-slate-100 dark:fill-zink-500"></i> {{ user.city }}</p>
+                        </div>
+                        <h5 class="">ФИО: {% if users.name %}{{users.name}}{% endif %}</h5>
+                        <h5 class="">Номер телефона : {% if users.phone%}{{users.phone}}{% else %}Не указан {% endif %}</h5>
+                        <h5 class="">Почта: {% if users.email %}{{users.email}}{% else %}Не указана {% endif %}</h5>
+                        <h5 class="">Город : {% if users.city %}{{users.city}}{% else %}Не указан {% endif %}</h5>
+                    </div>
+                </div>
+            </div><!--end grid-->
+        </div>
+    </div><!--end card-->
+    <div class="col-5 grid grid-cols-1 gap-x-5 lg:grid-cols-2 2xl:grid-cols-2">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="mb-3 text-15">{% trans 'Адрес регистрации' %}</h6>
+                <div class="overflow-x-auto">
+                    <table class="w-full whitespace-nowrap">
+                        <thead class="ltr:text-left rtl:text-right">
+                        <tr>
+                            <th class="px-3.5 py-2.5 font-semibold border-b border-slate-200 dark:border-zink-500">{% trans 'Номер' %}</th>
+                            <th class="px-3.5 py-2.5 font-semibold border-b border-slate-200 dark:border-zink-500">{% trans 'Дата' %}</th>
+                            <th class="px-3.5 py-2.5 font-semibold border-b border-slate-200 dark:border-zink-500">{% trans 'Тип' %}</th>
+                            <th class="px-3.5 py-2.5 font-semibold border-b border-slate-200 dark:border-zink-500">{% trans 'Сумма' %}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for transaction in transactions|slice:"5" %}
+                        <tr>
+                            <td class="px-3.5 py-2.5 border-y border-slate-200 dark:border-zink-500">{{ transaction.id }}</td>
+                            <td class="px-3.5 py-2.5 border-y border-slate-200 dark:border-zink-500">{{ transaction.date }}</td>
+                            <td class="px-3.5 py-2.5 border-y border-slate-200 dark:border-zink-500">{{ transaction.get_type_display }}</td>
+                            <td class="px-3.5 py-2.5 border-y border-slate-200 dark:border-zink-500">{{ transaction.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!--end card-->
+
+    </div><!--end grid-->
+
+</div>
+
+<!-- container-fluid -->
+{% endblock content %}

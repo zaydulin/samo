@@ -1,0 +1,46 @@
+{% load static access_tag %}
+{% load i18n %}
+<div class="row" id="employeeList">
+    {% for user in users %}
+    <div class="col-xl-4 col-sm-6 col-xxl-3 col-ed-4 box-col-4">
+        <div class="card social-profile">
+            <div class="card-body">
+                <div class="social-img-wrap">
+                    <div class="social-img">
+                        <img src="{{ user.avatar.url }}" alt="profile">
+                    </div>
+                    <div class="edit-icon">
+                        <svg>
+                            <use href="{% static 'assets/svg/icon-sprite.svg#profile-check' %}"></use>
+                        </svg>
+                    </div>
+                </div>
+                <div class="social-details">
+                    <h5 class="mb-1">
+                        <a href="#">{{ user.name }}</a>
+                    </h5>
+                    <span class="c-o-light" > <a href="{% url 'moderation:courses' %}?username={{ user.username }}">@{{ user.username }}</a></span>
+                    <ul class="card-social">
+                        <li>
+                            <h5 class="mb-0">{{ user.course_count|default_if_none:0 }}</h5><span class="c-o-light">Курсов</span>
+                        </li>
+                        <li>
+                            <h5 class="mb-0">{{ user.review_count|default_if_none:0 }}</h5><span class="c-o-light">Отзывов</span>
+                        </li>
+                        <li>
+                            <h5 class="mb-0">{{ user.paid_course_count|default_if_none:0 }}</h5><span class="c-o-light">Учеников</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p>{% trans 'Нет результатов' %}</p>
+    </div>
+    {% endfor %}
+</div>
+{% if is_paginated %}
+    {% include 'moderations/include/paginations.html' with items=page_obj %}
+{% endif %}

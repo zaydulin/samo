@@ -1,0 +1,38 @@
+<ul class="pagination">
+    {% if paginator.num_pages >= 1 %}
+    {% if page_obj.has_previous %}
+    <li class="dt-paging-button page-item">
+        <a class="page-link previous" href="?page=1" aria-controls="basic-6"
+           aria-disabled="true" aria-label="Previous" data-dt-idx="previous"
+           tabindex="-1">
+            «
+        </a>
+    </li>
+    {% endif %}
+    {% for i in paginator.page_range %}
+    {% if page_obj.number == i %}
+    <li class="dt-paging-button page-item active">
+        <a href="#" class="page-link" aria-controls="basic-6"
+           aria-current="page" data-dt-idx="0" tabindex="0">
+            {{ i }}
+        </a>
+    </li>
+    {% elif i > page_obj.number|add:'-2' and i < page_obj.number|add:'3' %}
+    <li class="dt-paging-button page-item">
+        <a href="?page={{ i }}" class="page-link" aria-controls="basic-6" data-dt-idx="1"
+           tabindex="0">
+            {{ i }}
+        </a>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="dt-paging-button page-item">
+        <a href="?page={{ paginator.num_pages }}" class="page-link next" aria-controls="basic-6" aria-label="Next"
+           data-dt-idx="next" tabindex="0">
+            »
+        </a>
+    </li>
+    {% endif %}
+    {% endif %}
+</ul>

@@ -1,0 +1,87 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" href="{% static 'profile/css/font-awesome/css/all.min.css' %}">
+{% endblock head %}
+
+{% block content %}
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">{% trans 'Категории' %}</h4>
+            <div class="toolbar-1" >
+                <div class="btn-group mb-1">
+                    <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'moderation:courses_categorys' %}`">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" onclick="location.href=`{% url 'moderation:courses_categorys' %}`">
+                        <i class="fa fa-refresh"></i>
+                    </button>
+                    <button type="button" class="btn btn-primary light px-3" id="deleteButton" onclick="deleteSelected()">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm mb-2">
+                    <thead style="text-align: center;">
+                    <tr>
+                        <th class="align-middle">
+                            <div class="form-check custom-checkbox">
+                                <input type="checkbox" class="form-check-input" id="checkAll">
+                                <label class="form-check-label" for="checkAll"></label>
+                            </div>
+                        </th>
+                        <th>{% trans 'ID' %}</th>
+                        <th>{% trans 'Название' %}</th>
+                        <th>{% trans 'Дата' %}</th>
+                        <th>{% trans 'Ссылка' %}</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for category in categorys %}
+                    <tr>
+                        <td class="py-2">
+                            <div class="form-check custom-checkbox checkbox-success">
+                                <input type="checkbox" name="category_ids" value="{{ category.id }}" class="form-check-input" id="checkbox_{{ category.id }}">
+                                <label class="form-check-label" for="checkbox_{{ category.id }}"></label>
+                            </div>
+                        </td>
+                        <td class="py-2"><strong>{{ category.id }}</strong></td>
+                        <td class="py-2">{{ category.name }}	</td>
+                        <td class="py-2">{{ category.created_at }}</td>
+                        <td class="py-2">
+                            {{ category.slug }}
+                        </td>
+                        <td class="py-2 text-right">
+                            <div class="dropdown text-sans-serif" style="position:static ">
+                                <button class="btn btn-primary tp-btn-light sharp" type="button" id="order-dropdown-0" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false"><span>...</span></button>
+                                <div class="dropdown-menu dropdown-menu-end border py-0" aria-labelledby="order-dropdown-0">
+                                    <div class="py-2">
+                                        <a class="dropdown-item" href="{#% url 'moderation:category_message' category.pk %#}">Редактировать</a>
+                                        <div class="dropdown-divider">
+                                        </div>
+                                        <button class="dropdown-item text-danger" onclick="deletecategory('{{ category.id }}')">Удалить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include 'moderations/include/paginations.html' with items=categorys %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

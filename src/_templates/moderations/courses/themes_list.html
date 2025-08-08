@@ -1,0 +1,25 @@
+<!---themes_list.html--->
+
+
+    {% if modules_with_themes %}
+    {% for module in modules_with_themes %}
+    {% include "moderations/courses/module_item.html" with module=module %}
+    {% endfor %}
+    {% endif %}
+
+    {% if themes_without_module %}
+    <div class="themes-without-module">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-header" style=" padding: 0; ">
+                    <p>Темы без модуля</p>
+                </div>
+                {% for theme in themes_without_module %}
+                {% include "moderations/courses/theme_item.html" with theme=theme %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+

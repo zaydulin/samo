@@ -1,0 +1,319 @@
+{% extends 'moderations/base.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+<link rel="stylesheet" href="{% static 'ckeditor/ckeditor.css' %}">
+{% endblock head %}
+
+{% block content %}
+<div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4>Настройки сайта</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Панель управления</a></li>
+            <li class="breadcrumb-item active">Настройки</li>
+        </ol>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-x-5 xl:grid-cols-1">
+    <div class="card">
+        <div class="card-body">
+
+            <form method="post" class="site-info" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.media }}
+                    <h4 class="card-title mb-4">{% trans "Файлы" %}</h4>
+                    <div class="col-md-12" style="display: flex">
+                        <div class="col-md-6" style="padding-right: 10px;">
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">{% trans "Лого" %}</h6>
+                                </div>
+                                {% if site.logo %}
+                                <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                    {% if site.logo %}
+                                    <img src="{{site.logo.url}}" alt=""
+                                         style="max-height: 50px">
+                                    {% endif %}
+                                </div>
+                                 {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                            <h5 style="  color: #ababab">Изображения нет</h5>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.logo }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">{% trans "Доп Лого" %}</h6>
+                                </div>
+                                {% if site.doplogo %}
+                                <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                    {% if site.doplogo %}
+                                    <img src="{{site.doplogo.url}}" alt=""
+                                         style="max-height: 50px">
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                            <h5 style="  color: #ababab">Изображения нет</h5>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.doplogo }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="padding-left: 10px;">
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">{% trans "Фавикон" %}</h6>
+                                </div>
+                                {% if site.favicon %}
+                                <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                    {% if site.favicon %}
+                                    <img src="{{site.favicon.url}}" alt=""
+                                         style="max-height: 50px">
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                            <h5 style="  color: #ababab">Изображения нет</h5>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.favicon }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="mb-3">
+                                    <h6 class="mb-2">{% trans "Метод оплаты" %}</h6>
+                                </div>
+                                {% if site.paymentmethod %}
+                                <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                    {% if site.paymentmethod %}
+                                    <img src="{{site.paymentmethod.url}}" alt=""
+                                         style="max-height: 50px">
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                    <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                                        <div style="height:50px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 311px;background: #fff;align-content: center;text-align: center;">
+                                            <h5 style="  color: #ababab">Изображения нет</h5>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3 single-form">
+                                    {{ form.paymentmethod }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="mb-4 mt-4 card-title">{% trans "Общее" %}</h4>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-2">{% trans "Название" %}</h6>
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.name }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <h6 class="mb-2">{% trans "Описание" %}</h6>
+                                    </div>
+                                    <div class="mb-3">
+                                        {{ form.description }}
+                                    </div>
+                                </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Заголовок сообщения" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.message_header }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Подвал сообщения" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.message_footer }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Яндекс Метрика" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.yandex_metrica }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Google Аналитика" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.google_analitic }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <h6 class="mb-2">{% trans "Копирайт" %}</h6>
+                                        </div>
+                                        <div class="mb-3">
+                                            {{ form.content }}
+                                        </div>
+                                    </div>
+                        <div class="row">
+                            <div class="col-sm-12 form-btn mt-8">
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        style=" margin-top: 10px; width: 150px">
+                                    {% trans "Сохранить" %}
+                                </button>
+                            </div>
+                        </div>
+        </form>
+    </div><!--end card-->
+</div>
+
+<div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Детальные настройки</h4>
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-pills justify-content-start mb-4">
+                                    <li class=" nav-item">
+                                        <a href="#navpills2-1" class="nav-link active" data-bs-toggle="tab" aria-expanded="false">Домашняя страница</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#navpills2-2" class="nav-link" data-bs-toggle="tab" aria-expanded="false">О нас</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#navpills2-3" class="nav-link" data-bs-toggle="tab" aria-expanded="true">Партнерство</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#navpills2-4" class="nav-link" data-bs-toggle="tab" aria-expanded="true">Контакты</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div id="navpills2-1" class="tab-pane active">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <iframe id="homepage-iframe" src="{% url 'moderation:homepage_update' %}" style="width: 100%; height: 600px; border: none; margin-top: 10px; "></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="navpills2-2" class="tab-pane">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <iframe id="about-iframe" src="{% url 'moderation:about_update' %}" style="width: 100%; height: 600px; border: none; margin-top: 10px; "></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="navpills2-3" class="tab-pane">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <iframe id="cooperation-iframe" src="{% url 'moderation:cooperation_update' %}" style="width: 100%; height: 600px; border: none; margin-top: 10px; "></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="navpills2-4" class="tab-pane">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <iframe id="contact-iframe" src="{% url 'moderation:contact_update' %}" style="width: 100%; height: 600px; border: none; margin-top: 10px; "></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+<style>
+    textarea {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        display: block;
+        width: 100%;
+        border-radius: .375rem;
+        border-width: 1px;
+        padding: .5rem 1rem;
+        font-size: .875rem;
+        font-weight: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        font-family: inherit;
+        resize: none;
+        height: 120px;
+    }
+
+    textarea:focus {
+        --tw-border-opacity: 1 !important;
+        border-color: rgb(59 130 246 / var(--tw-border-opacity)) !important;
+    }
+
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+    .django-ckeditor-widget {
+        width: 100%;
+    }
+    .cke_editor_id_description {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 1.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+        width: auto!important;
+    }
+    .settings-button {
+        width: 100%;
+        background-color: white;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        cursor: pointer;
+        border-width: 0;
+    }
+
+</style>
+{% endblock content %}
+<script>
+    CKEDITOR.replace('message_header');
+    CKEDITOR.replace('message_footer');
+</script>
+{% block footer %}
+{% endblock footer %}

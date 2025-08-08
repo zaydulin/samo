@@ -1,0 +1,139 @@
+<!---themes_item.html--->
+<div class="theme-item" id="theme-{{ theme.id }}">
+    <div class="d-flex" >
+        <span class="main-title">
+            {{ theme.name }}
+        </span>
+        <div class="btn-group dropend" style=" right: 10px; position: absolute; ">
+            <button class="btn btn-primary dropdown-toggle" style="padding: 0px 10px;"
+                    type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false"></button>
+            <ul class="dropdown-menu" style="">
+                <li>
+                    <!-- Иконка редактирования -->
+                    <a href="#" class="edit-theme" data-theme-id="{{ theme.id }}" for="edit-themes">
+                        <i class="fa fa-edit"></i> Изменить
+                    </a>
+                </li>
+                <li>
+                    <!-- Форма удаления -->
+                    <form id="delete-theme-{{ theme.id }}" action="{% url 'moderation:themes_delete' theme.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link p-0" style="text-decoration: none!important;">
+                            <i class="fa fa-trash"></i> Удалить
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <!-- Посмотреть -->
+                    <a href="#" for="views-themes" data-theme-id="{{ theme.id }}">
+                        <i class="fa fa-eye"></i> Посмотреть
+                    </a>
+                </li>
+                <li>
+                    <!-- Посмотреть -->
+                    <a href="#" data-themes-id-qwiz="{{ theme.id }}" for="qwiz-add">
+                        <i class="fa fa-plus-square"></i> Добавить тест
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="move-theme" data-themes-id="{{ theme.id }}" data-themes-position="{{ theme.position }}">
+                        <i class="fa fa-arrow-up"></i> Вверх
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="move-theme" data-themes-id="{{ theme.id }}" data-themes-position="{{ theme.position }}">
+                        <i class="fa fa-arrow-down"></i> Вниз
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% if theme.quizzes.all %}
+        <div class="quiz-container">
+            <ul class="quiz-list">
+                {% for quiz in theme.quizzes.all|dictsort:"position" %}
+                <li id="quiz-item-{{ quiz.id }}" class="quiz-item" style="{% if forloop.counter > 5 %}display: none;{% endif %}">
+                    <span class="title">{{ quiz.name }}</span>
+                    <div class="btn-group dropend" style="right: 10px; position: absolute; padding-top: 10px;">
+                        <button class="btn btn-secondary dropdown-toggle" style="padding: 0px 10px;"
+                                type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false"></button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="#"
+                                   hx-get="{% url 'moderation:get_quiz' quiz.id %}"
+                                   hx-target="#qwiz-edit"
+                                   hx-swap="innerHTML"
+                                   hx-push-url="false" class="qwiz-edit"
+                                   for="qwiz-edit">
+                                    <i class="fa fa-edit"></i> Изменить
+                                </a>
+                            </li>
+                            <li>
+                                <form id="delete-quiz-{{ quiz.id }}" action="{% url 'moderation:quiz_delete' quiz.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link p-0" style="text-decoration: none!important;">
+                                        <i class="fa fa-trash"></i> Удалить
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <a href="#" for="views-qwiz" data-qwiz-id="{{ quiz.id }}">
+                                    <i class="fa fa-eye"></i> Посмотреть
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-themes-id-qwiz="{{ theme.id }}" for="qwiz-add">
+                                    <i class="fa fa-plus-square"></i> Добавить тест
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="move-quiz" data-quiz-id="{{ quiz.id }}" data-direction="up"  data-quiz-position="{{ quiz.position }}">
+                                    <i class="fa fa-arrow-up"></i> Вверх
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="move-quiz" data-quiz-id="{{ quiz.id }}" data-direction="down" data-quiz-position="{{ quiz.position }}">
+                                    <i class="fa fa-arrow-down"></i> Вниз
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% if theme.quizzes.count > 5 %}
+            <!-- Кнопка для показа/скрытия элементов для этого конкретного списка -->
+<span class="toggle-quiz-list title" style="cursor: pointer" onclick="toggleQuizList(this)" data-expanded="false">
+    Раскрыть <i class="fa-solid fa-chevron-down"></i>
+</span>
+            {% endif %}
+        </div>
+    {% endif %}
+   <script>
+   function toggleQuizList(button) {
+    // Найти родительский контейнер кнопки
+    const container = button.closest('.quiz-container');
+    // Найти элементы списка внутри этого контейнера
+    const quizItems = container.querySelectorAll('.quiz-item');
+    const isExpanded = button.getAttribute('data-expanded') === 'true';
+
+    // Переключить состояние
+    quizItems.forEach((item, index) => {
+        if (index >= 5) {
+            item.style.display = isExpanded ? 'none' : 'block';
+        }
+    });
+
+    // Обновить текст кнопки, иконку и атрибут состояния
+    button.innerHTML = isExpanded
+        ? 'Раскрыть <i class="fa-solid fa-chevron-down"></i>'
+        : 'Скрыть <i class="fa-solid fa-chevron-up"></i>';
+    button.setAttribute('data-expanded', !isExpanded);
+}
+</script>
+
+
+</div>

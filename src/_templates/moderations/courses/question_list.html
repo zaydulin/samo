@@ -1,0 +1,143 @@
+<div id="editqwiz-type-2" class="editquestion-contain-type-2" {% if quiz.type == 2 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <div class="d-flex justify-content-between">
+                        <h5>Вопросы типа "Тесты"</h5>
+                        <div>
+                            <button type="button" class="btn btn-primary" id="add-editquestion-type-2">Добавить еще</button>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="editquestion-container-type-2">
+                        {% for question in questions %}
+                        {% if question %}
+                        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+                        <div class="row question-type-2">
+                            <div class="col-sm-8">
+                                <label for="editqwiz_title_type_2_{{ question.id }}">Заголовок:</label>
+                                <input type="text" id="editqwiz_title_type_2_{{ question.id }}" name="editqwiz_title_type_2[]" class="form-control" placeholder="Вопрос" value="{{ question.title }}">
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label" for="editqwiz_right_answer_type_2_{{ question.id }}">Правильный ответ</label>
+                                <select id="editqwiz_right_answer_type_2_{{ question.id }}" class="form-control" name="editqwiz_right_answer_type_2[]">
+                                    <option value="1" {% if question.right_answer == 1 %}selected{% endif %}>Не правильный</option>
+                                    <option value="2" {% if question.right_answer == 2 %}selected{% endif %}>Правильный</option>
+                                </select>
+                                <div class="col-12 mt-2">
+                                    <button type="button" class="btn btn-danger"
+                                            onclick="deleteQuestion({{ question.id }})">Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+<!-- Вопросы типа "Тесты с картинками" -->
+<div id="editqwiz-type-3" class="editquestion-contain-type-3" {% if quiz.type == 3 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+    <div class="d-flex justify-content-between">
+        <h5>Вопросы типа "Тесты с картинками"</h5>
+        <div>
+            <button type="button" class="btn btn-primary" id="add-editquestion-type-3">Добавить еще</button>
+        </div>
+    </div>
+    <hr>
+    <div class="editquestion-container-type-3">
+        {% for question in questions %}
+        {% if question %}
+        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+        <div class="row question-type-3">
+            <div class="col-6">
+                <label class="form-label" for="image-editqwiz-type-3_{{ question.id }}">Изображение</label>
+                <input type="file" name="image-editqwiz-type-3[]" id="image-editqwiz-type-3_{{ question.id }}" class="form-control">
+                <img id="preview-image-editqwiz-type-3_{{ question.id }}" src="{{ question.image.url }}" alt="Предварительный просмотр изображения" style="max-width: 100%; margin-top: 10px;">
+            </div>
+            <div class="col-sm-6">
+                <label for="editqwiz_title_type_3_{{ question.id }}">Заголовок:</label>
+                <input type="text" id="editqwiz_title_type_3_{{ question.id }}" name="editqwiz_title_type_3[]" class="form-control" placeholder="Вопрос" value="{{ question.title }}">
+                <label class="form-label" for="editqwiz_right_answer_type_3_{{ question.id }}">Правильный ответ</label>
+                <select id="editqwiz_right_answer_type_3_{{ question.id }}" class="form-control" name="editqwiz_right_answer_type_3[]">
+                    <option value="1" {% if question.right_answer == 1 %}selected{% endif %}>Не правильный</option>
+                    <option value="2" {% if question.right_answer == 2 %}selected{% endif %}>Правильный</option>
+                </select>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="editqwiz-type-4" class="editquestion-contain-type-4" {% if quiz.type == 4 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+    <div class="d-flex justify-content-between">
+        <h5>Вопросы типа "Выборка" — Редактирование</h5>
+        <div>
+            <button type="button" class="btn btn-primary" id="add-editquestion-type-4">Добавить еще</button>
+        </div>
+    </div>
+    <hr>
+    <div class="editquestion-container-type-4">
+        {% for question in questions %}
+        {% if question %}
+        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+        <div class="row question-type-4">
+            <div class="col-sm-6">
+                <label for="editqwiz_title_type_4_{{ question.id }}_1">Заголовок 1:</label>
+                <input type="text" id="editqwiz_title_type_4_{{ question.id }}_1" name="editqwiz_title_type_4_1[]" class="form-control" placeholder="Вопрос 1" value="{{ question.title }}">
+                <div class="alert-danger" id="alert-editqwiz_title_type_4_{{ question.id }}_1"></div>
+                <label class="form-label" for="editqwiz_right_answer_type_4_{{ question.id }}_1">Правильный ответ</label>
+                <div class="form-check-size">
+                    <div class="form-check form-switch form-check-inline">
+                        <select id="editqwiz_right_answer_type_4_{{ question.id }}_1" class="form-control" name="editqwiz_right_answer_type_4_1[]">
+                            <option value="1" {% if question.right_answer == 1 %}selected{% endif %}>Не правильный</option>
+                            <option value="2" {% if question.right_answer == 2 %}selected{% endif %}>Правильный</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-danger" id="alert-editqwiz_right_answer_type_4_{{ question.id }}_1"></div>
+            </div>
+            <div class="col-sm-6">
+                <label for="editqwiz_title_type_4_{{ question.id }}_2">Заголовок 2:</label>
+                <input type="text" id="editqwiz_title_type_4_{{ question.id }}_2" name="editqwiz_title_type_4_2[]" class="form-control" placeholder="Вопрос 2" value="{{ question.title }}">
+                <div class="alert-danger" id="alert-editqwiz_title_type_4_{{ question.id }}_2"></div>
+                <label class="form-label" for="editqwiz_right_answer_type_4_{{ question.id }}_2">Правильный ответ</label>
+                <div class="form-check-size">
+                    <div class="form-check form-switch form-check-inline">
+                        <select id="editqwiz_right_answer_type_4_{{ question.id }}_2" class="form-control" name="editqwiz_right_answer_type_4_2[]">
+                            <option value="1" {% if question.right_answer == 1 %}selected{% endif %}>Не правильный</option>
+                            <option value="2" {% if question.right_answer == 2 %}selected{% endif %}>Правильный</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-danger"
+                     id="alert-editqwiz_right_answer_type_4_{{ question.id }}_2"></div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<!-- Редактирование вопросов типа "Заполните пропуск" -->
+<div id="editqwiz-type-5" class="editquestion-contain-type-5" {% if quiz.type == 5 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+    <div class="d-flex justify-content-between">
+        <h5>Вопросы типа "Заполните пропуск" — Редактирование</h5>
+        <div>
+            <button type="button" class="btn btn-primary" id="add-editquestion-type-5">Добавить еще</button>
+        </div>
+    </div>
+    <hr>
+    <div class="editquestion-container-type-5">
+        {% for question in questions %}
+        {% if question %}
+        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+        <div class="row editquestion-type-5">
+            <div class="col-sm-12">
+                <label for="editqwiz_description_type_5_{{ question.id }}">Задача:</label>
+                <textarea type="text" id="editqwiz_description_type_5_{{ question.id }}" name="editqwiz_description_type_5[]" class="form-control" placeholder="Вопрос" style="display:none;">{{ question.description }}</textarea>
+                <textarea type="text" id="editqwiz_description_ckeditor_type_5_{{ question.id }}" name="editqwiz_description_ckeditor_type_5[]" class="form-control" placeholder="Вопрос" >{{ question.description }}</textarea>
+                <div class="alert-danger" id="alert-editqwiz_description_type_5_{{ question.id }}"></div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<!-- Дополнительные блоки для других типов тестов аналогичны -->

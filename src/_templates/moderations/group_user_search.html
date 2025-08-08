@@ -1,0 +1,12 @@
+<div class="flex flex-wrap items-center gap-4" style="margin-top: 10px;">
+    {% for user in users %}
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="users" id="user_{{ user.pk }}" value="{{ user.pk }}"
+                {% if user in selected_users %}checked{% endif %}>
+            <label class="form-check-label" for="user_{{ user.pk }}">
+                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="h-20 rounded-md">
+                {{ user.username }}
+            </label>
+        </div>
+    {% endfor %}
+</div>

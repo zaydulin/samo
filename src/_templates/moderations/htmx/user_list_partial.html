@@ -1,0 +1,12 @@
+{% for user in users %}
+<div class="col-xl-2 my-2 col-xxl-3 col-lg-4 col-sm-6" data-userid="{{ user.id }}" onclick="selectUser('{{ user.id }}', '{{ user.username }}')">
+    <div class="d-flex align-items-center">
+       <div class="project-media">
+          <img src="{% if user.avatar %}{{ user.avatar.url }}{% endif %}" alt="">
+       </div>
+       <div class="ms-3">
+          <h5 class="mb-0 pt-1 fs-18 font-w50 text-black">{{ user.username }}</h5>
+       </div>
+    </div>
+</div>
+{% endfor %}

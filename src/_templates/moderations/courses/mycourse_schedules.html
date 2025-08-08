@@ -1,0 +1,409 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/jquery.dataTables.css' %}">
+<style>
+    .offcanvas {
+  position: fixed;
+  top: 0;
+  right: -40%;
+  width: 40%;
+  height: 100%;
+  background-color: #f8f9fa;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease-in-out;
+  z-index: 1050;
+  padding: 2rem;
+}
+
+.offcanvas.show {
+  right: 0;
+}
+
+.offcanvas-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.hidden {
+    display: none;
+}
+</style>
+<style>
+    .dropdown-menu {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+}
+.hover-color {
+    color: black; /* базовый цвет */
+    text-decoration: none; /* убирает подчеркивание */
+}
+
+.hover-color:hover {
+    color: #7366ff; /* цвет при наведении */
+}
+
+.hover-color i {
+    transition: color 0.3s; /* плавный переход для иконки */
+}
+
+.hover-color:hover i {
+    color: #7366ff; /* цвет иконки при наведении */
+}
+.nav-item.dropdown {
+    max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+}
+.no-bg {
+    background-color: transparent !important; /* Убирает фон */
+    box-shadow: none !important; /* Убирает тени */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Убирает стрелочку */
+}
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<!-- Container-fluid starts-->
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="col-xl-12">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header card-no-border text-end">
+                            <div class="card-header-right-icon">
+                                <form method="post" action="{% url 'moderation:mycourse_schedules_create' course.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Добавить расписание</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body px-0 pt-0">
+                            <div class="list-product ">
+                                <div class="recent-table table-responsive custom-scrollbar">
+                                    <table class="table" >
+                                        <thead>
+                                            <tr>
+                                                <th style="padding-left: 20px;"> <span class="f-light f-w-600">Лекция</span></th>
+                                                <th> <span class="f-light f-w-600">Дата</span></th>
+                                                <th> <span class="f-light f-w-600">Начало / Конец</span></th>
+                                                <th> <span class="f-light f-w-600">Ссылка</span></th>
+                                                <th> <span class="f-light f-w-600">Пользователи</span></th>
+                                                <th> <span class="f-light f-w-600"></span></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for schedule in schedules %}
+                                        <tr class="product-removes inbox-data"  id="comment-{{ schedule.id }}">
+                                            <td style="padding-left: 20px;">
+                                                <p class="f-light">
+                                                    {{ schedule.themes.name }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="f-light">
+                                                    {{ schedule.data }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="f-light">
+                                                    {{ schedule.time_start }} / {{ schedule.time_end }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p class="f-light">
+                                                    {{ schedule.link }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <button id="right-offcanvas" class="btn btn-outline-primary view-users" data-schedule-id="{{ schedule.id }}">Посмотреть</button>
+                                            </td>
+                                            <td>
+                                                <div class="common-align gap-2 justify-content-start">
+                                                    <ul class="action">
+                                                        <li class="edit"> <a href="{% url 'moderation:mycourse_schedules_update' course.id schedule.id %}"><i class="fa-regular fa-pen-to-square"></i></a></li>
+                                                        <li style="cursor: pointer" class="delete delete-comment" data-comment-id="{{ schedule.id }}"><a><i class="fa-solid fa-trash-can"></i></a></li>
+                                                      </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="offcanvas-backdrop fade hidden"></div>
+<div class="offcanvas">
+    <div class="offcanvas-close">&times;</div>
+    <div class="card-header">
+        <h3 style="margin-bottom: 30px;">Список всех пользователей</h3>
+    </div>
+    <div class="table-responsive custom-scrollbar">
+        <table class="table">
+            <thead>
+            <tr class="border-bottom-primary">
+                <th>Пользователь</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody id="user-table-body">
+            <!-- Пользователи будут добавлены сюда -->
+            </tbody>
+        </table>
+    </div>
+    <button id="load-more-users" class="btn btn-outline-primary">Показать больше</button>
+</div>
+<!-- Container-fluid Ends-->
+{% endblock content %}
+{% block bootonfooter %}
+<script src="{% static 'site/_generals/js/custom_category.js' %}"></script>
+<script>
+    let offset = 0; // Начальный индекс
+    const limit = 20; // Количество пользователей на одну загрузку
+    const userTableBody = document.getElementById('user-table-body');
+    const loadMoreButton = document.getElementById('load-more-users');
+    let currentScheduleId = null; // Переменная для хранения текущего ID расписания
+    const getUsersUrl = "{% url 'moderation:get_users_by_schedule' 0 %}";
+    const removeUserUrl = "{% url 'moderation:remove_user_from_schedule' 0 '3ffd9528-5f62-4437-9ad5-456b2c11c28e' %}";
+
+    // Функция для загрузки пользователей
+    async function loadUsers(scheduleId, customOffset = null) {
+        const url = getUsersUrl.replace('0', scheduleId);
+        const effectiveOffset = customOffset !== null ? customOffset : offset;
+        const response = await fetch(`${url}?offset=${effectiveOffset}&limit=${limit}`);
+        if (!response.ok) {
+            console.error('Ошибка при загрузке пользователей:', response.statusText);
+            return;
+        }
+
+        const users = await response.json();
+        console.log('Полученные пользователи:', users);
+
+        if (users.length === 0) {
+            console.log('Пользователи не найдены для данного расписания.');
+        }
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'product-removes';
+            row.setAttribute('data-user-id', user.id); // Добавляем атрибут для удаления строки
+            row.innerHTML = `
+                <td>
+                    <div class="product-names">
+                        <div class="avatar">
+                            <img style="height: 80px!important; object-fit: cover" class="img-80 b-r-30" src="${user.avatar}" alt="${user.username}">
+                        </div>
+                        <p>${user.username}</p>
+                    </div>
+                </td>
+                <td>
+                    <button class="btn btn-outline-primary remove-user" data-user-id="${user.id}" data-schedule-id="${scheduleId}" onclick="removeUser(${scheduleId}, '${user.id}')">Убрать из расписания</button>
+                </td>
+            `;
+            userTableBody.appendChild(row);
+        });
+
+        if (customOffset === null && users.length > 0) {
+            offset += users.length;
+        }
+
+        loadMoreButton.style.display = users.length < limit ? 'none' : 'block';
+    }
+
+    // Обработчик клика по кнопке "Посмотреть"
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('view-users')) {
+            currentScheduleId = event.target.getAttribute('data-schedule-id');
+            offset = 0;
+            userTableBody.innerHTML = '';
+            loadUsers(currentScheduleId);
+
+            openOffcanvas();
+        }
+    });
+
+    // Обработчик клика по кнопке "Показать больше"
+    loadMoreButton.addEventListener('click', () => {
+        if (currentScheduleId) {
+            loadUsers(currentScheduleId);
+        }
+    });
+
+    function getRemoveUserUrl(scheduleId, userId) {
+        return removeUserUrl.replace('0', scheduleId).replace('3ffd9528-5f62-4437-9ad5-456b2c11c28e', userId);
+    }
+
+    async function removeUser(scheduleId, userId) {
+        const url = getRemoveUserUrl(scheduleId, userId);
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': `{{ csrf_token }}`,
+            },
+        });
+
+        if (!response.ok) {
+            console.error('Ошибка при удалении пользователя:', response.statusText);
+            return;
+        }
+
+        console.log('Пользователь успешно удален');
+
+        const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+        if (userRow) {
+            userRow.remove();
+        }
+
+        await loadUsers(currentScheduleId, offset - 1);
+
+        loadMoreButton.style.display = userTableBody.children.length < limit ? 'none' : 'block';
+    }
+
+    // Функция для открытия offcanvas
+    function openOffcanvas() {
+        const offcanvas = document.querySelector('.offcanvas');
+        const backdrop = document.querySelector('.offcanvas-backdrop');
+
+        if (offcanvas && backdrop) {
+            offcanvas.classList.add('show');
+            backdrop.classList.remove('hidden');
+            backdrop.classList.add('show');
+        }
+    }
+
+    // Функция для закрытия offcanvas
+    function closeOffcanvas() {
+        const offcanvas = document.querySelector('.offcanvas');
+        const backdrop = document.querySelector('.offcanvas-backdrop');
+
+        if (offcanvas && backdrop) {
+            offcanvas.classList.remove('show');
+            backdrop.classList.add('hidden');
+            backdrop.classList.remove('show');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentScheduleId = null;
+        offset = 0;
+        userTableBody.innerHTML = '';
+    });
+
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('offcanvas-close')) {
+            closeOffcanvas();
+        } else if (event.target.classList.contains('offcanvas-backdrop')) {
+            closeOffcanvas();
+        }
+    });
+</script>
+<script>
+    const button = document.querySelector('#right-offcanvas');
+    const offcanvas = document.querySelector('.offcanvas');
+    const backdrop = document.querySelector('.offcanvas-backdrop');
+    const closeButton = document.querySelector('.offcanvas-close');
+
+    button.addEventListener('click', () => {
+      offcanvas.classList.add('show');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('show');
+    });
+
+    closeButton.addEventListener('click', () => {
+      offcanvas.classList.remove('show');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('show');
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === backdrop) {
+        offcanvas.classList.remove('show');
+        backdrop.classList.add('hidden');
+        backdrop.classList.remove('show');
+      }
+    });
+</script>
+<script>
+$(document).ready(function() {
+    var csrftoken = '{{ csrf_token }}';
+
+    $('.delete-comment').click(function(e) {
+        e.preventDefault();
+        var commentId = $(this).data('comment-id');
+
+        if (confirm('Вы уверены, что хотите удалить это расписание?')) {
+            $.ajax({
+                url: `{% url 'moderation:delete_course_schedules' 0 %}` .replace(0, commentId),
+                type: 'POST',
+                headers: {'X-CSRFToken': csrftoken},
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#comment-' + commentId).fadeOut(300, function() { $(this).remove(); });
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Произошла ошибка при удалении расписания.');
+                }
+            });
+        }
+    });
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const dropdown = document.getElementById('generalSettingsDropdown');
+
+    dropdown.addEventListener('mouseenter', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.add('show');
+    });
+
+    dropdown.addEventListener('mouseleave', function() {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        menu.classList.remove('show');
+    });
+});
+</script>
+{% endblock bootonfooter %}

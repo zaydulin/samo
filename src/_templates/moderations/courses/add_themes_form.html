@@ -1,0 +1,416 @@
+<form id="lectionForm" method="POST" action="{% url 'moderation:create_theme' course.id %}">
+    <div class="card checkout-cart" id="themesmsform">
+        <div class="card-body basic-wizard important-validation" >
+            <!-- Существующее содержимое формы -->
+            <div class="card-header d-flex justify-content-between">
+                <h5>Создать лекцию</h5>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" id="saveAndThemes">Сохранить</button>
+                </div>
+            </div>
+            <!-- Добавим индикатор загрузки -->
+            <div id="loading-indicator-themes" class="htmx-indicator hidden">
+                Сохранение...
+            </div>
+            <div class="row g-3 custom-input">
+                {% csrf_token %}
+                <input type="hidden" name="course_id" id="course_id_themes" value="{{ course.id }}">
+                {% if course.modules_set %}
+                <!-- Добавляем выбор модуля -->
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_module_themes">Выберите модуль</label>
+                    <select name="module" class="form-control" id="id_module_themes">
+                        <option value="">Выберите модуль</option>
+                        {% for module in course.modules_set.all %}
+                        <option value="{{ module.id }}">{{ module.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="alert-danger" id="alert-module_themes">{{ errors.module }}</div>
+                </div>
+                {% endif %}
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_name_themes">Название лекции</label>
+                    <input type="text" name="name" class="form-control" id="id_name_themes" required value="">
+                    <div class="alert-danger" id="alert-name_themes">{{ errors.name }}</div>
+                </div>
+                <div class="col-sm-12">
+                        <label class="form-label" for="id_description_form_lection">Лекционный материал</label>
+                        <textarea name="description" id="id_description_lection" class="form-none" style=""></textarea>
+                        <div id="id_description_form_lection"></div>
+                        <div class="alert-danger" id="alert-description_lection"></div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_access_type_themes">Лекция доступна после прохождения предыдущей</label>
+                    <div id="access_type_themes"></div>
+                    <div class="form-check-size">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input check-size" id="id_access_type_themes" name="access_type" type="checkbox" role="switch" {% if theme.access_type %}checked{% endif %}>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-access_type_themes">{{ errors.access_type }}</div>
+                </div>
+                <div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="id_home_work_status_themes_add">Наличие домашнего задания</label>
+                            <div id="point_home_work"></div>
+                            <div class="form-check-size">
+                                <div class="form-check form-switch form-check-inline">
+                                    <input class="form-check-input check-size" id="id_home_work_status_themes_add" name="home_work_status" type="checkbox" role="switch" {% if theme.home_work_status %}checked{% endif %}>
+                                </div>
+                            </div>
+                            <div class="alert-danger" id="alert-home_work_status">{{ errors.home_work }}</div>
+                        </div>
+                        <div class="col-sm-12" id="id_home_work_show_add" style="display:none;">
+                            <label class="form-label" for="id_home_work_add_themes" style="margin-top: 10px">Задание</label>
+                            <textarea name="home_work_add_themes" id="id_home_work_add_themes" class="form-control" style="display:contents">{{ theme.home_work }}</textarea>
+                            <div id="home_work_add_themes_form"></div>
+                            <div class="alert-danger" id="alert-home_work">{{ errors.home_work }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <label class="form-label" for="id_point_status_themes">Количество баллов в тесте для прохождения</label>
+                    <div id="point_status"></div>
+                    <div class="form-check-size">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input check-size" id="id_point_status_themes" name="point_status" type="checkbox" role="switch" {% if theme.point_status %}checked{% endif %}>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-point_status">{{ errors.point_status }}</div>
+                </div>
+                <div class="col-sm-8" id="point-show-add" style="display:none;">
+                    <label class="form-label" for="id_point">Минимум баллов в тесте для прохождения темы </label>
+                    <input type="number" name="point" value="{{ theme.point|default_if_none:'' }}" min="0" class="form-control" id="id_point">
+                    <div class="alert-danger" id="alert-point">{{ errors.point }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="id_attempts_status_themes_add">Ограничить попытки прохождения</label>
+                            <div id="attempts_status"></div>
+                            <div class="form-check-size">
+                                <div class="form-check form-switch form-check-inline">
+                                    <input class="form-check-input check-size" id="id_attempts_status_themes_add" name="attempts_status" type="checkbox" role="switch" {% if theme.attempts_status %}checked{% endif %}>
+                                </div>
+                            </div>
+                            <div class="alert-danger" id="alert-attempts_status">{{ errors.attempts_status }}</div>
+                        </div>
+                        <div class="col-sm-8" id="id_attempts_show_add" style="display:none;">
+                            <label class="form-label" for="id_attempts">Попытки за прохождения в минуты</label>
+                            <input type="number" name="attempts" value="{{ theme.attempts|default_if_none:'' }}" min="0" class="form-control" id="id_attempts">
+                            <div class="alert-danger" id="alert-attempts">{{ errors.attempts }}</div>
+                        </div>
+                    </div>
+                </div>
+                 <div class="col-sm-12">
+                    <label class="form-label" for="id_test_duration">Время на тест (в минутах)</label>
+                    <input type="number" name="test_duration" class="form-control" id="id_test_duration" required value="{{ theme.test_duration }}" placeholder="Количество минут">
+                    <div class="alert-danger" id="alert-test_duration">{{ errors.test_duration }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_show_answer_themes">После прохождения показывать ответы</label>
+                    <div id="show_answer_themes"></div>
+                    <div class="form-check-size">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input check-size" id="id_show_answer_themes" name="show_answer" type="checkbox" role="switch" {% if theme.show_answer %}checked{% endif %}>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-show_answer_themes">{{ errors.show_answer }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+// Функция для инициализации или реинициализации TinyMCE для новых полей
+function initializeTinyMCEForLection() {
+    const elementId = 'id_description_form_lection'
+
+    const textarea = document.querySelector(`#${elementId}`);
+    if (!textarea) {
+        console.error(`Не найден элемент с id "${elementId}"`);
+        return;
+    }
+
+    // Уничтожаем существующий экземпляр, если он есть
+    const existingEditor = tinymce.get(elementId);
+    if (existingEditor) {
+        tinymce.remove(existingEditor);
+    }
+
+    try {
+        tinymce.init({
+            selector: `#${elementId}`, // Привязываем конкретный экземпляр к элементу
+            plugins: 'print preview fullpage paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount spellchecker imagetools textpattern noneditable help charmap quickbars emoticons',
+            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            content_style: 'img { max-width: 100%; height: auto; }',
+            autosave_ask_before_unload: false, // Disable unload warning
+            imagetools_cors_hosts: ['picsum.photos'],
+            images_upload_url: "{% url 'moderation:tinymce_upload' %}", // URL для загрузки изображений
+            images_upload_credentials: true,
+            automatic_uploads: true,
+            image_advtab: true,
+            image_title: true,
+            height: 400,
+            notifications: false,
+
+            // Обработчик загрузки изображений
+            images_upload_handler: function (blobInfo, success, failure) {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch("{% url 'moderation:tinymce_upload' %}", {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin' // Важно для правильной передачи CSRF-токена
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.location) {
+                        success(result.location);
+                    } else {
+                        failure('Upload failed');
+                    }
+                })
+                .catch(error => {
+                    failure('Upload failed: ' + error);
+                });
+            },
+
+            // Событие изменения контента
+            setup: function (editor) {
+                editor.on('change', function () {
+                    const hiddenTextarea = document.querySelector(`#${elementId}`);
+                    if (hiddenTextarea) {
+                        hiddenTextarea.value = editor.getContent();
+                    }
+                });
+
+                // Prevent unload warning
+                editor.on('init', function() {
+                    editor.initialized = true;
+                    editor.isNotDirty = true;
+                });
+            },
+
+            // Загружаем начальное содержимое в редактор
+            init_instance_callback: function (editor) {
+                const hiddenTextarea = document.querySelector(`#${elementId}`);
+                if (hiddenTextarea && hiddenTextarea.value) {
+                    editor.setContent(hiddenTextarea.value);
+                }
+                editor.isNotDirty = true;
+            }
+        });
+    } catch (error) {
+        console.error(`Ошибка инициализации TinyMCE для ${elementId}:`, error);
+    }
+}
+
+
+function initializeTinyMCEForHomeTask() {
+    const elementId = 'home_work_add_themes_form'
+
+    const textarea = document.querySelector(`#${elementId}`);
+    if (!textarea) {
+        console.error(`Не найден элемент с id "${elementId}"`);
+        return;
+    }
+
+    // Уничтожаем существующий экземпляр, если он есть
+    const existingEditor = tinymce.get(elementId);
+    if (existingEditor) {
+        tinymce.remove(existingEditor);
+    }
+
+    try {
+        tinymce.init({
+            selector: `#${elementId}`, // Привязываем редактор к уникальному элементу
+            plugins: 'print preview fullpage paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount spellchecker imagetools textpattern noneditable help charmap quickbars emoticons',
+            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            content_style: 'img { max-width: 100%; height: auto; }',
+            autosave_ask_before_unload: false, // Disable unload warning
+            imagetools_cors_hosts: ['picsum.photos'],
+            images_upload_url: "{% url 'moderation:tinymce_upload' %}", // URL для загрузки изображений
+            images_upload_credentials: true,
+            automatic_uploads: true,
+            image_advtab: true,
+            image_title: true,
+            height: 400,
+            notifications: false,
+
+            // Обработчик загрузки изображений
+            images_upload_handler: function (blobInfo, success, failure) {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch("{% url 'moderation:tinymce_upload' %}", {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin' // Важно для правильной передачи CSRF-токена
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.location) {
+                        success(result.location);
+                    } else {
+                        failure('Upload failed');
+                    }
+                })
+                .catch(error => {
+                    failure('Upload failed: ' + error);
+                });
+            },
+
+            // Событие изменения контента
+            setup: function (editor) {
+                editor.on('change', function () {
+                    const hiddenTextarea = document.querySelector(`#${elementId}`);
+                    if (hiddenTextarea) {
+                        hiddenTextarea.value = editor.getContent();
+                    }
+                });
+
+                // Prevent unload warning
+                editor.on('init', function() {
+                    editor.initialized = true;
+                    editor.isNotDirty = true;
+                });
+            },
+
+            // Загружаем начальное содержимое в редактор
+            init_instance_callback: function (editor) {
+                const hiddenTextarea = document.querySelector(`#${elementId}`);
+                if (hiddenTextarea && hiddenTextarea.value) {
+                    editor.setContent(hiddenTextarea.value);
+                }
+                editor.isNotDirty = true;
+            }
+        });
+    } catch (error) {
+        console.error(`Ошибка инициализации TinyMCE для ${elementId}:`, error);
+    }
+}
+
+// Функция для отображения уведомлений
+function showLectionNotification(message, isError = false) {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.color = 'white';
+    notification.style.backgroundColor = isError ? '#f44336' : '#4CAF50';
+    notification.style.zIndex = '9999';
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 500);
+    }, 3000);
+}
+
+// Функция для отправки формы
+async function submitLectionForm(event) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    if (!form) return;
+
+    const loadingIndicator = document.getElementById('loading-indicator-themes');
+    const alertContainer = document.getElementById('themesmsform'); // Область уведомлений
+    const editorInstance = tinymce.get('id_description_form_lection');
+
+    if (!editorInstance) {
+        showLectionNotification("Редактор текста для описания лекции не инициализирован.", true);
+        return;
+    }
+
+    const editorContent = editorInstance.getContent();
+    if (!editorContent.trim()) {
+        showLectionNotification("Поле описания не может быть пустым.", true);
+        return;
+    }
+
+    // Обновляем содержимое текстового поля
+    const hiddenTextarea = document.querySelector('#id_description_lection');
+    if (hiddenTextarea) {
+        hiddenTextarea.value = editorContent;
+    }
+
+    // Собираем данные формы
+    const formData = new FormData(form);
+    formData.set('description', editorContent);
+
+    const url = form.getAttribute('action');
+
+    try {
+        loadingIndicator.style.display = 'block';
+
+        const response = await fetch(url, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        });
+
+        loadingIndicator.style.display = 'none';
+
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP! статус: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            showLectionNotification("Лекция успешно сохранена!");
+
+            // Очистить поля формы
+            form.reset();
+            editorInstance.setContent('');
+
+            // Обновить список тем
+            $('#themeslist').load(location.href + ' #themeslist > *');
+        } else {
+            showLectionNotification(data.error || 'Произошла ошибка.', true);
+        }
+
+    } catch (error) {
+        console.error('Ошибка отправки формы:', error);
+        showLectionNotification("Ошибка при сохранении данных лекции. Попробуйте еще раз.", true);
+    }
+}
+
+// DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function () {
+    // Инициализация TinyMCE для лекций
+    initializeTinyMCEForLection();
+    initializeTinyMCEForHomeTask();
+
+    // Обработка формы
+    document.body.addEventListener('submit', function (event) {
+        const form = event.target.closest('#lectionForm');
+        if (form) {
+            submitLectionForm(event);
+        }
+    });
+});
+</script>

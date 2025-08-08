@@ -1,0 +1,259 @@
+{% load static user_tags moderations_tag %}
+<div>
+    <div class="logo-wrapper">
+
+        <a href="{% if request.user.type == 1 %} {% url 'useraccount:dashboard' %} {% else %}{% url 'useraccount:feed' %}{% endif %}">
+            <img class="img-fluid for-light" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo.png' %}{% endif %}" style="height: 40px;" alt="">
+            <img class="img-fluid for-dark" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo_dark.png' %}{% endif %}" style="height: 40px;" alt="">
+        </a>
+        <div class="back-btn">
+            <i class="fa-solid fa-angle-left"></i>
+        </div>
+        <div class="toggle-sidebar">
+            <i class="status_toggle middle sidebar-toggle" data-feather="grid"> </i>
+        </div>
+    </div>
+    <div class="logo-icon-wrapper">
+        <a href="{% if request.user.type == 1 %} {% url 'useraccount:dashboard' %} {% else %}{% url 'useraccount:feed' %}{% endif %}">
+            <img class="img-fluid" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo-icon.png' %}{% endif %}" alt="">
+        </a>
+    </div>
+    <nav class="sidebar-main">
+        <div class="left-arrow" id="left-arrow">
+            <i data-feather="arrow-left"></i>
+        </div>
+        <div id="sidebar-menu">
+            <ul class="sidebar-links" id="simple-bar">
+                <li class="back-btn">
+                    <a href="{% if request.user.type == 1 %} {% url 'useraccount:dashboard' %} {% else %}{% url 'useraccount:feed' %}{% endif %}">
+                        <img class="img-fluid" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/_generals/images/logo/logo-icon.png' %}{% endif %}" alt="">
+                    </a>
+                    <div class="mobile-back text-end">
+                        <span>Back</span>
+                        <i class="fa-solid fa-angle-right ps-2" aria-hidden="true"></i>
+                    </div>
+                </li>
+                <li class="pin-title sidebar-main-title">
+                    <div>
+                        <h6>Pinned</h6>
+                    </div>
+                </li>
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="lan-0">Основное</h6>
+                    </div>
+                </li>
+                {% if request.user.type == 1 %}
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% if request.user.type == 1 %} {% url 'useraccount:dashboard' %} {% else %}{% url 'useraccount:feed' %}{% endif %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-home"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#fill-home"></use>
+                        </svg>
+                        <span>Панель управления</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'useraccount:feed' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#c-invoice"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#c-invoice"></use>
+                        </svg>
+                        <span>Лента</span>
+                    </a>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'useraccount:bookmark_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-bookmark"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#fill-bookmark"></use>
+                        </svg>
+                        <span>Закладки</span>
+                    </a>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'useraccount:notebook_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-calendar"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#fill-calendar"></use>
+                        </svg>moder
+                        <span>Записи</span>
+                    </a>
+                </li>
+                 <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <label class="badge badge-light-primary">{% get_tickets_count request.user %}</label>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'useraccount:user_tickets' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-support-tickets"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#fill-support-tickets"></use>
+                        </svg>
+                        <span>Поддержка</span>
+                    </a>
+                </li>
+
+
+                <!---LMS--->
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="lan-0">LMS</h6>
+                    </div>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:certificate_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-blog"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-blog"></use>
+                        </svg>
+                        <span>Сертификаты</span>
+                    </a>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"> </i>
+                    <a class="sidebar-link sidebar-title" href="#">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-widget"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#fill-widget"></use>
+                        </svg>
+                        <span>Курсы </span>
+                    </a>
+                    <ul class="sidebar-submenu">
+
+                        <li>
+                            <a href="{% url 'moderation:courses' %}">Все курсы</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'moderation:coursesavailable' %}">Доступные</a>
+                        </li>
+
+                        {% if request.user.type == 2 or request.user.type == 1 %}
+                         <li>
+                            <a href="{% url 'moderation:mycourses' %}">Созданые</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'moderation:categoryscourse' %}">Категории</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:schedulestream_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#course-2"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#course-2"></use>
+                        </svg>
+                        <span>Трансляции</span>
+                    </a>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:teacher_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#user-visitor"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#user-visitor"></use>
+                        </svg>
+                        <span>Учителя</span>
+                    </a>
+                </li>
+                {% if request.user.type == 1  %}
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <label class="badge badge-light-primary">{% get_notifications_count request.user %} </label>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:needcourses' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-starter-kit"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-starter-kit"></use>
+                        </svg>
+                        <span>Требуется</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:curces_base' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-faq"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-faq"></use>
+                        </svg>
+                        <span>Правила</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="lan-0">Личное</h6>
+                    </div>
+                </li>
+                {% if request.user.type == 1 or request.user.type == 2 %}
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:schedule_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-coming-soon"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-coming-soon"></use>
+                        </svg>
+                        <span>График</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:withdraw' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-price"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-price"></use>
+                        </svg>
+                        <span>Баланс</span>
+                    </a>
+                </li>
+                <li class="sidebar-list">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'moderation:knowledge' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-faq"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-faq"></use>
+                        </svg>
+                        <span>База знаний</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="right-arrow" id="right-arrow"><i data-feather="arrow-right"></i></div>
+    </nav>
+</div>

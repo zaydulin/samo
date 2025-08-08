@@ -1,0 +1,514 @@
+{% extends 'moderations/base_for_iframe.html' %}
+{% load i18n %}
+{% load static %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock head %}
+
+{% block content %}
+
+<div class="row">
+    <form method="post"  class="account__main-info" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок первого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.oneblock_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание первого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.oneblock_description }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Изображение' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {% if homepage.oneblock_image %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if homepage.oneblock_image %}
+                            <img src="{{homepage.oneblock_image.url}}" alt="" style="max-height: 300px">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                                <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {{ form.oneblock_image }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок второго блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание второго блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_description }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Изображение' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {% if homepage.twoblock_image %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if homepage.twoblock_image %}
+                            <img src="{{homepage.twoblock_image.url}}" alt="" style="max-height: 300px">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                                <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {{ form.twoblock_image }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Изображение второе' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {% if homepage.twoblock_image_2 %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if homepage.twoblock_image_2 %}
+                            <img src="{{homepage.twoblock_image_2.url}}" alt="" style="max-height: 300px">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                                <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {{ form.twoblock_image_2 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок второго блока №1' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_title_check_1 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание второго блока №1' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_description_check_1 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок второго блока №2' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_title_check_2 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание второго блока №2' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_description_check_2 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок второго блока №3' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_title_check_3 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание второго блока №3' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.twoblock_description_check_3 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок третьего блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.threeblock_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание третьего блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.threeblock_description }}
+                </div>
+            </div>
+            <hr>
+            <div class="row select-form">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Тарифы" %}</h6>
+                </div>
+                <div class="col-sm-9">
+                    <div class="choices" data-type="select-multiple" tabindex="0" role="combobox"
+                         aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"
+                         style="position: relative;">
+                        {{ form.tariffs }}
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.four_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Описание четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.four_description }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок кнопки №1 четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.four_button_title_1 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок кнопки №2 четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.four_button_title_2 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Ссылка кнопки четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.four_button_link }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Изображение четвертого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {% if homepage.four_image %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            {% if homepage.four_image %}
+                            <img src="{{homepage.four_image.url}}" alt="" style="max-height: 300px">
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="mb-2 relative inline-block shadow-md bg-slate-100">
+                            <div style="height:300px; border: 0.0625rem solid #EEEEEE; border-radius:0.5rem;width: 500px;background: #fff;align-content: center;text-align: center;">
+                                <h1 style="transform: rotate(20deg); color: #ababab">Изображения нет</h1>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {{ form.four_image }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок пятого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.fiveblock_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row select-form">
+                <div class="col-sm-3">
+                    <h6 class="mb-2">{% trans "Отзывы" %}</h6>
+                </div>
+                <div class="col-sm-9">
+                    <div class="choices" data-type="select-multiple" tabindex="0" role="combobox"
+                         aria-autocomplete="list" aria-haspopup="true" aria-expanded="false"
+                         style="position: relative;">
+                        {{ form.testimonial }}
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок шестого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.sixblock_title }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок кнопки №1 шестого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.sixblock_button_title_1 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Заголовок кнопки №2 шестого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.sixblock_button_title_2 }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-3">
+                    <h6 class="mb-0">{% trans 'Ссылка кнопки шестого блока' %}</h6>
+                </div>
+                <div class="col-sm-9 text-secondary">
+                    {{ form.sixblock_button_link }}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-sm-12">
+                    <button type="submit" class="btn btn-success">
+                        {% trans 'Сохранить' %}
+                    </button>
+                    <button type="button" class="btn btn-success" id="open-testimonial-modal">
+                        {% trans 'Добавить отзыв' %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-backdrop hidden" id="modal-backdrop"></div>
+
+<div class="modal fade hidden" aria-hidden="true" style="display: none;" id="testimonial-modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans 'Создание отзыва' %}</h5>
+                <button type="button" class="btn-close close-testimonial-modal" id="close-testimonial-modal" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="testimonial-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="testimonial-name" class="block text-sm font-medium mt-4">{% trans 'Имя' %}</label>
+                        <input type="text" id="testimonial-name" name="name" class="form-control input-default" placeholder="{% trans 'Ваше имя' %}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="testimonial-description" class="block text-sm font-medium mt-4">{% trans 'Комментарий' %}</label>
+                        <textarea id="testimonial-description" name="description" class="form-control input-default" placeholder="{% trans 'Ваш комментарий' %}" required style="height: 120px!important;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="testimonial-image" class="block text-sm font-medium mt-4">{% trans 'Изображение' %}</label>
+                        <input type="file" id="testimonial-image" name="image" class="form-control input-default" accept=".png, .jpg, .jpeg, .webp, .svg">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">{% trans 'Сохранить' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    .form-control[type="file"]:not(:disabled):not([readonly]) {
+        --tw-border-opacity: 1;
+        border-color: rgb(226 232 240 / var(--tw-border-opacity));
+        width: fit-content;
+        display: block;
+        border-radius: .375rem;
+        border-width: 1px;
+        font-size: .875rem;
+        height: auto!important;
+        padding: 5px 0px 5px 10px;
+    }
+
+    textarea#id_about {
+        display: block !important;
+        background: #fff;
+        border: 0.0625rem solid #EEEEEE;
+        padding: 0.3125rem 0.25rem;
+        color: #6e6e6e;
+        border-radius: 0.5rem;
+    }
+    .choices__list--dropdown, .choices__list[aria-expanded] {
+        position: relative;
+        max-height: 120px;
+        overflow: auto;
+    }
+    .django-ckeditor-widget {
+        display: block !important;
+    }
+        .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    .modal-backdrop.show {
+        display: block;
+    }
+
+</style>
+<script>
+    document.getElementById('open-testimonial-modal').addEventListener('click', function () {
+    const modal = document.getElementById('testimonial-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+
+    modal.classList.remove('hidden');
+    modal.classList.add('show'); // Добавляем класс show
+    modal.style.display = 'block'; // Устанавливаем стиль display
+    backdrop.classList.add('show'); // Показываем затемнение
+    backdrop.style.display = 'block'; // Устанавливаем стиль display
+});
+
+document.getElementById('close-testimonial-modal').addEventListener('click', function () {
+    const modal = document.getElementById('testimonial-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+
+    modal.classList.add('hidden');
+    modal.classList.remove('show'); // Удаляем класс show
+    modal.style.display = 'none'; // Убираем стиль display
+    backdrop.classList.remove('show'); // Скрываем затемнение
+    backdrop.style.display = 'none'; // Убираем стиль display
+});
+
+document.getElementById('testimonial-modal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        this.classList.add('hidden');
+        this.classList.remove('show'); // Удаляем класс show
+        this.style.display = 'none'; // Убираем стиль display
+        const backdrop = document.getElementById('modal-backdrop');
+        backdrop.classList.remove('show'); // Скрываем затемнение
+        backdrop.style.display = 'none'; // Убираем стиль display
+    }
+});
+
+document.getElementById('testimonial-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // предотвращаем стандартное поведение отправки формы
+
+    const formData = new FormData(this);
+
+    fetch("{% url 'moderation:create_testimonial' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Закрытие модального окна и обновление страницы
+            document.getElementById('testimonial-modal').classList.add('hidden');
+            document.getElementById('modal-backdrop').classList.remove('show');
+            location.reload();
+        } else {
+            alert("Ошибка при сохранении отзыва: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+    });
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем все элементы с классом 'choices'
+        const choicesElements = document.querySelectorAll('.choices select');
+
+        // Инициализируем Choices для каждого селекта
+        choicesElements.forEach(choicesElement => {
+            const choices = new Choices(choicesElement, {
+                searchEnabled: true,
+                placeholder: true,
+                placeholderValue: 'Выберите', // Можно установить значение по умолчанию
+                noResultsText: 'Нет результатов',
+                noChoicesText: 'Нет доступных вариантов',
+                removeItemButton: true,
+            });
+
+            // Обработчик события изменения для каждого селекта
+            choicesElement.addEventListener('change', function() {
+                console.log('Selected options:', Array.from(this.selectedOptions).map(option => option.value));
+
+                // Убираем placeholder, если выбрана хотя бы одна опция
+                if (this.selectedOptions.length > 0) {
+                    choices.placeholderValue = ''; // Устанавливаем пустое значение для placeholder
+                } else {
+                    choices.placeholderValue = 'Выберите'; // Возвращаем исходное значение
+                }
+                choices.setValue(this.value); // Обновляем значение в Choices
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

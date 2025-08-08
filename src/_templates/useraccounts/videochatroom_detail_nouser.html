@@ -1,0 +1,1331 @@
+{% extends 'useraccounts/base_no_user.html' %}
+{% load static %}
+{% load i18n %}
+{% block headtitle %} Конференция{% endblock headtitle %}
+{% block headdescription %}{% endblock headdescription %}
+{% block headkeywords %}{% endblock headkeywords %}
+{% block head %}
+  <style>
+    video {
+      width: 300px;
+      margin: 5px;
+      background: #000;
+    }
+    .remoteContainer {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .remoteContainer .label {
+      font-weight: bold;
+      margin-bottom: 3px;
+      text-align: center;
+    }
+    #participantsList div {
+      margin: 2px;
+      padding: 2px;
+      border: 1px solid #ccc;
+      display: inline-block;
+    }
+    button {
+      margin: 5px;
+      padding: 8px;
+    }
+  </style>
+<style>
+    .user-card {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    overflow: hidden;
+}
+
+.user-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.user-card .username {
+    position: absolute;
+    bottom: -8px;;
+    left: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+   .key-container {
+        display: inline-block;
+        position: relative;
+    }
+
+    /* Замазанный ключ */
+    .conference-key {
+        color: transparent; /* Делаем текст невидимым */
+        text-shadow: 0 0 8px rgba(0, 0, 0, 0.5); /* Размазываем */
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    /* Показываем ключ при наведении */
+    .key-container:hover .conference-key,
+    .key-container:focus-within .conference-key {
+        color: black; /* Показываем текст */
+        text-shadow: none; /* Убираем размытие */
+    }
+</style>
+{% endblock head %}
+{% block content %}
+    <!-- Контент -->
+    {% if videochat.is_closed == True %}
+    <div class="p-4">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title" >{{ videochat.name }}</h6>
+                    </div>
+                    <div class="col-lg-12" style="padding: 30px;">
+                         <div class="row">
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <!-- stat 1 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid h-10 w-10"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.participants.count }}</h4>
+                                            <span class="text-sm">Спикеры</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 2 -->
+                                    <div class="col-lg-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square h-10 w-10"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.get_type_display }}</h4>
+                                            <span class="text-sm">Тип комнаты</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users h-10 w-10"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.visitors.count }}</h4>
+                                            <span class="text-sm">Участников</span>
+                                        </div>
+                                    </div>
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock h-10 w-10"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.time }}</h4>
+                                            <span class="text-sm">Длительность</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-lg-6">
+
+                                 <h4 class="card-title">Об конференции</h4>
+
+                                <div class="p-6">
+                                    <div>
+                                        {{ videochat.descriptions }}
+                                        <div class="grid grid-cols-4 gap-6">
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    Дата старта
+                                                </p>
+                                                 <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-clock"></i>Время старта</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_time }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>Дата конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;"> <i class="fa-regular fa-clock"></i> Время конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_time }}</h5>
+                                            </div>
+                                        </div>
+                                        {% if files %}
+                                        <div class="mt-6" style="margin-top: 20px;">
+                                            <h6 class="text-gray-800 font-medium mb-3">Файлы к конференции</h6>
+                                            <div class="grid md:grid-cols-4 gap-3">
+                                                {% for file in files %}
+                                                <div class="p-2 border border-gray-200 dark:border-gray-700 rounded mb-2">
+                                                    <div class="flex items-center">
+                                                        <div class="h-9 w-9 rounded flex justify-center items-center text-primary bg-primary/20 me-3">
+                                                            <i class="mgc_file_new_line text-xl"></i>
+                                                        </div>
+
+                                                        <div class="">
+                                                            <a href="{{ file.file.url }}" class="text-sm font-medium">{{ file.file.name }}</a>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            </div>
+                         </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="card-header">
+                                <h6 class="card-title">Спикеры</h6>
+                            </div>
+                             <div class="p-6" style="    padding: 30px;">
+                                <!-- Basic -->
+                                <div class="grid xl:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5"   style="overflow: auto; ">
+                                     <div class="flex relative user-card">
+                                        <img alt="gallery" class="absolute w-full object-cover object-center rounded" width="150px" src="{{ videochat.spiker.avatar.url }}">
+                                        <h1 class="username title-font text-lg font-medium text-gray-900 mb-3">
+                                            {{ videochat.spiker.username}}
+                                        </h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <main class="flex-grow " style="position: fixed; margin: -1.5rem; height: calc(100% - 150px);padding-right: 20px;"  data-my-id="user{{ current_user.id }}">
+
+        <h2>Моя камера/Демонстрация экрана</h2>
+  <video id="localVideo" autoplay muted playsinline></video>
+  <br>
+  <!-- Кнопки управления -->
+  <h2>Удалённые видео</h2>
+  <div id="remoteVideos"></div>
+
+
+
+    </main>
+    <!---|Offcanvases|-->
+    <div class="common-offcanvas">
+        <div class="offcanvas offcanvas-end" id="staticBackdrop" data-bs-scroll="true"  data-bs-backdrop="false" tabindex="-1" aria-modal="true" role="dialog" aria-labelledby="staticBackdropLabel">
+              <div class="offcanvas-header pb-0">
+                <h5 class="offcanvas-title" id="staticBackdropLabel">Чат</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+              <div class="offcanvas-body custom-input">
+                  <div class="right-sidebar-Chats" style="height: 100%;">
+                    <div class="msger" style="height: 90%;">
+ <div class="msger-chat" id="chat" style="height: 100%;">
+      {% for message in messages %}
+          {% if message.author.id != current_user.id %}
+            <div class="msg left-msg">
+              <div class="msg-img" style="background-image: url('{{ message.author.avatar.url }}');"></div>
+              <div class="msg-bubble">
+                <div class="msg-info">
+                  <div class="msg-info-name">{{ message.author.username }}</div>
+                  <div class="msg-info-time">{{ message.timestamp|date:"H:i" }}</div>
+                </div>
+                <div class="msg-text">{{ message.content }}</div>
+              </div>
+            </div>
+          {% else %}
+            <div class="msg right-msg">
+              <div class="msg-img" style="background-image: url('{{ message.author.avatar.url }}');"></div>
+              <div class="msg-bubble">
+                <div class="msg-info">
+                  <div class="msg-info-name">{{ message.author.username }}</div>
+                  <div class="msg-info-time">{{ message.timestamp|date:"H:i" }}</div>
+                </div>
+                <div class="msg-text">{{ message.content }}</div>
+              </div>
+            </div>
+          {% endif %}
+      {% endfor %}
+  </div>
+
+  <form class="msger-inputarea">
+    <input class="msger-input" type="text" placeholder="Введите ваше сообщение.." autocomplete="off">
+    <button class="msger-send-btn" type="submit"><i class="fa fa-location-arrow"></i></button>
+  </form>
+                    </div>
+                  </div>
+              </div>
+            </div>
+        <div class="offcanvas offcanvas-bottom" id="offcanvasBottom" tabindex="-1" aria-labelledby="offcanvasBottomLabel" style="height: 100%;">
+          <div class="offcanvas-header pb-0">
+            <h5 class="offcanvas-title" id="offcanvasBottomLabel">Подробная информация об конференции</h5>
+            <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body custom-input custom-scrollbar">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title" id="room-name">{{ videochat.name }}</h6>
+                    </div>
+                    <div class="col-lg-12" style="padding: 30px;">
+                         <div class="row">
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <!-- stat 1 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid h-10 w-10"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">1</h4>
+                                            <span class="text-sm">Спикеры</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 2 -->
+                                    <div class="col-lg-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square h-10 w-10"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.get_type_display }}</h4>
+                                            <span class="text-sm">Тип комнаты</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users h-10 w-10"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.visitors.count }}</h4>
+                                            <span class="text-sm">Участников</span>
+                                        </div>
+                                    </div>
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock h-10 w-10"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.time }}</h4>
+                                            <span class="text-sm">Длительность</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-lg-6">
+
+                                 <h4 class="card-title">Об конференции</h4>
+
+                                <div class="p-6">
+                                    <div>
+                                        {{ videochat.descriptions }}
+                                        <div class="grid grid-cols-4 gap-6">
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    Дата старта
+                                                </p>
+                                                 <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-clock"></i>Время старта</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_time }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>Дата конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;"> <i class="fa-regular fa-clock"></i> Время конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_time }}</h5>
+                                            </div>
+                                        </div>
+                                        {% if files %}
+                                        <div class="mt-6" style="margin-top: 20px;">
+                                            <h6 class="text-gray-800 font-medium mb-3">Файлы к конференции</h6>
+                                            <div class="grid md:grid-cols-4 gap-3">
+                                                {% for file in files %}
+                                                <div class="p-2 border border-gray-200 dark:border-gray-700 rounded mb-2">
+                                                    <div class="flex items-center">
+                                                        <div class="h-9 w-9 rounded flex justify-center items-center text-primary bg-primary/20 me-3">
+                                                            <i class="mgc_file_new_line text-xl"></i>
+                                                        </div>
+
+                                                        <div class="">
+                                                            <a href="{{ file.file.url }}" class="text-sm font-medium">{{ file.file.name }}</a>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            </div>
+                         </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="card-header">
+                                <h6 class="card-title">Спикеры</h6>
+                            </div>
+                             <div class="p-6" style="    padding: 30px;">
+                                <!-- Basic -->
+                                <div class="grid xl:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5"   style="overflow: auto; height: calc(100vh - 100px);">
+                                     <div class="flex relative user-card">
+                                        <img alt="gallery" class="absolute w-full object-cover object-center rounded" width="150px" src="{{ videochat.spiker.avatar.url }}">
+                                        <h1 class="username title-font text-lg font-medium text-gray-900 mb-3">
+                                            {{ videochat.spiker.username}}
+                                        </h1>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="offcanvas offcanvas-bottom" id="offcanvasUsersBottom" tabindex="-1" aria-labelledby="offcanvasUsersBottomLabel" style="height: 100%;">
+                      <div class="offcanvas-header pb-0">
+                        <h5 class="offcanvas-title" id="offcanvasUsersBottomLabel">Подключенные пользователи</h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                      </div>
+                      <div class="offcanvas-body custom-input custom-scrollbar">
+                        <div class="grid lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-3">
+                                <div class="card">
+                                    <div class="card-header">
+
+                                    </div>
+
+                                    <div class="p-4">
+
+                            <div class="p-6">
+                                <!-- Basic -->
+                                <div class="grid xl:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5"   id="participantsList" style="overflow: auto; height: calc(100vh - 100px);">
+                                    {% for user in videochat.visitors.all %}
+                                    <div class="flex relative user-card">
+                                        <img alt="gallery" class="absolute w-full object-cover object-center rounded" width="150px" src="{{ user.user.avatar.url }}">
+                                        <h1 class="username title-font text-lg font-medium text-gray-900 mb-3">
+                                            {{ user.user.username}}
+                                        </h1>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                    </div>
+                    </div>
+                </div>
+          </div>
+        </div>
+     </div>
+        {% if current_user.id == videochat.spiker.id %}
+        <div class="offcanvas offcanvas-top" id="offcanvasTicketsTop" data-bs-scroll="true"  data-bs-backdrop="false" tabindex="-1" aria-labelledby="offcanvasTicketsTopLabel" style="height: 50%;">
+              <div class="offcanvas-header pb-0">
+                <h5 class="offcanvas-title" id="offcanvasTicketsTopLabel">Принять заявки на доступ</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+              <div class="offcanvas-body custom-input custom-scrollbar">
+                <div class="px-4 py-8 overflow-y-auto">
+                <div class="table overflow-hidden w-full">
+                    <div class="container-fluid basic_table">
+                        <div class="row">
+                          <div class="col-sm-12">
+                            <div class="card">
+                              <div class="table-responsive custom-scrollbar">
+                                <table class="table">
+                                  <thead>
+                                    <tr class="border-bottom-primary">
+                                      <th scope="col">Имя пользователя</th>
+                                      <th scope="col">Смотреть</th>
+                                      <th scope="col">Участвовать</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody id="not_added-list">
+                                  {% for not_added in videochat.notadded.all %}
+                                    <tr class="border-bottom-primary" id="list-user-not_added-{{not_added.id}}">
+                                      <td> <img class="img-30 me-2" src="{{ not_added.user.avatar.url }}" alt="profile">{{ not_added.user.username }}</td>
+                                      <td><button id="add-to-visitors-{{ not_added.id }}" class="px-3 py-1 rounded text-xs font-medium bg-primary/25 text-primary" data-videochat-user-id="{{ not_added.id }}">Разрешить смотреть</button></td>
+                                      <td><button id="add-to-participants-{{ not_added.id }}" class="px-3 py-1 rounded text-xs font-medium bg-success/25 text-success" data-videochat-user-id="{{ not_added.id }}">Разрешить участвовать</button></td>
+                                    </tr>
+                                  {% endfor %}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="tooltipmodalStop" tabindex="-1" role="dialog" aria-labelledby="tooltipmodalStop" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title"> Закончить конференцию?</h5>
+                            <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                                <h5>Трансляция будет прекращена </h5>
+                            <p class="mt-2">Все пользователи автоматически выйдут из нее
+                            </p>
+                            <hr>
+                          </div>
+                          <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Закрыть</button>
+                            <button class="btn btn-danger" type="button" id="stopRoomButton">Остановить</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+        <div class="modal fade" id="tooltipmodalCLose" tabindex="-1" role="dialog" aria-labelledby="tooltipmodalCLose" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Закрыть трансляцию?</h5>
+                            <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                                <h5>Трансляция будет доступан только по ключу </h5>
+                           <div class="key-container" tabindex="0">
+    <p class="mt-2">
+         Ключ конференции - <a class="conference-key " id="conferenceKey" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Скопировано" data-bs-original-title="popover text">{{videochat.token}}</a>
+    </p>
+
+</div>
+                            <hr>
+                          </div>
+                          <div class="modal-footer">
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Закрыть</button>
+                            <button class="btn btn-danger" type="button" id="closeConferenceButton">Закрыть конференцию</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+        {% endif %}
+    </div>
+    <div class="fixed bottom-0 footer h-16 flex items-center px-6 bg-white shadow dark:bg-gray-800" style="left: unset !important;position: fixed;margin-left: 0px;">
+            <div class="flex justify-center w-full gap-4">
+                    <button id="toggleVideo" class="btn btn-success" title="Выключить видео"><i class="fa-solid fa-video"></i></button>
+                    <button id="toggleMic" class="btn btn-success" title="Выключить микрофон"><i class="fa-solid fa-microphone"></i></button>
+                    <button id="toggleScreen" class="btn btn-danger" title="Включить демострацию экрана"><i class="fa-solid fa-desktop"></i></button>
+            </div>
+    </div>
+    <div class="fixed bottom-0 footer h-16 flex items-center px-6 bg-white shadow dark:bg-gray-800" style="left: unset !important;position: fixed;   margin-left: 365px;">
+        <div class="flex justify-center w-full gap-4">
+            <div>
+                <button class="btn btn-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom"><i class="fa-solid fa-info-circle"></i> Информация о комнате</button>
+                <!------>
+                {% if videochat.is_closed == False%}
+
+                <button class="btn bg-success text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasUsersBottom" aria-controls="offcanvasUsersBottom">
+                    <i class="fa-solid fa-user-group"></i>Пользователи в комнате
+                </button>
+
+
+                <button class="btn btn-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="offcanvasRight"><i class="icofont icofont-ui-text-chat"></i>
+                        Чат</button>
+
+
+
+                {% if current_user.id == videochat.spiker.id %}
+                 <button class="btn bg-secondary text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTicketsTop" aria-controls="offcanvasTicketsTop">
+                    <i class="fa-solid fa-book"></i>
+                        Заявки
+                 </button>
+                    {% if videochat.is_start == False%}
+                        <button class="btn bg-success text-white" data-fc-type="offcanvas" data-fc-target="topbar-pause-modal">
+                            <i class="mgc_play_line text-base me-4"></i> Начать
+                        </button>
+                    {% else %}
+
+                    <button class="btn bg-warning text-white" type="button" data-bs-toggle="modal" data-bs-target="#tooltipmodalStop" ><i class="fa-regular fa-circle-stop"></i> Остановить</button>
+
+                    {% endif %}
+
+                    <button class="btn btn-danger text-white" type="button" data-bs-toggle="modal" data-bs-target="#tooltipmodalCLose"><i class="icon-close"></i>Закрыть</button>
+                    {% endif %}
+                {% endif %}
+                <br>
+
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock content %}
+{% block bootonfooter %}
+
+<script src="{% static 'site/_generals/conference/config.js' %}"></script>
+
+
+
+<!--ws video-->
+<script>
+  /***************** Глобальные переменные *****************/
+  const localVideo = document.getElementById('localVideo');
+  const toggleVideoButton = document.getElementById('toggleVideo');
+  const toggleMicButton = document.getElementById('toggleMic');
+  const toggleScreenButton = document.getElementById('toggleScreen');
+  const remoteVideosContainer = document.getElementById('remoteVideos');
+  const participantsListContainer = document.getElementById('participantsList');
+  const toggleVideoIcon = toggleVideoButton.querySelector('i');
+  const toggleMicIcon = toggleMicButton.querySelector('i');
+  const toggleScreenIcon = toggleScreenButton.querySelector('i');
+
+  let localStream = null;           // Текущий поток (камера или демонстрация)
+  let localVideoTrack = null;       // Текущая видео-дорожка локального потока
+  let localAudioTrack = null;       // Текущая аудио-дорожка
+  let isScreenSharing = false;      // Флаг демонстрации экрана
+  let screenStream = null;          // Поток демонстрации экрана
+  let peerConnections = {};         // RTCPeerConnection для каждого участника
+  let negotiationInProgress = {};   // Флаги renegotiation для каждого участника
+  let pendingCandidates = {};       // Очередь для ICE-кандидатов
+
+  // Уникальный идентификатор пользователя (предполагается, что сервер подставляет его)
+  const userId = "{{ request.user.id }}" || `user_${Date.now()}`; // Пример уникального ID
+  const roomSlug = '{{ videochat.slug }}';
+  const wsUrl = `wss://${window.location.host}/video/${roomSlug}/`;
+  const signalingSocket = new WebSocket(wsUrl);
+
+  /***************** Функция добавления удалённого видео *****************/
+  function addRemoteStream(remoteUserId, stream) {
+    let container = document.getElementById(`remoteContainer_${remoteUserId}`);
+    if (!container) {
+      container = document.createElement("div");
+      container.id = `remoteContainer_${remoteUserId}`;
+      container.classList.add("remoteContainer");
+
+      // Создаём метку (можно расширить, если есть дополнительные данные)
+      const label = document.createElement("div");
+      label.classList.add("label");
+      label.textContent = remoteUserId;
+      container.appendChild(label);
+
+      // Создаём видеоэлемент
+      const videoElem = document.createElement("video");
+      videoElem.id = `remoteVideo_${remoteUserId}`;
+      videoElem.autoplay = true;
+      videoElem.playsInline = true;
+      videoElem.style.border = "1px solid #ccc";
+      container.appendChild(videoElem);
+
+      // Сохраняем uid в атрибуте
+      container.setAttribute("data-uid", remoteUserId);
+      remoteVideosContainer.appendChild(container);
+    }
+    const videoElem = document.getElementById(`remoteVideo_${remoteUserId}`);
+    videoElem.srcObject = stream;
+    console.log(`[WebRTC] Установлен srcObject для видео ${remoteUserId}`);
+  }
+
+  /***************** WS сигнализация *****************/
+  signalingSocket.onopen = () => {
+    console.log("[WebSocket] Соединение установлено");
+    // Получаем локальный поток с веб-камеры сразу после установки соединения
+    startVideo();
+  };
+
+  signalingSocket.onerror = (error) => {
+    console.error("[WebSocket] Ошибка:", error);
+  };
+
+  signalingSocket.onclose = (event) => {
+    console.warn("[WebSocket] Соединение закрыто", event);
+  };
+
+  signalingSocket.onmessage = async (event) => {
+    const message = JSON.parse(event.data);
+    console.log("[WebSocket] Получено сообщение:", message, message.type);
+
+    if (message.type === "participants_update") {
+      // participants здесь – массив объектов с данными пользователя
+      updateParticipantsList(message.participants);
+      setupMeshConnections(message.participants);
+      return;
+    }
+
+    const { type, sender, sdp, candidate } = message;
+    if (sender === userId) return; // Игнорировать свои сообщения
+
+    if (type === "offer") {
+      console.log("[WebRTC] Получен offer от:", sender);
+      await handleOffer(sender, sdp);
+    } else if (type === "answer") {
+      console.log("[WebRTC] Получен answer от:", sender);
+      await handleAnswer(sender, sdp);
+    } else if (type === "ice") {
+      console.log("[WebRTC] Получен ICE-кандидат от:", sender);
+      await handleIceCandidate(sender, candidate);
+    }
+  };
+
+  /***************** Обновление списка участников *****************/
+  function updateParticipantsList(participants) {
+    console.log("[Participants] Обновление списка участников:", participants);
+    // Очищаем контейнер
+    participantsListContainer.innerHTML = "";
+
+    // Для каждого участника создаём карточку с аватаром и именем
+    participants.forEach(participant => {
+      const container = document.createElement("div");
+      container.classList.add("flex", "relative", "user-card");
+
+      container.innerHTML = `
+        <img alt="gallery" class="absolute w-full object-cover object-center rounded" width="150px" src="${participant.avatar}">
+        <h1 class="username title-font text-lg font-medium text-gray-900 mb-3">
+          ${participant.username}
+        </h1>
+      `;
+
+      participantsListContainer.appendChild(container);
+    });
+
+    // Удаляем контейнеры удалённых участников из remoteVideos
+    const remoteContainers = remoteVideosContainer.querySelectorAll("[data-uid]");
+    remoteContainers.forEach(container => {
+      const uid = container.getAttribute("data-uid");
+      console.log(`[Participants] Проверка наличия пользователя с id: ${uid}`);
+      // Проверяем, есть ли участник с таким id в списке обновлённых объектов
+      if (!participants.some(p => p.id === uid)) {
+        const videoElem = document.getElementById(`remoteVideo_${uid}`);
+        if (videoElem) {
+          videoElem.srcObject = null;
+          videoElem.remove();
+        }
+        container.remove();
+        console.log(`[DOM] Удалён контейнер для удалённого пользователя ${uid}`);
+        // Закрываем RTCPeerConnection для этого пользователя
+        if (peerConnections[uid]) {
+          peerConnections[uid].close();
+          delete peerConnections[uid];
+          delete negotiationInProgress[uid];
+          console.log(`[RTCPeerConnection] Закрыто соединение с ${uid}`);
+        }
+      }
+    });
+  }
+
+  // Функция для установки RTCPeerConnections (Mesh)
+  async function setupMeshConnections(participants) {
+    // Перебираем участников, получая их id
+    for (const participant of participants) {
+      if (participant.id === userId) continue;
+      if (!peerConnections[participant.id]) {
+        await createPeerConnection(participant.id);
+      }
+    }
+  }
+
+  /***************** Обработка offer/answer/ICE *****************/
+  async function handleOffer(sender, sdp) {
+    const peerConnection = peerConnections[sender] || await createPeerConnection(sender);
+    if (peerConnection.signalingState !== 'stable') {
+      console.warn(`PeerConnection с ${sender} не в стабильном состоянии. Текущее состояние: ${peerConnection.signalingState}`);
+      return;
+    }
+
+    try {
+      const remoteDesc = new RTCSessionDescription({ type: 'offer', sdp });
+      await peerConnection.setRemoteDescription(remoteDesc);
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      signalingSocket.send(JSON.stringify({
+        type: 'answer',
+        sdp: answer.sdp,
+        sender: userId,
+        target: sender,
+      }));
+      console.log("[WebRTC] Отправлен answer пользователю:", sender);
+
+      // Обработка pending ICE-кандидатов
+      if (pendingCandidates[sender]) {
+        for (const cand of pendingCandidates[sender]) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+            console.log("[WebRTC] Добавлен ICE-кандидат из очереди для:", sender);
+          } catch (error) {
+            console.error("[WebRTC] Ошибка добавления ICE-кандидата из очереди:", error);
+          }
+        }
+        delete pendingCandidates[sender];
+      }
+    } catch (error) {
+      console.error("[WebRTC] Ошибка обработки offer от", sender, error);
+    }
+  }
+
+  async function handleAnswer(sender, sdp) {
+    const peerConnection = peerConnections[sender];
+    if (!peerConnection) {
+      console.error("Получен answer от неизвестного пользователя:", sender);
+      return;
+    }
+
+    // Проверяем, ожидает ли PeerConnection ответ
+    if (peerConnection.signalingState !== 'have-local-offer') {
+      console.warn(`PeerConnection с ${sender} не ожидает ответа. Текущее состояние: ${peerConnection.signalingState}`);
+      return;
+    }
+
+    try {
+      const remoteDesc = new RTCSessionDescription({ type: 'answer', sdp });
+      await peerConnection.setRemoteDescription(remoteDesc);
+      console.log("[WebRTC] Установлено удаленное описание для:", sender);
+
+      // Обработка pending ICE-кандидатов
+      if (pendingCandidates[sender]) {
+        for (const cand of pendingCandidates[sender]) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+            console.log("[WebRTC] Добавлен ICE-кандидат из очереди для:", sender);
+          } catch (error) {
+            console.error("[WebRTC] Ошибка добавления ICE-кандидата из очереди:", error);
+          }
+        }
+        delete pendingCandidates[sender];
+      }
+    } catch (error) {
+      console.error("[WebRTC] Ошибка установки удаленного описания:", error);
+    }
+  }
+
+  async function handleIceCandidate(sender, candidate) {
+    if (!peerConnections[sender]) {
+      console.error("Получен ICE-кандидат от неизвестного пользователя:", sender);
+      return;
+    }
+    const peerConnection = peerConnections[sender];
+
+    // Проверяем, установлено ли remoteDescription
+    if (peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log("[WebRTC] Добавлен ICE-кандидат от:", sender);
+      } catch (error) {
+        console.error("[WebRTC] Ошибка добавления ICE-кандидата:", error);
+      }
+    } else {
+      // Добавляем кандидата в очередь, если remoteDescription еще не установлен
+      if (!pendingCandidates[sender]) {
+        pendingCandidates[sender] = [];
+      }
+      pendingCandidates[sender].push(candidate);
+      console.log(`[WebRTC] Кандидат добавлен в очередь для ${sender}`);
+    }
+  }
+
+  /***************** Создание RTCPeerConnection *****************/
+  async function createPeerConnection(remoteUserId) {
+    console.log("Создаем Peer", remoteUserId);
+    const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    const peerConnection = new RTCPeerConnection(configuration);
+    peerConnections[remoteUserId] = peerConnection;
+    negotiationInProgress[remoteUserId] = false; // Инициализируем флаг renegotiation
+    let isNegotiating = false;
+
+    // Обработка событий renegotiation
+    peerConnection.onnegotiationneeded = async () => {
+      if (isNegotiating) return;
+      isNegotiating = true;
+      try {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        signalingSocket.send(JSON.stringify({
+          type: 'offer',
+          sdp: offer.sdp,
+          sender: userId,
+          target: remoteUserId,
+        }));
+        console.log(`[onnegotiationneeded] Отправлен offer для ${remoteUserId}`);
+      } catch (e) {
+        console.error("Ошибка переговоров с", remoteUserId, e);
+      } finally {
+        isNegotiating = false;
+      }
+    };
+
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log(`[ICE] Создан кандидат для ${remoteUserId}:`, event.candidate);
+        signalingSocket.send(JSON.stringify({
+          type: 'ice',
+          candidate: event.candidate,
+          sender: userId,
+          target: remoteUserId,
+        }));
+      }
+    };
+
+    peerConnection.ontrack = (event) => {
+      console.log(`[WebRTC] ontrack от ${remoteUserId}:`, event);
+      if (event.streams && event.streams.length > 0) {
+        addRemoteStream(remoteUserId, event.streams[0]);
+      } else {
+        console.warn(`[WebRTC] ontrack, но streams пустой для ${remoteUserId}`);
+      }
+    };
+
+    peerConnection.onsignalingstatechange = () => {
+      console.log(`[PeerConnection] Signaling state changed to: ${peerConnection.signalingState} для ${remoteUserId}`);
+    };
+
+    peerConnection.oniceconnectionstatechange = () => {
+      console.log(`[PeerConnection] ICE connection state changed to: ${peerConnection.iceConnectionState} для ${remoteUserId}`);
+      if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed' || peerConnection.iceConnectionState === 'closed') {
+        // Удаление пользователя
+        if (peerConnections[remoteUserId]) {
+          peerConnections[remoteUserId].close();
+          delete peerConnections[remoteUserId];
+          delete negotiationInProgress[remoteUserId];
+        }
+        const container = document.getElementById(`remoteContainer_${remoteUserId}`);
+        if (container) {
+          container.remove();
+          console.log(`[DOM] Автоматически удалён контейнер для ${remoteUserId} при изменении ICE состояния.`);
+        }
+      }
+    };
+
+    // Добавляем дорожки локального потока, если он уже получен
+    if (localStream) {
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+        console.log(`[WebRTC] Добавлена дорожка ${track.kind} для ${remoteUserId}`);
+      });
+    }
+
+    return peerConnection;
+  }
+
+  // Функция для определения инициатора (если понадобится для логики)
+  function isInitiator(remoteUserId) {
+    // Простая логика: пользователь с меньшим ID инициирует соединение
+    return userId < remoteUserId;
+  }
+
+  /***************** Управление локальным потоком *****************/
+  async function startVideo() {
+    try {
+      // Запрашиваем поток с веб-камеры и микрофона
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+      localVideoTrack = localStream.getVideoTracks()[0];
+      localAudioTrack = localStream.getAudioTracks()[0];
+      console.log("[Media] Локальный поток (камера) получен");
+
+      // Обновляем соединения: если какие-то соединения уже есть, добавляем дорожки
+      for (let remoteUserId in peerConnections) {
+        localStream.getTracks().forEach(track => {
+          if (!peerConnections[remoteUserId].getSenders().some(s => s.track && s.track.kind === track.kind)) {
+            peerConnections[remoteUserId].addTrack(track, localStream);
+            console.log(`[WebRTC] Добавлена дорожка ${track.kind} для ${remoteUserId} после получения локального потока`);
+          }
+        });
+      }
+    } catch (error) {
+      console.error("[Media] Ошибка получения локального потока:", error);
+    }
+  }
+
+  // Переключение видео (включение/выключение)
+  function toggleVideo() {
+    if (localVideoTrack) {
+      if (localVideoTrack.enabled) {
+        toggleVideoButton.classList.remove('btn-success');
+        toggleVideoButton.classList.add('btn-danger');
+        toggleVideoIcon.classList.remove('fa-video');
+        toggleVideoIcon.classList.add('fa-video-slash');
+        toggleVideoButton.title = "Включить видео";
+      } else {
+        toggleVideoButton.classList.remove('btn-danger');
+        toggleVideoButton.classList.add('btn-success');
+        toggleVideoIcon.classList.remove('fa-video-slash');
+        toggleVideoIcon.classList.add('fa-video');
+        toggleVideoButton.title = "Выключить видео";
+      }
+      localVideoTrack.enabled = !localVideoTrack.enabled;
+      console.log("[Media] Видео", localVideoTrack.enabled ? "включено" : "выключено");
+
+      for (let remoteUserId in peerConnections) {
+        const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "video");
+        if (sender) {
+          sender.replaceTrack(localVideoTrack);
+          console.log(`[WebRTC] Обновлена видеодорожка для ${remoteUserId}`);
+        }
+      }
+    }
+  }
+
+  // Переключение микрофона (включение/выключение)
+  function toggleMic() {
+    if (localAudioTrack) {
+      localAudioTrack.enabled = !localAudioTrack.enabled;
+
+      if (localAudioTrack.enabled) {
+        toggleMicButton.classList.remove('btn-danger');
+        toggleMicButton.classList.add('btn-success');
+        toggleMicIcon.classList.remove('fa-microphone-slash');
+        toggleMicIcon.classList.add('fa-microphone');
+        toggleMicButton.title = "Выключить микрофон";
+      } else {
+        toggleMicButton.classList.remove('btn-success');
+        toggleMicButton.classList.add('btn-danger');
+        toggleMicIcon.classList.remove('fa-microphone');
+        toggleMicIcon.classList.add('fa-microphone-slash');
+        toggleMicButton.title = "Включить микрофон";
+      }
+
+      console.log("[Media] Микрофон", localAudioTrack.enabled ? "включен" : "выключен");
+
+      for (let remoteUserId in peerConnections) {
+        const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "audio");
+        if (sender) {
+          sender.replaceTrack(localAudioTrack);
+          console.log(`[WebRTC] Обновлена аудиодорожка для ${remoteUserId}`);
+        }
+      }
+    }
+  }
+
+  /***************** Демонстрация экрана *****************/
+  async function startScreenShare() {
+    try {
+      if (isScreenSharing) {
+        stopScreenShare();
+        return;
+      }
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      localVideo.srcObject = screenStream;
+      const screenTrack = screenStream.getVideoTracks()[0];
+      localVideoTrack = screenTrack;
+      isScreenSharing = true;
+      toggleScreenButton.classList.remove('btn-success');
+      toggleScreenButton.classList.add('btn-danger');
+      toggleScreenIcon.classList.remove('fa-desktop');
+      toggleScreenIcon.classList.add('fa-stop'); // Предполагаемый значок для остановки
+      toggleScreenButton.title = "Отключить демонстрацию";
+      console.log("[Screen] Поток демонстрации экрана получен");
+
+      for (let remoteUserId in peerConnections) {
+        const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "video");
+        if (sender) {
+          sender.replaceTrack(screenTrack);
+          console.log(`[Screen] Замена видеодорожки для ${remoteUserId}`);
+        }
+      }
+
+      // Если демонстрация остановлена браузером
+      screenTrack.onended = () => {
+        stopScreenShare();
+      };
+    } catch (error) {
+      console.error("[Screen] Ошибка получения потока демонстрации экрана:", error);
+    }
+  }
+
+  function stopScreenShare() {
+    if (isScreenSharing && screenStream) {
+      screenStream.getTracks().forEach(track => track.stop());
+      screenStream = null;
+      isScreenSharing = false;
+      toggleScreenButton.classList.remove('btn-danger');
+      toggleScreenButton.classList.add('btn-success');
+      toggleScreenIcon.classList.remove('fa-stop');
+      toggleScreenIcon.classList.add('fa-desktop');
+      toggleScreenButton.title = "Демонстрация экрана";
+      console.log("[Screen] Демонстрация экрана остановлена");
+      // Возвращаем поток с веб-камеры
+      startVideo();
+    }
+  }
+
+  /***************** Привязка событий кнопок *****************/
+  toggleVideoButton.addEventListener("click", toggleVideo);
+  toggleMicButton.addEventListener("click", toggleMic);
+  toggleScreenButton.addEventListener("click", startScreenShare);
+  /***************** Конец скрипта *****************/
+</script>
+
+<!--ws chat-->
+<script>
+    // Переменные, которые можно задать через контекст шаблона:
+    // Например, currentUsername и currentAvatar получаются из request.user
+    const currentUsername = "{{ current_user.username }}";
+    const currentAvatar = "{{ current_user.avatar.url }}";
+    // Например, в URL-ах указываем идентификатор комнаты (videoroom.pk или slug)
+    const roomName = "{{ videochat.slug }}";
+    // Формирование URL для WebSocket-соединения
+    // Если используете WSS (production) - измените ws:// на wss://
+    const wsUrlChat = `wss://${window.location.host}/chat/${roomName}/`;
+    const chatSocket = new WebSocket(wsUrlChat);
+    // Отправка сообщения при отправке формы
+    document.querySelector('.msger-inputarea').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const inputField = document.querySelector('.msger-input');
+      let message = inputField.value.trim();
+      if (!message) return;
+      // Отправляем JSON-сообщение через сокет
+      chatSocket.send(JSON.stringify({
+        'message': message,
+        'username': currentUsername,
+        'avatar': currentAvatar,
+      }));
+      inputField.value = '';
+    });
+
+    // Обработка входящих сообщений
+    chatSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      const message = data.message;
+      const username = data.username;
+      const avatar = data.avatar;
+      const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+      // Создаем новый div для сообщения
+      const msgDiv = document.createElement('div');
+      // Определяем класс: если отправитель совпадает с текущим пользователем, сообщение выводится справа
+      if (username === currentUsername) {
+        msgDiv.classList.add('msg', 'right-msg');
+      } else {
+        msgDiv.classList.add('msg', 'left-msg');
+      }
+
+      // Формируем HTML сообщение
+      msgDiv.innerHTML = `
+        <div class="msg-img" style="background-image: url('${avatar}');"></div>
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">${username}</div>
+            <div class="msg-info-time">${time}</div>
+          </div>
+          <div class="msg-text">${message}</div>
+        </div>
+      `;
+
+      document.getElementById('chat').appendChild(msgDiv);
+      // Прокрутка чата к последнему сообщению
+      document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+      console.error('Chat socket closed unexpectedly');
+    };
+  </script>
+{% if current_user.id == videochat.spiker.id %}
+<!--ws control-->
+<script>
+  // Получаем slug комнаты из шаблона (например, через Django-тег)
+  const roomSlugControl = "{{ videochat.slug }}";
+  // Формирование URL для WS-соединения для управления комнатой
+  const wsControlUrl = `wss://${window.location.host}/room_control/${roomSlugControl}/`;
+  const roomControlSocket = new WebSocket(wsControlUrl);
+
+  roomControlSocket.onopen = () => {
+    console.log("[Room Control WS] Соединение установлено");
+  };
+
+  roomControlSocket.onerror = (error) => {
+    console.error("[Room Control WS] Ошибка:", error);
+  };
+
+  roomControlSocket.onclose = (event) => {
+    console.warn("[Room Control WS] Соединение закрыто", event);
+  };
+
+  roomControlSocket.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.type === "room_closed") {
+        console.log("Комната закрыта!");
+        // Перезагружаем страницу через 0.5 секунды
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else if (data.type === "error") {
+        console.error("Ошибка:", data.message);
+      }
+  };
+
+  // При нажатии на кнопку "Закрыть конференцию" отправляем команду "stop"
+  document.getElementById('stopRoomButton').addEventListener('click', function() {
+    roomControlSocket.send(JSON.stringify({
+      type: "stop"
+    }));
+    console.log("Отправлена команда на закрытие комнаты");
+  });
+
+  // При нажатии на кнопку "Отменить конференцию" отправляем команду "room_canceled"
+  document.getElementById('closeConferenceButton').addEventListener('click', function() {
+    roomControlSocket.send(JSON.stringify({
+      type: "room_canceled"
+    }));
+    console.log("Отправлена команда на отмену комнаты");
+  });
+</script>
+<!--scripts styles-->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const conferenceKey = document.getElementById('conferenceKey');
+
+        conferenceKey.addEventListener('mouseenter', function () {
+            const textToCopy = conferenceKey.textContent.trim();
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                console.log('Ключ скопирован: ', textToCopy);
+                // Временное изменение стиля для визуального подтверждения
+                conferenceKey.style.backgroundColor = '#d4edda'; // Светло-зеленый фон
+                setTimeout(() => {
+                    conferenceKey.style.backgroundColor = '';
+                }, 1000);
+            }).catch(err => {
+                console.error('Ошибка при копировании: ', err);
+                // Временное изменение стиля для визуального подтверждения ошибки
+                conferenceKey.style.backgroundColor = '#f8d7da'; // Светло-красный фон
+                setTimeout(() => {
+                    conferenceKey.style.backgroundColor = '';
+                }, 1000);
+            });
+        });
+
+        // Предотвращение выделения текста при наведении
+        conferenceKey.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+        });
+    });
+</script>
+<!-- ws notadded -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const NotAddedSlug = "{{ videochat.slug }}"; // Получаем slug комнаты из контекста
+
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const socket = new WebSocket(wsScheme + '://' + window.location.host + '/notadded/' + NotAddedSlug + '/');
+
+        socket.onopen = function(e) {
+            console.log("WebSocket подключен");
+        };
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.action === 'remove_user') {
+                const userDiv = document.getElementById(`list-user-not_added-${data.videochat_user_id}`);
+                if (userDiv) {
+                    userDiv.remove();
+                }
+            } else if (data.action === 'add_user') {
+                const user = data.user;
+                const notAddedList = document.getElementById('not_added-list');
+                if (notAddedList) {
+                    // Создаем новый div для пользователя
+                    const userRow = document.createElement('tr');
+                        userRow.className = 'border-bottom-primary';
+                        userRow.id = `list-user-not_added-${user.id}`;
+                        userRow.innerHTML = `
+                            <td>
+                                <img class="img-30 me-2" src="${user.avatar_url}" alt="profile">${user.username}
+                            </td>
+                            <td>
+                                <button id="add-to-visitors-${user.id}" class="px-3 py-1 rounded text-xs font-medium bg-primary/25 text-primary" data-videochat-user-id="${user.id}">
+                                    Разрешить смотреть
+                                </button>
+                            </td>
+                            <td>
+                                <button id="add-to-participants-${user.id}" class="px-3 py-1 rounded text-xs font-medium bg-success/25 text-success" data-videochat-user-id="${user.id}">
+                                    Разрешить участвовать
+                                </button>
+                            </td>
+                        `;
+                    notAddedList.prepend(userRow); // Добавляем нового пользователя в начало списка
+                }
+            } else if (data.action === 'clear_notadded') {
+                const notAddedList = document.getElementById('not_added-list');
+                if (notAddedList) {
+                    notAddedList.innerHTML = ''; // Очищаем список
+                }
+            }
+        };
+
+        socket.onclose = function(e) {
+            console.log("WebSocket отключен");
+        };
+
+        socket.onerror = function(e) {
+            console.error("WebSocket ошибка:", e);
+        };
+
+        // Обработчик кнопок "Разрешить смотреть" и "Разрешить участвовать"
+        document.getElementById('not_added-list').addEventListener('click', function(event) {
+            if (event.target.tagName === 'BUTTON') {
+                const button = event.target;
+                const videochatUserId = button.getAttribute('data-videochat-user-id');
+                let action = '';
+
+                if (button.id.startsWith('add-to-visitors')) {
+                    action = 'allow_watch';
+                } else if (button.id.startsWith('add-to-participants')) {
+                    action = 'allow_participate';
+                }
+
+                if (action && videochatUserId) {
+                    socket.send(JSON.stringify({
+                        'action': action,
+                        'videochat_user_id': videochatUserId
+                    }));
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Получаем slug комнаты из шаблона (например, через Django-тег)
+    const roomSlugParticipants = "{{ videochat.slug }}";
+
+    // Формируем URL для WS-соединения для участников
+    const wsParticipantUrl= `wss://${window.location.host}/participants/${roomSlugParticipants}/`;
+    const participantSocket = new WebSocket(wsParticipantUrl);
+
+    participantSocket.onopen = () => {
+      console.log("[Participant WS] Соединение установлено");
+    };
+
+    participantSocket.onerror = (error) => {
+      console.error("[Participant WS] Ошибка:", error);
+    };
+
+    participantSocket.onclose = (event) => {
+      console.warn("[Participant WS] Соединение закрыто", event);
+    };
+
+    participantSocket.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.type === "redirect") {
+        const redirectUrl = data.url;
+        console.log("Перенаправление на:", redirectUrl);
+        window.location.href = redirectUrl;
+      }
+      // Можно добавить обработку других типов сообщений при необходимости
+    };
+  });
+</script>
+{% endblock bootonfooter %}

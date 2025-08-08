@@ -1,0 +1,106 @@
+<style>
+    .alert {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    position: relative;
+    transition: opacity 0.3s ease-in-out;
+}
+.alert-success {
+    background-color: #28a745;
+    color: white;
+}
+.alert-danger {
+    background-color: #dc3545;
+    color: white;
+}
+</style>
+
+<form id="module-form">
+   <div class="card checkout-cart" id="themesmsform">
+       <div class="card-body basic-wizard important-validation">
+           <div class="card-header d-flex justify-content-between">
+               <h5>Создать Модуль</h5>
+               <div class="d-flex justify-content-end">
+                   <button type="submit" class="btn btn-primary">Сохранить</button>
+               </div>
+           </div>
+           <div id="loading-indicator-themes" style="display: none;">
+               Сохранение...
+           </div>
+           <div id="response-container"></div>
+
+           <div class="row g-3 custom-input">
+               {% csrf_token %}
+               <input type="hidden" name="course_id" value="{{ course.id }}">
+               <div class="col-sm-12">
+                   <label class="form-label" for="id_name_themes">Название</label>
+                   <input type="text" name="name" class="form-control" id="id_name_themes" required>
+                   <div class="alert-danger" id="alert-name_themes"></div>
+               </div>
+           </div>
+       </div>
+   </div>
+</form>
+<div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('module-form');
+    const alertContainer = document.getElementById('alert-container');
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // предотвратить стандартное поведение формы
+
+        const courseId = form.querySelector('input[name="course_id"]').value;
+        const formData = new FormData(form);
+        document.getElementById('loading-indicator-themes').style.display = 'block';
+
+        fetch(`{% url 'moderation:create_module' '3ffd9528-5f62-4437-9ad5-456b2c11c28e' %}`.replace('3ffd9528-5f62-4437-9ad5-456b2c11c28e', courseId), {  // Путь с подстановкой course_id
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'  // указывает на AJAX-запрос
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading-indicator-themes').style.display = 'none';
+            alertContainer.innerHTML = '';  // очищаем контейнер перед новым сообщением
+
+            if (data.success) {
+                const successAlert = document.createElement('div');
+                successAlert.classList.add('alert', 'alert-success');
+                successAlert.textContent = 'Модуль успешно создан!';
+                alertContainer.appendChild(successAlert);
+
+                // обновить список модулей без обновления страницы
+                $('#themeslist').load(location.href + ' #themeslist > *');
+
+                // Очистить поле ввода названия
+                form.querySelector('input[name="name"]').value = '';
+
+                // Скрыть сообщение через 5 секунд
+                setTimeout(() => successAlert.remove(), 5000);
+            } else {
+                const errorAlert = document.createElement('div');
+                errorAlert.classList.add('alert', 'alert-danger');
+                errorAlert.textContent = data.error || 'Произошла ошибка.';
+                alertContainer.appendChild(errorAlert);
+
+                // Скрыть сообщение через 5 секунд
+                setTimeout(() => errorAlert.remove(), 5000);
+            }
+        })
+        .catch(error => {
+            document.getElementById('loading-indicator-themes').style.display = 'none';
+            console.error('Ошибка:', error);
+            const errorAlert = document.createElement('div');
+            errorAlert.classList.add('alert', 'alert-danger');
+            errorAlert.textContent = 'Произошла ошибка при отправке запроса.';
+            alertContainer.appendChild(errorAlert);
+
+            // Скрыть сообщение через 5 секунд
+            setTimeout(() => errorAlert.remove(), 5000);
+        });
+    });
+});
+</script>

@@ -1,0 +1,685 @@
+{% extends 'moderations/base.html' %}
+{% load static moderations_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+#timer-container {
+    position: fixed;
+    top: 80px; /* Увеличьте это значение, чтобы опустить таймер ниже */
+    right: 20px;
+    z-index: 1000;
+    text-align: center;
+}
+
+#timer-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #626ae8;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#total-questions {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #333;
+}
+    .question {
+        cursor: pointer;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+        transition: background-color 0.3s ease;
+        border-radius: 12px;
+    }
+    /* Specific styling for type 3 questions */
+.question-type-3 {
+    padding: 5px;
+    margin-bottom: 0; /* Remove bottom margin since we have margin-bottom on question-row */
+}
+
+    .question:hover {
+        background-color: #f0f0f0;
+    }
+
+    .question.selected {
+        background-color: #b1acfa;
+        border-color: #7366ff;
+    }
+
+    .options {
+        padding-left: 20px;
+    }
+
+    input[type="text"] {
+        display: inline-block;
+        margin: 5px;
+        padding: 8px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        width: auto; /* Можно изменить на фиксированное значение, например 200px */
+        transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+        border-color: #007bff; /* Синий цвет при фокусе */
+        outline: none;
+    }
+
+    .test-container {
+        font-size: 0.875rem; /* Уменьшаем общий размер шрифта */
+    }
+
+    .test-header {
+        margin-bottom: 15px;
+    }
+
+    .test-header span {
+        font-size: 0.9rem;
+    }
+
+    .timer {
+        font-size: 1rem;
+    }
+
+    .quiz-container {
+        margin-bottom: 20px;
+    }
+
+    .quiz-container h3 {
+        font-size: 1.25rem; /* Уменьшаем размер заголовка */
+    }
+
+    .quiz-container p {
+        font-size: 0.875rem;
+        margin-bottom: 10px;
+    }
+
+    .question h4 {
+        font-size: 1rem; /* Уменьшаем размер заголовка вопроса */
+    }
+
+    .question p {
+        font-size: 0.875rem; /* Уменьшаем описание вопроса */
+    }
+
+    .question .options label {
+        font-size: 0.875rem;
+    }
+
+    .question-image {
+        max-width: 100%; /* Уменьшаем изображения, чтобы они занимали меньше места */
+        height: auto;
+    }
+
+    .btn {
+        font-size: 0.875rem; /* Уменьшаем размер кнопки */
+        padding: 8px 15px;
+    }
+
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 10px auto; /* Центрируем изображение и добавляем небольшой отступ сверху и снизу */
+    }
+</style>
+<style>
+    .choice {
+        display: inline-block;
+        padding: 20px;  /* Увеличили размер кнопки */
+
+        border: 1px solid #ccc;
+        border-radius: 10px;  /* Уменьшили радиус до 10px */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        flex-grow: 1;  /* Разделяют доступное пространство */
+        margin-right: 5px;  /* Небольшая щель между кнопками */
+    }
+
+    .choice:last-child {
+        margin-right: 0;  /* Убираем правую щель у последнего элемента */
+    }
+
+    .choice:hover {
+        background-color: #e0e0e0;
+    }
+
+    .choice.selected {
+        border-color: #7366ff;
+        background-color: #b1acfa;
+        color: white;
+    }
+</style>
+<style>
+    .selected {
+  border: 2px solid #65c15c ;
+  border-radius: 5px;
+  box-shadow: 0 0 5px rgba(115, 102, 255, 0.5);
+}
+.match-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.match-item.selected {
+  background-color: #65c15c !important;
+  border-color: #65c15c;
+}
+
+.line {
+  stroke: #007bff;
+  stroke-width: 2;
+}
+</style>
+
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+
+{% block content %}
+<div id="timer-container">
+    <div id="timer-circle">
+        <span id="timer-display">00:00</span>
+    </div>
+    <div id="total-questions">
+        Вопросов: {{ total_questions }}
+    </div>
+</div>
+<div class="test-container">
+    <h2>Прохождение теста для темы: {{ theme.name }}</h2>
+    <div class="test-header">
+        <span>Общее количество вопросов: <strong>{{ total_questions }}</strong></span>
+        <div id="timer" class="timer">
+            <span id="time"></span>
+        </div>
+    </div>
+    <form id="quiz-form" method="post">
+        {% csrf_token %}
+        {% for quiz in quizzes %}
+        {% if quiz.type != 6%}
+        <div class="card quiz-container">
+            <div class="card-header">
+                <h3>{{ quiz.name }}</h3>
+                   {% if quiz.type == 2 %}
+                {% if quiz.get_count_of_correct_answers > 1 %}
+                    <span>Выберите несколько вариантов ответа</span>
+                {% else %}
+                    <span>Выберите один вариант ответа</span>
+                {% endif %}
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% for question in quiz.question_quiz.all %}
+                {% if quiz.type == 2 %}
+                    {% if quiz.get_count_of_correct_answers > 1 %}
+                            <div class="form-check checkbox checkbox-primary mb-0" data-question-id="{{ question.id }}">
+                                <input class="form-check-input" id="{{ question.id }}" type="checkbox">
+                                <label class="form-check-label" for="{{ question.id }}">{{ question.title }}</label>
+                                <input type="hidden" name="question_{{ question.id }}" data-question-id="{{ question.id }}" value="">
+                            </div>
+
+                 <br>
+                    {% elif quiz.get_count_of_correct_answers == 1 %}
+
+                       <div class="form-check radio radio-primary" data-question-id="{{ question.id }}">
+    <input class="form-check-input" id="{{ question.id }}" type="radio" name="quiz_{{ quiz.id }}">
+    <label class="form-check-label" for="{{ question.id }}">{{ question.title }}</label>
+    <input type="hidden" name="question_{{ question.id }}" data-question-id="{{ question.id }}" value="">
+</div>
+                <br>
+                    {% endif %}
+                {% elif quiz.type == 3 %}
+                {% if forloop.first or forloop.counter0|divisibleby:2 %}
+                <div class="question-row" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                    {% endif %}
+                    <div class="question question-type-3" data-question-id="{{ question.id }}"
+                         style="flex: 1; text-align: center;">
+                        <h4>{{ question.title }}</h4>
+                        {% if question.image %}
+                        <img src="{{ question.image.url }}" alt="{{ question.title }}" class="question-image"
+                             style="width: 100%; max-width: 300px; max-height: 100%;">
+                        {% endif %}
+                        <input type="hidden" name="question_{{ question.id }}" value="">
+                    </div>
+                    {% if forloop.counter|divisibleby:2 or forloop.last %}
+                </div>
+                {% endif %}
+                {% elif quiz.type == 4 %}
+                <div class="question-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+    <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+    <!-- Кнопки для выбора -->
+    <div class="choice" id="choice_left_{{ question.id }}" onclick="selectChoice('{{ question.id }}', 'left', '{{ question.title }}')">
+        <span>{{ question.title }}</span>
+    </div>
+    <div class="choice" id="choice_right_{{ question.id }}" onclick="selectChoice('{{ question.id }}', 'right', '{{ question.second_title }}')">
+        <span>{{ question.second_title }}</span>
+    </div>
+    <!-- Скрытое поле для отправки выбранного ответа -->
+    <input type="hidden" id="answer_{{ question.id }}" name="answer_{{ question.id }}">
+</div>
+                {% elif quiz.type == 5 %}
+                <div class="question1">
+                    <div class="row">
+                        <div class="badge-spacing" >
+                            {% for hint in question.hints.all %}
+                        <div class="badge badge-primary" style="font-size: 14px;"><i class="fa-solid fa-bars"></i> {{hint.name}} </div>
+                        {% endfor %}
+                            </div>
+                        <h4 id="question_{{ question.id }}">
+                            {{ question.description|safe }}
+                        </h4>
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+       {% if quizzes_with_matching_questions %}
+    {% for quiz_name, shuffled_questions in quizzes_with_matching_questions.items %}
+        <div class="card quiz-container">
+            <div class="card-header">
+                <h3>{{ quiz_name }}</h3>
+            </div>
+            <div class="card-body">
+                {% for item in shuffled_questions %}
+                    <div class="row question-match" id="question-pair-{{ item.left_question_id }}-{{ item.right_question_id }}">
+                        <div class="col-md-4 match-left">
+                            <div class="match-container" id="left-container-{{ item.left_question_id }}">
+                                {% if item.left.type == 'text' %}
+                                    <button type="button" class="match-item left-item btn btn-light"
+                                            data-id="left-{{ item.left_question_id }}-text">
+                                        {{ item.left.content }}
+                                    </button>
+                                {% elif item.left.type == 'file' %}
+                                    <button type="button" class="match-item left-item btn btn-light"
+                                            data-id="left-{{ item.left_question_id }}-file">
+                                        <img src="{{ item.left.content }}" alt="Left Image"
+                                             style="max-width: 100%; height: 150px; object-fit: cover;">
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4"></div>
+                        <div class="col-md-4 match-right">
+                            <div class="match-container" id="right-container-{{ item.right_question_id }}">
+                                {% if item.right.type == 'text' %}
+                                    <button type="button" class="match-item right-item btn btn-light"
+                                            data-id="right-{{ item.right_question_id }}-text">
+                                        {{ item.right.content }}
+                                    </button>
+                                {% elif item.right.type == 'file' %}
+                                    <button type="button" class="match-item right-item btn btn-light"
+                                            data-id="right-{{ item.right_question_id }}-file">
+                                        <img src="{{ item.right.content }}" alt="Right Image"
+                                             style="max-width: 100%; height: 150px; object-fit: cover;">
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+{% endif %}
+          <input type="hidden" id="connections-input" name="connections">
+        <button type="submit" class="btn btn-primary">Отправить ответы</button>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let duration = {{ test_duration }} * 60; // Конвертируем минуты в секунды
+        const display = document.getElementById('timer-display');
+
+        function startTimer() {
+            const timerInterval = setInterval(function () {
+                let minutes = Math.floor(duration / 60);
+                let seconds = duration % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                display.textContent = `${minutes}:${seconds}`;
+
+                if (duration <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Время вышло!');
+                }
+                duration--;
+            }, 1000);
+        }
+
+        startTimer();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quizzes = document.querySelectorAll('.quiz-container');
+
+        quizzes.forEach(function(quiz) {
+            const questions = quiz.querySelectorAll('.question'); // Находим все вопросы внутри текущего quiz
+
+            questions.forEach(function(question) {
+                question.addEventListener('click', function() {
+                    // Убираем класс selected у всех вопросов внутри этого quiz
+                    questions.forEach(q => q.classList.remove('selected'));
+
+                    // Добавляем класс selected только к выбранному вопросу
+                    question.classList.add('selected');
+                });
+            });
+        });
+    });
+</script>
+<!--Для чекбоксов-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Для всех чекбоксов
+    document.querySelectorAll('.form-check.checkbox input[type="checkbox"]').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const hiddenInput = this.parentNode.querySelector('input[type="hidden"]');
+            if (this.checked) {
+                // Если чекбокс выбран, записываем ID в скрытое поле
+                hiddenInput.value = this.id;
+            } else {
+                // Если чекбокс снят, очищаем скрытое поле
+                hiddenInput.value = '';
+            }
+        });
+    });
+});
+
+
+</script>
+<!-- Для радиокнопок -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Для всех радиокнопок
+    document.querySelectorAll('.form-check.radio input[type="radio"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            const quizId = this.name; // Имя группы радиокнопок
+            const allRadios = document.querySelectorAll(`input[name="${quizId}"]`);
+
+            allRadios.forEach(function(r) {
+                // Очищаем скрытые поля других радиокнопок в группе
+                const hiddenInput = r.parentNode.querySelector('input[type="hidden"]');
+                hiddenInput.value = '';
+            });
+
+            // Записываем ID выбранной радиокнопки в скрытое поле
+            const hiddenInput = this.parentNode.querySelector('input[type="hidden"]');
+            hiddenInput.value = this.id;
+        });
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quizzes = document.querySelectorAll('.quiz-container');
+
+    quizzes.forEach(function(quiz) {
+        const questions = quiz.querySelectorAll('.question');
+
+        questions.forEach(function(question) {
+            question.addEventListener('click', function() {
+                // Сброс выбора других вопросов в этом тесте
+                questions.forEach(q => {
+                    q.classList.remove('selected');
+                    q.querySelector('input[type="hidden"]').value = ''; // Сбрасываем скрытое поле
+                });
+
+                // Устанавливаем выбор текущего вопроса
+                question.classList.add('selected');
+                const hiddenInput = question.querySelector('input[type="hidden"]');
+                hiddenInput.value = question.getAttribute('data-question-id'); // Заполняем скрытое поле ID вопроса
+
+                // Логируем ID выбранного вопроса
+                console.log(`Выбран вопрос с ID: ${hiddenInput.value}`);
+            });
+        });
+    });
+
+    // Логирование данных формы перед отправкой
+    document.getElementById('quiz-form').addEventListener('submit', function(event) {
+        const formData = new FormData(this);
+        formData.forEach((value, key) => {
+            console.log(`Отправляется: ${key} = ${value}`);
+        });
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Находим все вопросы на странице
+    const questions = document.querySelectorAll('.question1 h4');
+
+    questions.forEach((question) => {
+        const questionId = question.id.split('_')[1]; // Извлекаем ID вопроса
+        const description = question.innerHTML; // Получаем описание вопроса
+        const parts = [];
+        let currentPart = '';
+        let inStrongTag = false;
+
+        // Проходим по всем символам в строке
+        for (let i = 0; i < description.length; i++) {
+            const char = description[i];
+
+            if (char === '<' && description[i + 1] === 's' && description[i + 2] === 't') {
+                if (currentPart) {
+                    parts.push(currentPart); // Добавляем обычный текст
+                }
+                currentPart = '';
+                inStrongTag = true;
+                i += 6; // Пропускаем <strong>
+            } else if (char === '<' && description[i + 1] === '/' && description[i + 2] === 's') {
+                if (inStrongTag) {
+                    parts.push('__INPUT__'); // Добавляем маркер для инпута
+                    currentPart = '';
+                    inStrongTag = false;
+                }
+                i += 8; // Пропускаем </strong>
+            } else {
+                currentPart += char; // Собираем обычный текст
+            }
+        }
+
+        if (currentPart.trim()) {
+            parts.push(currentPart); // Добавляем последний кусок текста
+        }
+
+        // Создаем новый контейнер
+        const container = document.createElement('div');
+
+        parts.forEach((part, index) => {
+            if (part === '__INPUT__') {
+                // Добавляем инпут
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = `answer_${questionId}`;
+                input.id = `answer_${questionId}`;
+                input.placeholder = 'Введите ответ';
+                container.appendChild(input);
+            } else {
+                // Проверяем, есть ли уже <span> в строке
+                const fragment = document.createRange().createContextualFragment(part.trim());
+                if (!part.includes('<span>')) {
+                    // Если <span> нет, оборачиваем в <span> с font-size: 15px;
+                    const span = document.createElement('span');
+                    span.style.fontSize = '15px';
+                    span.appendChild(fragment);
+                    container.appendChild(span);
+                } else {
+                    container.appendChild(fragment);
+                }
+            }
+        });
+
+        question.innerHTML = ''; // Очищаем вопрос
+        question.appendChild(container); // Вставляем новую разметку с инпутами
+    });
+});
+</script>
+<script>
+    function selectChoice(questionId, side, selectedAnswer) {
+        // Снимаем класс selected с других элементов
+        const leftChoice = document.getElementById('choice_left_' + questionId);
+        const rightChoice = document.getElementById('choice_right_' + questionId);
+        leftChoice.classList.remove('selected');
+        rightChoice.classList.remove('selected');
+
+        // Добавляем класс selected к выбранному элементу
+        if (side === 'left') {
+            leftChoice.classList.add('selected');
+        } else {
+            rightChoice.classList.add('selected');
+        }
+
+        // Записываем выбранный ответ в скрытое поле
+        document.getElementById('answer_' + questionId).value = selectedAnswer;
+    }
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leader-line/style.css">
+<script src="https://cdn.jsdelivr.net/npm/leader-line"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  let selectedLeft = null;
+  let selectedRight = null;
+  const connections = new Map(); // Хранение соединений { leftId: rightId }
+  const hiddenInput = document.getElementById("connections-input"); // Скрытое поле для хранения соединений
+
+  // Удалить существующую линию
+function removeLine(id) {
+  const connection = connections.get(id);
+  if (connection && connection.line) {
+    connection.line.remove();
+    const connectedId = connection.rightId || connection.leftId;
+
+    // Удаляем оба ключа из connections
+    connections.delete(id);
+    if (connectedId) {
+      connections.delete(connectedId);
+    }
+
+    // Обновляем скрытое поле
+    updateHiddenInput();
+  }
+}
+
+  // Создать новую линию
+  function createLine(leftElement, rightElement) {
+    return new LeaderLine(leftElement, rightElement, {
+      color: '#7366ff',
+      size: 4,
+      startPlug: 'behind',
+      endPlug: 'arrow1',
+      path: 'straight',
+    });
+  }
+
+  // Обновить скрытое поле с соединениями
+  function updateHiddenInput() {
+    if (!hiddenInput) return; // Если скрытое поле отсутствует, пропускаем обновление
+
+    const result = Array.from(connections.entries())
+      .filter(([key, value]) => key.startsWith("left") && value.rightId) // Проверяем валидность ключей
+      .map(([key, value]) => ({
+        leftId: key,
+        rightId: value.rightId,
+      }));
+    hiddenInput.value = JSON.stringify(result); // Сохраняем соединения в скрытое поле
+  }
+
+  // Попытка создать соединение между двумя выбранными элементами
+  function attemptConnection() {
+      if (selectedLeft && selectedRight) {
+        const leftId = selectedLeft.getAttribute("data-id");
+        const rightId = selectedRight.getAttribute("data-id");
+
+        // Удаляем старые соединения
+        removeLine(leftId);
+        removeLine(rightId);
+
+        // Создаем новое соединение
+        const line = createLine(selectedLeft, selectedRight);
+        connections.set(leftId, { rightId, line });
+        connections.set(rightId, { leftId, line });
+
+        // Обновляем скрытое поле с соединениями
+        updateHiddenInput();
+
+        // Сброс выделения
+        toggleSelection(selectedLeft, false);
+        toggleSelection(selectedRight, false);
+        selectedLeft = null;
+        selectedRight = null;
+      }
+  }
+
+  // Добавить или убрать визуальное выделение
+  function toggleSelection(element, isSelected) {
+    if (isSelected) {
+      element.classList.add("selected");
+      element.style.border = "4px solid #65c15c"; // Добавляем рамку
+    } else {
+      element.classList.remove("selected");
+      element.style.border = "none"; // Убираем рамку
+    }
+  }
+
+  // Обработчик для левых элементов
+  document.querySelectorAll(".left-item").forEach(item => {
+    item.addEventListener("click", function () {
+      if (selectedLeft === this) {
+        toggleSelection(this, false);
+        selectedLeft = null;
+      } else {
+        if (selectedLeft) toggleSelection(selectedLeft, false);
+        toggleSelection(this, true);
+        selectedLeft = this;
+      }
+      attemptConnection();
+    });
+  });
+
+  // Обработчик для правых элементов
+  document.querySelectorAll(".right-item").forEach(item => {
+    item.addEventListener("click", function () {
+      if (selectedRight === this) {
+        toggleSelection(this, false);
+        selectedRight = null;
+      } else {
+        if (selectedRight) toggleSelection(selectedRight, false);
+        toggleSelection(this, true);
+        selectedRight = this;
+      }
+      attemptConnection();
+    });
+  });
+});
+</script>
+
+{% endblock %}

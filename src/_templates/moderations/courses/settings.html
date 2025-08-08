@@ -1,0 +1,392 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% block title %}{#{ seo_title }#}{% endblock title %}
+{% block description %}{#{ seo_description }#}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{#{ seo_previev.url }#} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{#{ seo_propertytitle }#}{% endblock propertydescription %}
+{% block propertyimage %}{#{ seo_propertydescription }#}{% endblock propertyimage %}
+{% block head %}
+<style>
+    #accessDisplay{
+        display:none;
+    }
+    .dropdown-menu {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+        opacity: 1;
+    }
+    .hover-color {
+        color: black; /* базовый цвет */
+        text-decoration: none; /* убирает подчеркивание */
+    }
+
+    .hover-color:hover {
+        color: #7366ff; /* цвет при наведении */
+    }
+
+    .hover-color i {
+        transition: color 0.3s; /* плавный переход для иконки */
+    }
+
+    .hover-color:hover i {
+        color: #7366ff; /* цвет иконки при наведении */
+    }
+    .nav-item.dropdown {
+        max-width: 270px; /* Задает максимальную ширину для предотвращения наложения */
+    }
+    .no-bg {
+        background-color: transparent !important; /* Убирает фон */
+        box-shadow: none !important; /* Убирает тени */
+    }
+
+    .dropdown-toggle::after {
+        display: none; /* Убирает стрелочку */
+    }
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+{% block content %}
+<div class="user-profile">
+    <div class="row">
+        <!-- user profile first-style start-->
+        <div class="col-sm-12">
+            <div class="card hovercard text-center">
+                <div class="cardheader" style="background: url({% if course.cover %}{{course.cover.url}}{% else %}../images/other-images/bg-profile.png{% endif %}) 10% center / cover; height: 200px;"></div>
+                <div class="info">
+                    <div class="title">
+                        <a>
+                            {{course.name}}
+                        </a>
+                    </div>
+                </div>
+                {% include 'moderations/courses/_menu.html' %}
+            </div>
+        </div>
+        <div class="card checkout-cart" id="sertificatemsform">
+            <div class="card-body">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Настройки</h5>
+                    <div class="d-flex">
+                        <button onclick="SaveCertificate('save', '{{ course.id }}')" class="btn btn-primary" id="saveSertificate">Сохранить</button>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <form method="post" enctype="multipart/form-data" id="courseSettingsForm">
+                            <div class="container mt-3">
+                                <!-- Radio buttons -->
+                                <div class="form-group d-flex justify-content-center mb-4">
+                                    <div class="btn-group" role="group" aria-label="Access control options">
+                                        <input type="radio" class="btn-check" name="access" id="public" value="public" {% if course.type == 1 %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="public">Доступно всем</label>
+
+                                        <input type="radio" class="btn-check" name="access" id="selected" value="selected" {% if course.type == 2 %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="selected">Только выбранным</label>
+
+                                        <input type="radio" class="btn-check" name="access" id="private" value="private" {% if course.type == 3 %}checked{% endif %}>
+                                        <label class="btn btn-outline-primary" for="private">Закрыто для всех</label>
+                                    </div>
+                                </div>
+                                <!-- Date range -->
+                                <div class="row justify-content-center">
+                                    <div class="col-md-auto">
+                                        <div for="public" {% if course.type == 1 %}style="display: none;"{% endif %}>
+                                            <h3 class="text-center">Список доступных всем</h3>
+                                            <p class="text-center">Подробно</p>
+                                        </div>
+                                        <div for="selected" {% if course.type == 2 %}style="display: none;"{% endif %}>
+                                            <h3 class="text-center">Список доступных только выбраных</h3>
+                                            <p class="text-center">Подробно</p>
+                                        </div>
+                                        <div for="private" {% if course.type == 3 %}style="display: none;"{% endif %}>
+                                            <h3 class="text-center">Закрыть доступ всем </h3>
+                                            <p class="text-center">Подробно</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-md-auto">
+                                        <div class="align-items-center gap-3" id="public-list">
+                                            {% if course.coursesettings_set.exists %}
+                                            {% for coursesettings in course.coursesettings_set.all %}
+                                            <div class="form-group" id="public-data-list_{{ coursesettings.id }}">
+                                                <div class="d-flex">
+                                                    <div class="form-group">
+                                                        <label for="startDate" class="form-label">С даты:</label>
+                                                        <input type="date" class="form-control" id="public-startDate_{{ coursesettings.id }}" name="public-startDate_{{ coursesettings.id }}" value="{{ coursesettings.data_start|date:"Y-m-d" }}">
+                                                    </div>
+                                                    <div class="form-group pl-3">
+                                                        <label for="endDate" class="form-label">По дату:</label>
+                                                        <input type="date" class="form-control" id="public-endDate_{{ coursesettings.id }}" name="public-endDate_{{ coursesettings.id }}" value="{{ coursesettings.data_end|date:"Y-m-d" }}">
+                                                    </div>
+                                                    <div class="form-group pt-4">
+                                                        <button type="button" onclick="SaveCertificate('delete', '{{ coursesettings.id|escapejs }}')" id="delete-public-data-{{ coursesettings.id }}" class="btn btn-outline-danger">
+                                                            Удалить
+                                                        </button>
+                                                        {% if forloop.last %}
+                                                        <button type="button" id="add-public-data-{{ coursesettings.id }}" class="btn btn-outline-success">
+                                                            Добавить
+                                                        </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                            {% else %}
+                                            <!-- Пустые поля, если нет настроек -->
+                                            <div class="form-group" id="public-data-list_0">
+                                                <div class="d-flex">
+                                                    <div class="form-group">
+                                                        <label for="startDate" class="form-label">С даты:</label>
+                                                        <input type="date" class="form-control" id="public-startDate_0" name="public-startDate_0">
+                                                    </div>
+                                                    <div class="form-group pl-3">
+                                                        <label for="endDate" class="form-label">По дату:</label>
+                                                        <input type="date" class="form-control" id="public-endDate_0" name="public-endDate_0">
+                                                    </div>
+                                                    <div class="form-group pt-4">
+                                                        <button type="button" id="delete-public-data-0" class="btn btn-outline-danger" style="display:none;">
+                                                            Удалить
+                                                        </button>
+                                                        <button type="button" id="add-public-data-0" class="btn btn-outline-success">
+                                                            Добавить
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="accessDisplay">{{ course.type }}</div>  <!-- Показываем текущий тип доступа -->
+<script>
+    function toggleDateRange() {
+        // Get the selected access type
+        const selectedAccess = document.querySelector('input[name="access"]:checked').id;
+
+        // Hide all sections initially
+        document.querySelector('div[for="public"]').style.display = "none";
+        document.querySelector('div[for="selected"]').style.display = "none";
+        document.querySelector('div[for="private"]').style.display = "none";
+
+        // Show the relevant section based on the selected access
+        if (selectedAccess === "public") {
+            document.querySelector('div[for="public"]').style.display = "block";
+        } else if (selectedAccess === "selected") {
+            document.querySelector('div[for="selected"]').style.display = "block";
+        } else if (selectedAccess === "private") {
+            document.querySelector('div[for="private"]').style.display = "block";
+        }
+    }
+
+    // Initialize display on load
+    toggleDateRange();
+
+    // Add event listener for changes to the radio buttons
+    document.querySelectorAll('input[name="access"]').forEach((elem) => {
+        elem.addEventListener('change', toggleDateRange);
+    });
+
+
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Find all blocks
+        const allBlocks = document.querySelectorAll('[id^="public-data-list_"]');
+        if (!allBlocks.length) return;
+
+        // Find the last block
+        const lastBlock = allBlocks[allBlocks.length - 1];
+
+        // Get the number of the last block
+        let publicDataCounter = parseInt(lastBlock.id.split('_')[1]);
+
+        function addPublicDataBlock() {
+            publicDataCounter++; // Increment the counter for the new block
+
+            const publicListContainer = document.getElementById("public-list");
+
+            const newBlock = document.createElement("div");
+            newBlock.className = "form-group";
+            newBlock.id = `public-data-list_${publicDataCounter}`;
+
+            newBlock.innerHTML = `
+        <div class="d-flex">
+            <div class="form-group">
+                <label for="public-startDate_${publicDataCounter}" class="form-label">С даты:</label>
+                <input type="date" class="form-control" id="public-startDate_${publicDataCounter}" name="public-startDate_${publicDataCounter}">
+            </div>
+            <div class="form-group pl-3">
+                <label for="public-endDate_${publicDataCounter}" class="form-label">По дату:</label>
+                <input type="date" class="form-control" id="public-endDate_${publicDataCounter}" name="public-endDate_${publicDataCounter}">
+            </div>
+            <div class="form-group pt-4">
+                <button type="button" onclick="SaveCertificate('delete', {{ course.id }}, {{ coursesettings.id }})" id="delete-public-data-${publicDataCounter}" class="btn btn-outline-danger">
+                    Удалить
+                </button>
+
+                <button type="button" id="add-public-data-${publicDataCounter}" class="btn btn-outline-success">
+                    Добавить
+                </button>
+            </div>
+        </div>
+    `;
+
+            publicListContainer.appendChild(newBlock);
+
+            // Set up handlers for the new block
+            const currentDeleteButton = newBlock.querySelector(`#delete-public-data-${publicDataCounter}`);
+            const currentAddButton = newBlock.querySelector(`#add-public-data-${publicDataCounter}`);
+
+            currentDeleteButton.addEventListener("click", function() {
+                newBlock.remove();
+
+                // After deletion, find the new last block
+                const newLastBlock = document.querySelector('[id^="public-data-list_"]:last-child');
+                if (newLastBlock) {
+                    const newLastBlockNum = parseInt(newLastBlock.id.split('_')[1]);
+                    const newLastAddButton = document.getElementById(`add-public-data-${newLastBlockNum}`);
+                    if (newLastAddButton) {
+                        newLastAddButton.style.display = "block";
+                    }
+                }
+            });
+
+            currentAddButton.addEventListener("click", function() {
+                addPublicDataBlock();
+                currentAddButton.style.display = "none";
+                currentDeleteButton.style.display = "block";
+            });
+
+            // Show the delete button for the previous block
+            const previousDeleteButton = document.querySelector(`#delete-public-data-${publicDataCounter - 1}`);
+            if (previousDeleteButton) {
+                previousDeleteButton.style.display = "block";
+            }
+
+            // Hide the add button for the previous block
+            const previousAddButton = document.querySelector(`#add-public-data-${publicDataCounter - 1}`);
+            if (previousAddButton) {
+                previousAddButton.style.display = "none";
+            }
+
+            // Show the add button for the current (last) block
+            currentAddButton.style.display = "block";
+        }
+
+        // Set up handlers for the last block
+        const lastAddButton = document.getElementById(`add-public-data-${publicDataCounter}`);
+        const lastDeleteButton = document.getElementById(`delete-public-data-${publicDataCounter}`);
+
+        if (lastAddButton) {
+            lastAddButton.addEventListener("click", function() {
+                addPublicDataBlock();
+                lastAddButton.style.display = "none";
+                if (lastDeleteButton) {
+                    lastDeleteButton.style.display = "block";
+                }
+            });
+        }
+
+        // Show the delete button for all blocks except the last one
+        allBlocks.forEach((block, index) => {
+            if (index < allBlocks.length - 1) {
+                const blockNum = parseInt(block.id.split('_')[1]);
+                const deleteButton = document.getElementById(`delete-public-data-${blockNum}`);
+                if (deleteButton) {
+                    deleteButton.style.display = "block";
+                }
+                const addButton = document.getElementById(`add-public-data-${blockNum}`);
+                if (addButton) {
+                    addButton.style.display = "none";
+                }
+            }
+        });
+    });
+</script>
+<script>
+    function SaveCertificate(action, settingId = null) {
+        const access = document.querySelector('input[name="access"]:checked').value;
+        const formData = new FormData();
+        formData.append('access', access);
+        formData.append('csrfmiddlewaretoken', "{{ csrf_token|escapejs }}"); // Escape the CSRF token
+        formData.append('action', action);
+
+        if (action === 'delete' && settingId) {
+            formData.append('setting_id_to_delete', settingId);
+        } else {
+            const publicDataBlocks = document.querySelectorAll('[id^="public-data-list_"]');
+            publicDataBlocks.forEach(block => {
+                const startDate = block.querySelector('input[name^="public-startDate"]').value;
+                const endDate = block.querySelector('input[name^="public-endDate"]').value;
+                const settingId = block.querySelector('input[name^="settingId"]')?.value || '';
+
+                formData.append('course_id', "{{ course.id }}");
+
+                if (startDate && endDate) {
+                    formData.append('public_start_date[]', startDate);
+                    formData.append('public_end_date[]', endDate);
+                    formData.append('setting_id[]', settingId);
+                }
+            });
+        }
+
+        fetch("{% url 'moderation:update_course_settings' course.id %}", {
+            method: "POST",
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification("Настройки курса успешно обновлен!");
+                    if (action === 'delete' && settingId) {
+                        document.getElementById(`public-data-list_${settingId}`).remove();
+                    }
+                } else {
+                    showNotification("Ошибка обновления.", true);
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка:", error);
+                showNotification("Произошла ошибка при отправке данных.", true);
+            });
+    }
+    function showNotification(message, isError = false) {
+        console.log('Showing notification:', message);
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.padding = '10px 20px';
+        notification.style.borderRadius = '5px';
+        notification.style.color = 'white';
+        notification.style.backgroundColor = isError ? '#f44336' : '#4CAF50';
+        notification.style.zIndex = '9999';
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.5s';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 500);
+        }, 3000);
+    }
+</script>
+{% endblock content %}

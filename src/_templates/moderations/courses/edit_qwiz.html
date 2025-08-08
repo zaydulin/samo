@@ -1,0 +1,1268 @@
+<style>
+    .remove-row {
+  width: 120px;       /* Устанавливаем ширину 120 пикселей */
+  margin: 10px;       /* Устанавливаем отступ 10 пикселей */
+}
+        .remove-row-old {
+  width: 120px;       /* Устанавливаем ширину 120 пикселей */
+  margin: 10px;       /* Устанавливаем отступ 10 пикселей */
+}
+</style>
+
+
+<form id="editqwizForm" action="{% if quiz.id %}{% url 'moderation:update_quiz' quiz.id %}{% endif %}" method="post" enctype="multipart/form-data">
+    <div class="card checkout-cart">
+        <div class="card-body basic-wizard important-validation" id="msform">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Редактирование теста</h5>
+                <div>
+                    <button type="submit" class="btn btn-primary" id="saveeditqwizForm">Сохранить</button>
+                </div>
+            </div>
+            <div id="loading-indicator" class="htmx-indicator">
+                Сохранение...
+            </div>
+            <div class="row g-3 custom-input">
+                {% csrf_token %}
+                <input type="hidden" id="themeId" name="theme_id" value="{{ quiz.theme.id }}">
+
+                <!-- Заголовок -->
+                <div class="col-sm-6">
+                    <label for="editqwizName" class="form-label">Заголовок:</label>
+                    <input type="text" id="editqwizName" name="name" class="form-control" placeholder="Название задания" value="{{ quiz.name }}">
+                    <div class="alert-danger" id="alert-editqwizName"></div>
+                </div>
+
+                <!-- Тип теста -->
+                <div class="col-sm-4">
+                    <label class="form-label" for="editqwizType">Тип</label>
+                    <select id="editqwizType" class="form-control" name="type" >
+                        <option value="2" {% if quiz.type == 2 %}selected{% endif %}>Текстовые варианты</option>
+                        <option value="3" {% if quiz.type == 3 %}selected{% endif %}>Варианты с картинками</option>
+                        <option value="4" {% if quiz.type == 4 %}selected{% endif %}>Выбор из двух</option>
+                        <option value="5" {% if quiz.type == 5 %}selected{% endif %}>Заполнить пропуски</option>
+                        <option value="6" {% if quiz.type == 6 %}selected{% endif %}>Найти соответствие</option>
+                    </select>
+                    <div class="alert-danger" id="alert-editqwizType"></div>
+                </div>
+                <div class="col-sm-2" id="id_point_show_edit">
+                    <label class="form-label" for="id_point">Баллы</label>
+                    <input type="number" name="point" value="{{ quiz.point }}" min="0" class="form-control" id="id_point">
+                    <div class="alert-danger" id="alert-point">{{ errors.point }}</div>
+                </div>
+
+                <!-- Описание -->
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_description_editqwiz">Описание</label>
+                    <textarea name="description" id="id_description_editqwiz" class="form-none" style="display: none;">{{ quiz.description }}</textarea>
+                    <div id="id_description_editqwiz_form"></div>
+                    <div class="alert-danger" id="alert-description_editqwiz"></div>
+                </div>
+
+                <!-- Вопросы типа "Тесты" -->
+                <div id="editqwiz-type-2" class="editquestion-contain-type-2" {% if quiz.type == 2 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <div class="d-flex justify-content-between">
+                        <h3>Варианты ответов <br> <span style="font-size: 18px;">Введите варианты ответов, пометьте правильные</span> </h3>
+
+                    </div>
+                    <hr>
+
+                    <div class="editquestion-container-type-2">
+                        {% for question in questions %}
+                        {% if question %}
+                        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+                        <div class="row question-type-2 mb-3" id="question-{{ question.id }}">
+                            <div class="col-sm-8">
+                                <input type="text" id="editqwiz_title_type_2_{{ question.id }}" name="editqwiz_title_type_2[]" class="form-control" placeholder="Вариант ответа" value="{{ question.title }}">
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-check-size">
+                                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                                    <div class="btn btn-outline-success-2x">
+                                      <div class="checkbox checkbox-success">
+                                                                    <input type="hidden" name="editqwiz_right_answer_type_2[]" value="off">
+                            <input id="editqwiz_right_answer_type_2_{{ question.id }}" type="checkbox"
+                                   {% if question.right_answer == 2 %} checked {% endif %}
+                                   name="editqwiz_right_answer_type_2[]" value="on">
+                            <label class="mb-0" for="editqwiz_right_answer_type_2_{{ question.id }}">Правильный ответ</label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <button type="button" class="btn btn-danger delete-question" data-question-id="{{ question.id }}" data-quiz-id="{{ quiz.id }}" style="float: right;">
+                                        <i class="fa fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+<!-- Вопросы типа "Тесты с картинками" -->
+                <div id="editqwiz-type-3" class="editquestion-contain-type-3" {% if quiz.type == 3 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <div class="d-flex justify-content-between">
+                        <h5>Вопросы типа "Тесты с картинками"</h5>
+                    </div>
+                    <hr>
+                    <div class="editquestion-container-type-3">
+                        {% for question in questions %}
+                        {% if question %}
+                        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+                        <div class="row question-type-3 mb-3" id="question-{{ question.id }}">
+                            <div class="col-2">
+
+
+                                 <label for="image-editqwiz-type-3_{{ question.id }}" style="height: 100%; display: flex; justify-content: center; align-items: center;" class="btn b-ln-height btn-outline-primary">
+                                    {% if question.image  %}
+                                       <img id="preview-image-editqwiz-type-3_{{ question.id }}" src="{{ question.image.url }}" alt="Предварительный просмотр изображения"
+                                         style=" width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                     {% else %}
+                                      <i class="fa-solid fa-upload"></i>
+
+                                     {% endif %}
+                                </label>
+                                <input type="file" name="image-editqwiz-type-3[]" id="image-editqwiz-type-3_{{ question.id }}" style="display: none" class="form-control">
+                                <div class="alert-danger" id="alert-image-qwiz-type-3_0"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" id="editqwiz_title_type_3_{{ question.id }}" name="editqwiz_title_type_3[]" class="form-control" placeholder="Подпись к картинке" value="{{ question.title }}">
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-check-size">
+                                    <div class="btn-group btn-option" data-bs-toggle="buttons">
+                                    <div class="btn btn-outline-success-2x">
+                                      <div class="checkbox checkbox-success">
+                                        <input type="hidden" name="editqwiz_right_answer_type_3[]" value="off">
+                                        <input id="editqwiz_right_answer_type_3_{{ question.id }}"  type="checkbox"    {% if question.right_answer == 2 %} checked {% endif %} value="on"  name="editqwiz_right_answer_type_3[]" name="type">
+                                        <label class="mb-0" for="editqwiz_right_answer_type_3_{{ question.id }}">Правильный ответ</label>
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                    <button type="button" class="btn btn-danger delete-question" data-question-id="{{ question.id }}" data-quiz-id="{{ quiz.id }}" style="float: right;">
+                                        <i class="fa fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div id="editqwiz-type-4" class="editquestion-contain-type-4" {% if quiz.type == 4 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <div class="d-flex justify-content-between">
+                        <h5>Добавьте\Редактировануйте варианты ответов</h5>
+                    </div>
+                    <hr>
+                    <div class="editquestion-container-type-4">
+                        {% for question in questions %}
+                        {% if question %}
+                        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+                        <div class="row question-type-4 mb-3" id="question-{{ question.id }}">
+                            <div class="col-sm-6">
+                                <label for="editqwiz_title_type_4_{{ question.id }}_1">Заголовок 1:</label>
+                                <input type="text" id="editqwiz_title_type_4_{{ question.id }}_1"
+                                       name="editqwiz_title_type_4_1[]" class="form-control" placeholder="Вопрос 1"
+                                       value="{{ question.title }}">
+                                <div class="alert-danger" id="alert-editqwiz_title_type_4_{{ question.id }}_1"></div>
+                                <label class="form-label" for="editqwiz_right_answer_type_4_{{ question.id }}_1">Правильный
+                                    ответ</label>
+                                <div class="form-check-size">
+                                    <div class="form-check form-switch form-check-inline">
+                                        <select id="editqwiz_right_answer_type_4_{{ question.id }}_1"
+                                                class="form-control" name="editqwiz_right_answer_type_4_1[]">
+                                            <option value="1" {% if question.right_answer == 1 %}selected{% endif %}>
+                                                Слева
+                                            </option>
+                                            <option value="2" {% if question.right_answer == 2 %}selected{% endif %}>
+                                                Справа
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="alert-danger"
+                                     id="alert-editqwiz_right_answer_type_4_{{ question.id }}_1"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="editqwiz_title_type_4_{{ question.id }}_2">Заголовок 2:</label>
+                                <input type="text" id="editqwiz_title_type_4_{{ question.id }}_2"
+                                       name="editqwiz_title_type_4_2[]" class="form-control" placeholder="Вопрос 2"
+                                       value="{{ question.second_title }}">
+                                <div class="alert-danger" id="alert-editqwiz_title_type_4_{{ question.id }}_2"></div>
+                                <div class="col-12 mt-2">
+                                    <button type="button" class="btn btn-danger delete-question"
+                                            data-question-id="{{ question.id }}" data-quiz-id="{{ quiz.id }}"
+                                            style="float: right;">
+                                        <i class="fa fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- Редактирование вопросов типа "Заполните пропуск" -->
+                <div id="editqwiz-type-5" class="editquestion-contain-type-5" {% if quiz.type == 5 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+                    <div class="d-flex justify-content-between">
+                        <h5>Вопросы типа "Заполните пропуск" — Редактирование</h5>
+                    </div>
+                    <hr>
+                    <div class="editquestion-container-type-5">
+                        {% for question in questions %}
+                        {% if question %}
+                        <input type="hidden" name="question_id[]" value="{{ question.id }}">
+                        <div class="row editquestion-type-5 mb-3" id="question-{{ question.id }}">
+                             <div class="col-sm-12">
+                                 <span>Для пользователя будут выведены слова-подсказки чтобы было легче решить тест. Подсказки необязательны.</span><br>
+                                <button type="button" class="btn btn-primary"  id="add-hint-new-to-old">Добавить подсказку</button>
+
+                                            <!-- Новые поля input будут добавляться сюда -->
+                                    {% for hint in question.hints.all %}
+                                    <div class="d-flex align-items-center mb-2">
+                                        <input type="text" class="form-control me-2" style="width: 300px;" placeholder="Введите подсказку" name="hint_{{hint.id}}" value="{{hint.name}}">
+                                        <div class="btn-group btn-option" data-bs-toggle="buttons">
+                                            <div class="btn btn-outline-success-2x">
+                                                <div class="checkbox checkbox-success">
+                                                    <!-- Убираем hidden поле "off", оно будет заменено динамически -->
+                                                     <input type="hidden" name="qwiz_right_answer_type_5_{{hint.id}}" value="">
+                                                    <input type="checkbox" id="qwiz_right_answer_type_5_{{hint.id}}" name="qwiz_right_answer_type_5_{{hint.id}}" {% if hint.right_answer == 2 %} checked {% endif %}>
+                                                    <label class="mb-0" for="qwiz_right_answer_type_5_{{hint.id}}">Правильный ответ</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-danger btn-sm remove-hint-old" data-hint-id="{{hint.id}}" style="margin-left: 10px;">Удалить</button>
+                                    </div>
+                                    {% endfor %}
+                                  <div id="input-container-edit" class="mt-3">
+                                    </div>
+
+                            </div>
+
+                            <div class="col-sm-12">
+                                <label for="editqwiz_description_ckeditor_type_5_{{ question.id }}">Введите текст.Выделите жирным слова,вместо которых будет пропуск.</label>
+                                <textarea type="text" id="editqwiz_description_ckeditor_type_5_{{ question.id }}" name="editqwiz_description_type_5[]" class="form-control" placeholder="Вопрос" style="display:none;">{{ question.description }}</textarea>
+                                <div class="alert-danger" id="alert-editqwiz_description_type_5_{{ question.id }}"></div>
+                            </div>
+                            <div class="col-12 mt-2">
+                                    <button type="button" class="btn btn-danger delete-question" data-question-id="{{ question.id }}" data-quiz-id="{{ quiz.id }}" style="float: right;">
+                                        <i class="fa fa-trash"></i> Удалить
+                                    </button>
+                                </div>
+                        </div>
+
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div id="editqwiz-type-6" class="question-contain-type-6" {% if quiz.type == 6 %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+  <div class="d-flex justify-content-between">
+    <h5>Вопросы типа "Найти соответствие"</h5>
+  </div>
+  <hr>
+  <!-- Вывод существующих вопросов -->
+  {% for question in quiz.question_quiz.all %}
+  <div class="row question-type-6 mb-3">
+    <div class="col-sm-2">
+      <label for="image-qwiz-type-6_{{ question.id }}"
+             class="btn b-ln-height btn-outline-primary"
+             style="height: 100%; display: flex; justify-content: center; align-items: center;">
+        {% if question.left_file %}
+        <img id="preview-image-qwiz-type-6_{{ question.id }}"
+             src="{{ question.left_file.url }}"
+             alt="Предварительный просмотр изображения"
+             style="display:block; width:50px; height:50px; object-fit:cover; border-radius:4px;">
+        {% else %}
+          {% if question.left_text %}
+            <i class="fas fa-times"></i>
+          {% else %}
+            <i class="fa-solid fa-upload"></i>
+          {% endif %}
+        {% endif %}
+      </label>
+      <input type="file"
+             name="image-qwiz-type-6_{{ question.id }}"
+             id="image-qwiz-type-6_{{ question.id }}"
+             style="display:none"
+             class="form-control"
+             {% if question.left_text %}disabled{% endif %}
+             >
+    </div>
+    <div class="col-sm-1" style="align-content:center;">
+      <span style="text-align:center; display:inline-block; width:100%;">или</span>
+    </div>
+    <div class="col-sm-2">
+      <input type="text"
+             id="qwiz_title_type_6_{{ question.id }}"
+             name="qwiz_title_type_6_{{ question.id }}"
+             class="form-control"
+             placeholder="Текстовый вариант"
+             value="{{ question.left_text|default_if_none:'' }}"
+             {% if question.left_file %}disabled{% endif %}>
+    </div>
+    <div class="col-sm-2"><hr></div>
+    <div class="col-sm-2">
+      <label for="image-qwiz-type-second-6_{{ question.id }}"
+             class="btn b-ln-height btn-outline-primary"
+             style="height: 100%; display: flex; justify-content: center; align-items: center;">
+        {% if question.right_file %}
+        <img id="preview-image-qwiz-type-second-6_{{ question.id }}"
+             src="{{ question.right_file.url }}"
+             alt="Предварительный просмотр изображения"
+             style="display:block; width:50px; height:50px; object-fit:cover; border-radius:4px;">
+        {% else %}
+        {% if question.right_text %}
+            <i class="fas fa-times"></i>
+          {% else %}
+            <i class="fa-solid fa-upload"></i>
+          {% endif %}
+        {% endif %}
+      </label>
+      <input type="file"
+             name="image-qwiz-type-second-6_{{ question.id }}"
+             id="image-qwiz-type-second-6_{{ question.id }}"
+             style="display:none"
+             class="form-control"
+             {% if question.right_text %}disabled{% endif %}
+             >
+    </div>
+    <div class="col-sm-1" style="align-content:center;">
+      <span style="text-align:center; display:inline-block; width:100%;">или</span>
+    </div>
+    <div class="col-sm-2">
+      <input type="text"
+             id="qwiz_title_type_second_6_{{ question.id }}"
+             name="qwiz_title_type_second_6_{{ question.id }}"
+             class="form-control"
+             placeholder="Текстовый вариант"
+             value="{{ question.right_text|default_if_none:'' }}"
+             {% if question.right_file %}disabled{% endif %}>
+    </div>
+    <button type="button" class="btn btn-danger remove-row-old" data-question-id="{{question.id}}">Удалить</button>
+  </div>
+  {% endfor %}
+</div>
+
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <div>
+                    <!--ТЕст текст-->
+                    <button type="button" class="btn btn-primary" {% if quiz.type == 2 %} style="display: block" {% else %} style="display: none" {% endif %} id="add-editquestion-type-2">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <!--ТЕст картинки-->
+                <div>
+                    <button type="button" class="btn btn-primary"  {% if quiz.type == 3 %} style="display: block" {% else %} style="display: none" {% endif %} id="add-editquestion-type-3">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                <!--Выбор-->
+                <div>
+                    <button type="button" class="btn btn-primary"  {% if quiz.type == 4 %} style="display: block" {% else %} style="display: none" {% endif %}  id="add-editquestion-type-4">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <h5></h5>
+                        <!--ТЕст пропуск-->
+                <div>
+                    <button type="button" class="btn btn-primary"  {% if quiz.type == 5 %} style="display: block" {% else %} style="display: none" {% endif %} id="add-editquestion-type-5">Добавить вариант</button>
+                </div>
+
+            </div>
+                        <div class="d-flex justify-content-between">
+                <h5></h5>
+                        <!--ТЕст пропуск-->
+                <div>
+                    <button type="button" class="btn btn-primary"  {% if quiz.type == 6 %} style="display: block" {% else %} style="display: none" {% endif %} id="add-editquestion-type-6">Добавить вариант</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+<!--Редактирование и создание тестов-->
+<script>
+    $(document).ready(function () {
+        // Функция инициализации CKEditor
+        function initEditCKEditor(element, targetTextarea) {
+            // Проверяем, существует ли уже редактор для этого элемента
+            if (editors[element.id]) {
+                console.log(`Editor already exists for ${element.id}`);
+                return Promise.resolve(editors[element.id]);
+            }
+
+            return ClassicEditor
+                .create(element, {
+                    toolbar: ['bold', '|'],
+                    placeholder: 'Введите текст с пропусками...',
+                })
+                .then(editor => {
+                    editors[element.id] = editor;
+
+                    editor.model.document.on('change:data', () => {
+                        const data = editor.getData();
+                        $(targetTextarea).val(data);
+                    });
+
+                    console.log(`Editor initialized for ${element.id}`);
+                    return editor;
+                })
+                .catch(error => {
+                    console.error(`Editor initialization failed for ${element.id}:`, error);
+                });
+        }
+
+
+// Объект для хранения экземпляров CKEditor
+        const editors = {};
+        const links = document.querySelectorAll('a[for]');
+        const formList = document.getElementById('form-list');
+
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('for');
+                const targetForm = document.getElementById(targetId);
+
+                if (targetForm && formList.contains(targetForm)) {
+                    Array.from(formList.children).forEach(child => {
+                        if (child.id !== targetId) {
+                            child.classList.add('form-none');
+                        }
+                    });
+
+                    targetForm.classList.remove('form-none');
+                }
+            });
+        });
+
+// Функция создания нового редактора для вопроса type 5
+        function createEditNewEditor(index) {
+            const editorElement = document.querySelector(`#editqwiz_description_ckeditor_type_5_${index}`);
+            const targetTextarea = `#editqwiz_description_type_5_${index}`;
+
+            if (editorElement && !editors[`editor_${index}`]) { // Проверка: если редактор еще не инициализирован
+                initEditCKEditor(editorElement, targetTextarea).then(editor => {
+                    editors[`editor_${index}`] = editor; // Сохраняем редактор по индексу
+                });
+            }
+        }
+    // Делегирование клика для элементов с атрибутом for="qwiz-edit"
+
+        // Функция для скрытия всех блоков вопросов
+        function hideAllQuestionContainers() {
+            $('.editquestion-contain-type-2').hide();
+            $('#add-editquestion-type-2').hide();
+            $('.editquestion-contain-type-3').hide();
+            $('#add-editquestion-type-3').hide();
+            $('.editquestion-contain-type-4').hide();
+            $('#add-editquestion-type-4').hide();
+            $('.editquestion-contain-type-5').hide();
+            $('#add-editquestion-type-5').hide();
+        }
+
+        // Инициализация первого редактора при загрузке страницы
+
+
+
+        // Функция для инициализации всех редакторов на странице
+        function initializeAllEditors() {
+            $('.editquestion-container-type-5 textarea[id^="editqwiz_description_ckeditor_type_5_"]').each(function () {
+                const id = $(this).attr('id');
+                const index = id.split('_').pop();
+                const targetTextarea = `#editqwiz_description_type_5_${index}`;
+
+                initEditCKEditor(this, targetTextarea);
+            });
+        }
+
+        // Инициализация первого редактора только если выбран тип 5
+        function initializeEditFirstEditor() {
+            const selectedType = $('#editqwizType').val();
+            if (selectedType === '5') {
+                // Небольшая задержка для уверенности, что DOM полностью загружен
+                setTimeout(() => {
+                    initializeAllEditors();
+                }, 100);
+            }
+        }
+
+        // Запускаем инициализацию при загрузке страницы
+        initializeEditFirstEditor();
+
+        // Обработчик изменения значения в поле qwizType
+        $('#editqwizType').on('change', function () {
+            var selectedType = $(this).val();
+
+            // Скрываем все контейнеры
+            hideAllQuestionContainers();
+
+            // Удаляем все существующие экземпляры CKEditor
+            Object.values(editors).forEach(editor => {
+                if (editor) {
+                    editor.destroy().catch(error => console.error(error));
+                }
+            });
+            // Очищаем объект редакторов
+            Object.keys(editors).forEach(key => delete editors[key]);
+
+            // Показываем нужный контейнер
+            if (selectedType == '2') {
+                $('.editquestion-contain-type-2').show();
+                $('#add-editquestion-type-2').show();
+            } else if (selectedType == '3') {
+                $('.editquestion-contain-type-3').show();
+                $('#add-editquestion-type-3').show();
+            } else if (selectedType == '4') {
+                $('.editquestion-contain-type-4').show();
+                $('#add-editquestion-type-4').show();
+            } else if (selectedType == '5') {
+                $('.editquestion-contain-type-5').show();
+                $('#add-editquestion-type-5').show();
+
+                // Небольшая задержка для уверенности, что DOM обновился
+                setTimeout(() => {
+                    createEditNewEditor(0);
+                }, 100);
+            }
+        });
+
+        // Функция для отображения уведомлений
+    function showAlert(message, type) {
+        // Создаем элемент div для отображения уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили из вашего CSS
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px'; // Из CSS
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out'; // Из CSS
+
+        // Добавляем элемент на страницу (например, в начало body)
+        document.body.prepend(alertDiv);
+
+        // Удаляем элемент через 3 секунды
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+        // Отправка формы через AJAX
+        // Отправка формы через AJAX
+$('#saveeditqwizForm').on('click', function (event) {
+    event.preventDefault();
+
+    // Обновляем значения всех текстовых полей перед отправкой
+    Object.values(editors).forEach(editor => {
+        if (editor) {
+            const editorData = editor.getData();
+            const editorIndex = editor.sourceElement.id.split('_').pop();
+            $(`#editqwiz_description_type_5_${editorIndex}`).val(editorData);
+        }
+    });
+
+    // Переименовываем файлы изображений перед отправкой
+    const imageInputs = $('input[type="file"][id^="image-editqwiz-type-3_"]');
+    imageInputs.each(function () {
+        const input = $(this)[0]; // Получаем DOM элемент input
+        const questionId = input.id.split('_')[1]; // Получаем ID вопроса
+        const file = input.files[0]; // Получаем выбранный файл
+
+        if (file) {
+            // Переименовываем файл в соответствии с ID вопроса
+            const fileExtension = file.name.split('.').pop(); // Получаем расширение файла
+            const newFileName = `image-editqwiz-type-3_${questionId}.${fileExtension}`; // Формируем новое имя
+
+            // Создаем новый объект файла с переименованным именем
+            const renamedFile = new File([file], newFileName, { type: file.type });
+
+            // Обновляем значение input с новым файлом
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(renamedFile);
+            input.files = dataTransfer.files;
+        }
+    });
+
+    // Собираем данные формы
+    var formData = new FormData($('#editqwizForm')[0]);
+
+    // Логируем данные формы перед отправкой
+    for (var pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+
+    // Отправка формы через AJAX
+    $.ajax({
+        type: 'POST',
+        url: `{% url 'moderation:update_quiz' 4444 %}`.replace('4444', `{{quiz.id}}`), // URL для обновления квиза
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+            $('#loading-indicator').show();
+        },
+        success: function (response) {
+            showAlert('Задание успешно сохранено', 'success');
+            $('#loading-indicator').hide();
+            const qwizId = response.qwiz_id;
+            const newName = response.qwiz_name;
+
+            $(`#quiz-item-${qwizId} .title`).text(newName);
+        },
+        error: function (response) {
+    console.log(response);
+    // Проверяем, есть ли message в response
+    const errorMessage = response.responseJSON && response.responseJSON.message
+                         ? response.responseJSON.message
+                         : 'Произошла ошибка при сохранении задания';
+    showAlert(errorMessage, 'danger');
+    $('#loading-indicator').hide();
+        }
+    });
+});
+
+
+         // Установка темы при нажатии на кнопку
+    $(document).on('click', '[data-themes-id-qwiz]', function () {
+        var themeId = $(this).data('themes-id-qwiz');
+        $('#themeId').val(themeId);
+    });
+
+
+    // Функция для создания нового CKEditor
+    function createEditNewEditor(index) {
+        const editorElement = document.querySelector(`#editqwiz_description_ckeditor_type_5_${index}`);
+        const targetTextarea = `#editqwiz_description_type_5_${index}`;
+
+        // Если существует старый редактор с этим индексом, уничтожаем его
+        if (editors[`editor_${index}`]) {
+            editors[`editor_${index}`].destroy()
+                .then(() => {
+                    delete editors[`editor_${index}`];
+                })
+                .catch(error => console.error('Ошибка при удалении редактора:', error));
+        }
+
+        if (editorElement) {
+            initEditCKEditor(editorElement, targetTextarea).then(editor => {
+                editors[`editor_${index}`] = editor;
+            });
+        }
+    }
+    let hintCounter = 0;
+    let questionCounter = 0;
+
+    // Добавление вопросов для типа "Заполните пропуск" (type 5)
+    $('#add-editquestion-type-5').on('click', function () {
+        let maxIndex = 1;
+        $('.editquestion-container-type-5 textarea[id^="editqwiz_description_type_5_"]').each(function () {
+            const id = $(this).attr('id');
+            const index = parseInt(id.split('_').pop());
+            if (index > maxIndex) {
+                maxIndex = index;
+            }
+        });
+
+        const index = maxIndex + 1;
+
+        var newQuestion = `
+            <div class="row editquestion-type-5 mb-3">
+                 <div class="col-sm-12">
+                        <button type="button" class="btn btn-primary add-hint-new">Добавить подсказку</button>
+                        <div class="input-container-edit mt-3">
+                            <!-- Новые поля input будут добавляться сюда -->
+                        </div>
+                    </div>
+                <div class="col-sm-12 pt-3">
+                    <label class="form-label" for="editqwiz_description_ckeditor_type_5_${questionCounter}">Введите текст. Выделите жирным слова,вместо которых будет пропуск.</label>
+                    <textarea name="editqwiz_description_ckeditor_type_5_[]" id="editqwiz_description_ckeditor_type_5_${questionCounter}" class="form-control"></textarea>
+                    <div class="alert-danger" id="alert-editqwiz_description_type_5_${index}"></div>
+                </div>
+                <div class="col-sm-12 pt-3">
+                    <button type="button" class="btn btn-danger delete-question-type-5" data-editor-index="${index}" style="float: right;"><i class="fa fa-trash"></i> Удалить</button>
+                </div>
+            </div>
+        `;
+
+        $('.editquestion-container-type-5').append(newQuestion);
+        createEditNewEditor(questionCounter);
+        questionCounter++;
+    });
+
+    // Удаление вопросов типа 5
+    $(document).on('click', '.delete-question-type-5', function() {
+        const index = $(this).data('editor-index');
+
+        // Уничтожаем экземпляр CKEditor перед удалением DOM-элемента
+        if (editors[`editor_${index}`]) {
+            editors[`editor_${index}`].destroy()
+                .then(() => {
+                    delete editors[`editor_${index}`];
+                    $(this).closest('.editquestion-type-5').remove();
+                })
+                .catch(error => {
+                    console.error('Ошибка при удалении редактора:', error);
+                    // Всё равно удаляем DOM-элемент в случае ошибки
+                    $(this).closest('.editquestion-type-5').remove();
+                });
+        } else {
+            $(this).closest('.editquestion-type-5').remove();
+        }
+    });
+
+       // Обработчик для кнопки с ID 'add-hint' (статическая кнопка, загружается с HTML)
+document.getElementById('add-hint-new-to-old').addEventListener('click', function () {
+    const inputContainer = document.getElementById('input-container-edit'); // Контейнер для подсказок
+    console.log('click')
+    console.log(inputContainer)
+    // Создаем новый input
+    const newInput = `
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" class="form-control me-2" style="width: 300px;" placeholder="Введите подсказку" name="hint_new_0">
+            <div class="btn-group btn-option" data-bs-toggle="buttons">
+                <div class="btn btn-outline-success-2x">
+                    <div class="checkbox checkbox-success">
+                        <!-- Убираем скрытое поле "off" и изменяем его значение динамически -->
+                        <input type="checkbox" id="qwiz_right_answer_new_type_5_${hintCounter}" >
+                        <label class="mb-0" for="qwiz_right_answer_new_type_5_${hintCounter}">Правильный ответ</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-hint-new" style="margin-left: 10px;">Удалить</button>
+        </div>
+    `;
+
+    // Увеличиваем счётчик
+    hintCounter++;
+
+    // Добавляем input в контейнер
+    inputContainer.insertAdjacentHTML('beforeend', newInput);
+
+    // Добавляем обработчик для кнопки удаления
+    const removeButtons = document.querySelectorAll('.add-hint-new-to-old');
+    removeButtons[removeButtons.length - 1].addEventListener('click', function () {
+        this.parentElement.remove(); // Удаляем родительский div подсказки
+    });
+
+    // Добавляем обработчик для изменения значения скрытого поля в зависимости от состояния чекбокса
+    const checkbox = document.getElementById(`qwiz_right_answer_new_type_5_${hintCounter - 1}`);
+
+    // Создаем скрытое поле для каждого чекбокса
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = `qwiz_right_answer_new_type_5_${hintCounter - 1}`;
+    hiddenInput.value = 'off'; // Изначально скрытое поле содержит 'off'
+    checkbox.parentElement.insertBefore(hiddenInput, checkbox); // Вставляем скрытое поле перед чекбоксом
+
+    // Обработчик для изменения значения скрытого поля на 'on' или 'off'
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            hiddenInput.value = 'on'; // Если чекбокс выбран, скрытое поле становится 'on'
+        } else {
+            hiddenInput.value = 'off'; // Если чекбокс не выбран, скрытое поле становится 'off'
+        }
+    });
+});
+
+
+    // Обработчик для кнопки 'add-hint', созданной динамически
+
+$(document).on('click', '.add-hint-new', function () {
+    const inputContainer = $(this).closest('.col-sm-12').find('.input-container-edit');
+
+    console.log('Dynamic add-hint button clicked!');
+
+    // Создаем новый input для подсказки и чекбокса
+    const newInput = `
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" class="form-control me-2" style="width: 300px;" placeholder="Введите подсказку" name="hint_${questionCounter}">
+            <div class="btn-group btn-option" data-bs-toggle="buttons">
+                <div class="btn btn-outline-success-2x">
+                    <div class="checkbox checkbox-success">
+                        <!-- Убираем hidden поле "off", оно будет заменено динамически -->
+                        <input type="hidden" id="qwiz_right_answer_type_5_${questionCounter}" name="qwiz_right_answer_type_5_${questionCounter}" value="off">
+                        <input type="checkbox" id="qwiz_right_answer_type_5_${hintCounter}" >
+                        <label class="mb-0" for="qwiz_right_answer_type_5_${hintCounter}">Правильный ответ</label>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-danger btn-sm remove-hint-new" style="margin-left: 10px;">Удалить</button>
+        </div>
+    `;
+
+    hintCounter++;  // Увеличиваем счетчик для подсказок
+
+    // Добавляем новый input в контейнер
+    inputContainer.append(newInput);
+
+    // Обработчик для удаления подсказки
+    // Добавляем обработчик для изменения значения скрытого поля
+    $(`#qwiz_right_answer_type_5_${questionCounter}`).on('change', function () {
+        const hiddenInput = $(this).closest('.d-flex').find('input[type="hidden"]');
+        console.log(hiddenInput)
+        if ($(this).prop('checked')) {
+            hiddenInput.val('on');  // Если чекбокс выбран, скрытое поле становится "on"
+        } else {
+            hiddenInput.val('off'); // Если чекбокс не выбран, скрытое поле становится "off"
+        }
+    });
+});
+
+
+// Делегируем обработчик для удаления подсказки
+    $(document).on('click', '.remove-hint-new', function() {
+    $(this).closest('.d-flex').remove(); // Удаляем всю строку с input и кнопкой
+});
+    $(document).on('click', '.remove-hint-old', function() {
+
+
+        const hintId = $(this).data('hint-id');
+        // Отправляем запрос на удаление
+        fetch('{% url "moderation:delete_hint" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                hint_id: hintId, // Передаем полученное значение hint_id
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                $(this).closest('.d-flex').remove();
+                showAlert('Подсказка удалена', 'success');
+            } else {
+                showAlert('Ошибка при удалении подсказки', 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('Ошибка запроса', 'danger');
+        });
+    });
+
+    $('#add-editquestion-type-2').on('click', function () {
+        var index = $('.question-type-2').length;
+
+        var newQuestion = `
+            <div class="row question-type-2 mb-3">
+                <div class="col-sm-8">
+                    <input type="text" id="editqwiz_title_type_2_${index}" name="editqwiz_title_type_2[]" class="form-control" placeholder="Вариант  ответа" >
+                    <div class="alert-danger" id="aalert-editqwiz_title_type_2_${index}"></div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-check-size">
+                        <div class="btn-group btn-option" data-bs-toggle="buttons">
+                        <div class="btn btn-outline-success-2x">
+                          <div class="checkbox checkbox-success">
+                            <input type="hidden" name="editqwiz_right_answer_type_2[]" value="off">
+                            <input id="editqwiz_right_answer_type_2_${index}"  type="checkbox"  name="editqwiz_right_answer_type_2[]">
+                            <label class="mb-0" for="editqwiz_right_answer_type_2_${index}">Правильный ответ</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="alert-danger" id="alert-qwiz_right_answer_type_2_${index}"></div>
+                </div>
+                <div class="col-sm-12 mt-2">
+                        <button type="button" class="btn btn-danger delete-question-type-2" style="float: right;"><i class="fa fa-trash"></i> Удалить</button>
+
+                </div>
+            </div>
+        `;
+
+        $('.editquestion-container-type-2').append(newQuestion);
+    });
+
+    // Удаление вопросов типа 2
+    $(document).on('click', '.delete-question-type-2', function() {
+        $(this).closest('.question-type-2').remove();
+    });
+
+    $('#add-editquestion-type-3').on('click', function () {
+        let maxIndex = 0;
+
+        $('.editquestion-container-type-3 input[id^="image-editqwiz-type-3_"]').each(function () {
+            const id = $(this).attr('id');
+            const index = parseInt(id.split('_').pop());
+            if (index > maxIndex) {
+                maxIndex = index;
+            }
+        });
+
+        const index = maxIndex + 1;
+
+        var newQuestion = `
+             <div class="row question-type-3 mb-3">
+                <div class="col-sm-2">
+                    <label for="image-qwiz-type-3_${index}" style="height: 100%; display: flex;justify-content: center;align-items: center;" class="btn b-ln-height btn-outline-primary">
+                        <i class="fa-solid fa-upload"></i>
+                        <img id="preview-image-qwiz-type-3_${index}" src="" alt="Предварительный просмотр изображения" style="display: none; width: 100%; height: auto;">
+                    </label>
+                    <input type="file" name="image-qwiz-type-3[]" style="display: none" id="image-qwiz-type-3_${index}" class="form-control">
+                    <div class="alert-danger" id="alert-image-qwiz-type-3_${index}"></div>
+                </div>
+                <div class="col-sm-6">
+                    <input type="text" id="qwiz_title_type_3_${index}" name="qwiz_title_type_3[]" class="form-control" placeholder="Подпись к картинке" value="">
+                </div>
+                <div class="col-sm-4">
+                    <div class="alert-danger" id="alert-qwiz_title_type_3_${index}"></div>
+                    <div class="form-check-size">
+                        <div class="btn-group btn-option" data-bs-toggle="buttons">
+                            <div class="btn btn-outline-success-2x">
+                                <div class="checkbox checkbox-success">
+                                    <input type="hidden" name="qwiz_right_answer_type_3[]" value="off">
+                                    <input id="qwiz_right_answer_type_3_${index}" type="checkbox" name="qwiz_right_answer_type_3[]" name="type">
+                                    <label class="mb-0" for="qwiz_right_answer_type_3_${index}">Правильный ответ</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-qwiz_right_answer_type_3_${index}"></div>
+                </div>
+                <div class="col-sm-12 mt-2">
+                    <button type="button" class="btn btn-danger delete-question-type-3" style="float: right;">
+                        <i class="fa fa-trash"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        `;
+
+        $('.editquestion-container-type-3').append(newQuestion);
+    });
+
+    // Удаление вопросов типа 3
+    $(document).on('click', '.delete-question-type-3', function() {
+        $(this).closest('.question-type-3').remove();
+    });
+
+    $('#add-editquestion-type-4').on('click', function() {
+        var index = $('.question-type-4').length;
+
+        var newQuestion = `
+        <div class="row question-type-4 mb-3">
+            <div class="col-sm-6">
+                <label for="editqwiz_title_type_4_${index}_1">Заголовок 1:</label>
+                <input type="text" id="editqwiz_title_type_4_${index}_1" name="editqwiz_title_type_4_1[]" class="form-control" placeholder="Вопрос 1" >
+                <div class="alert-danger" id="alert-editqwiz_title_type_4_${index}_1"></div>
+                <label class="form-label" for="editqwiz_right_answer_type_4_${index}_1">Правильный ответ</label>
+                <div class="form-check-size">
+                    <div class="form-check form-switch form-check-inline">
+                        <select id="editqwiz_right_answer_type_4_${index}_1" class="form-control" name="editqwiz_right_answer_type_4_1[]">
+                            <option value="1">Слева</option>
+                            <option value="2">Справа</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-danger" id="alert-editqwiz_right_answer_type_4_${index}_1"></div>
+            </div>
+            <div class="col-sm-6">
+                <label for="editqwiz_title_type_4_${index}_2">Заголовок 2:</label>
+                <input type="text" id="editqwiz_title_type_4_${index}_2" name="editqwiz_title_type_4_2[]" class="form-control" placeholder="Вопрос 2">
+                <div class="alert-danger" id="alert-editqwiz_title_type_4_${index}_2"></div>
+            </div>
+            <div class="col-sm-12 mt-2">
+                <button type="button" class="btn btn-danger delete-question-type-4" style="float: right;"><i class="fa fa-trash"></i> Удалить</button>
+            </div>
+        </div>
+        `;
+
+        $('.editquestion-container-type-4').append(newQuestion);
+    });
+
+    // Удаление вопросов типа 4
+    $(document).on('click', '.delete-question-type-4', function() {
+        $(this).closest('.question-type-4').remove();
+    });
+
+    // Предварительный просмотр изображений
+    $(document).on('change', 'input[type="file"]', function (e) {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        var preview = $(this).next('img');
+
+        reader.onloadend = function () {
+            preview.attr('src', reader.result);
+            preview.show();
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            preview.attr('src', "");
+            preview.hide();
+        }
+    });
+});
+</script>
+<!--Удаление вопросов-->
+<script>
+$(document).ready(function() {
+
+    // Функция для отображения уведомлений
+    function showAlert(message, type) {
+        // Создаем элемент div для отображения уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили из вашего CSS
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px'; // Из CSS
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out'; // Из CSS
+
+        // Добавляем элемент на страницу (например, в начало body)
+        document.body.prepend(alertDiv);
+
+        // Удаляем элемент через 3 секунды
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Обработчик для кнопки удаления
+    $('.delete-question').on('click', function() {
+        var questionId = $(this).data('question-id'); // Получаем ID вопроса
+        var quizId = $(this).data('quiz-id'); // Получаем ID квиза
+
+        // Находим все строки с вопросом по ID (возможно несколько контейнеров)
+        var rows = $('.row').filter(function() {
+            return $(this).attr('id') === 'question-' + questionId; // Ищем все элементы с соответствующим ID
+        });
+
+        // Отправляем AJAX-запрос на удаление вопроса
+        $.ajax({
+            url: `{% url 'moderation:delete_question' 2222 3333 %}`.replace('2222', quizId).replace('3333', questionId), // Укажи правильный URL
+            method: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}', // Токен CSRF
+            },
+            success: function(response) {
+                if (response.success) {
+                    rows.remove(); // Удаляем все строки с вопросом на клиенте
+                    showAlert('Вопрос успешно удален', 'success');
+                } else {
+                    showAlert('Ошибка при удалении вопроса', 'danger');
+                }
+            },
+            error: function() {
+                showAlert('Ошибка при удалении вопроса', 'danger');
+            }
+        });
+    });
+});
+</script>
+<script>
+if (typeof addBtnEditQuestionType6 === 'undefined') {
+  const addBtnEditQuestionType6 = document.getElementById("add-editquestion-type-6");
+  const containerEdit = document.getElementById("editqwiz-type-6");
+
+  // Счётчик для новых блоков
+  let newBlockCounter = 1;
+
+  function initRowEvents(row) {
+    // Левый блок
+    const fileLeft = row.querySelector('[id^="image-qwiz-type-6_"]');
+    const textLeft = row.querySelector('[id^="qwiz_title_type_6_"]');
+    const previewLeft = row.querySelector('[id^="preview-image-qwiz-type-6_"]');
+    const labelLeft = row.querySelector(`label[for="${fileLeft.id}"]`);
+    const iconLeft = labelLeft ? labelLeft.querySelector("i") : null;
+
+    if (fileLeft) {
+      fileLeft.addEventListener("change", function () {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            if (previewLeft) {
+              previewLeft.src = e.target.result;
+              previewLeft.style.display = "block";
+            }
+            textLeft.value = ""; // Убираем текст при загрузке файла
+            textLeft.disabled = true;
+            if (iconLeft) iconLeft.className = "fas fa-times";
+          };
+          reader.readAsDataURL(this.files[0]);
+        } else {
+          if (previewLeft) {
+            previewLeft.src = "";
+            previewLeft.style.display = "none";
+          }
+          textLeft.disabled = false;
+          if (iconLeft) iconLeft.className = "fa-solid fa-upload";
+        }
+      });
+    }
+
+    if (textLeft) {
+      textLeft.addEventListener("input", function () {
+        if (this.value.trim().length > 0) {
+          fileLeft.value = ""; // Убираем файл при вводе текста
+          if (previewLeft) {
+            previewLeft.src = "";
+            previewLeft.style.display = "none";
+          }
+          fileLeft.disabled = true;
+          if (iconLeft) iconLeft.className = "fas fa-times";
+        } else {
+          fileLeft.disabled = false;
+          if (iconLeft) iconLeft.className = "fa-solid fa-upload";
+        }
+      });
+    }
+
+    // Правый блок
+    const fileRight = row.querySelector('[id^="image-qwiz-type-second-6_"]');
+    const textRight = row.querySelector('[id^="qwiz_title_type_second_6_"]');
+    const previewRight = row.querySelector('[id^="preview-image-qwiz-type-second-6_"]');
+    const labelRight = row.querySelector(`label[for="${fileRight.id}"]`);
+    const iconRight = labelRight ? labelRight.querySelector("i") : null;
+
+    if (fileRight) {
+      fileRight.addEventListener("change", function () {
+        if (this.files && this.files[0]) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            if (previewRight) {
+              previewRight.src = e.target.result;
+              previewRight.style.display = "block";
+            }
+            textRight.value = ""; // Убираем текст при загрузке файла
+            textRight.disabled = true;
+            if (iconRight) iconRight.className = "fas fa-times";
+          };
+          reader.readAsDataURL(this.files[0]);
+        } else {
+          if (previewRight) {
+            previewRight.src = "";
+            previewRight.style.display = "none";
+          }
+          textRight.disabled = false;
+          if (iconRight) iconRight.className = "fa-solid fa-upload";
+        }
+      });
+    }
+
+    if (textRight) {
+      textRight.addEventListener("input", function () {
+        if (this.value.trim().length > 0) {
+          fileRight.value = ""; // Убираем файл при вводе текста
+          if (previewRight) {
+            previewRight.src = "";
+            previewRight.style.display = "none";
+          }
+          fileRight.disabled = true;
+          if (iconRight) iconRight.className = "fas fa-times";
+        } else {
+          fileRight.disabled = false;
+          if (iconRight) iconRight.className = "fa-solid fa-upload";
+        }
+      });
+    }
+
+    // Обработка кнопки удаления блока
+    const removeBtn = row.querySelector(".remove-row");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", function () {
+        row.remove();
+      });
+    }
+
+    // Обработка кнопки удаления для статических блоков
+    const removeBtnOld = row.querySelector(".remove-row-old");
+    if (removeBtnOld) {
+      removeBtnOld.addEventListener("click", function () {
+        const questionId = $(this).data('question-id');
+        fetch('{% url "moderation:delete_question_type_six" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify({ questionId })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === 'success') {
+              showAlert('Вопрос удален', 'success');
+              row.remove();
+            } else {
+              showAlert('Ошибка при удалении вопроса', 'danger');
+            }
+          })
+          .catch(() => showAlert('Ошибка запроса', 'danger'));
+      });
+    }
+  }
+
+  // Обработка добавления нового блока
+  addBtnEditQuestionType6.addEventListener("click", function () {
+    const newIdentifier = "new_" + newBlockCounter;
+    newBlockCounter++;
+
+    const newRow = document.createElement("div");
+    newRow.classList.add("row", "question-type-6", "mb-3");
+
+    newRow.innerHTML = `
+      <div class="col-sm-2">
+        <label for="image-qwiz-type-6_${newIdentifier}" class="btn b-ln-height btn-outline-primary" style="height: 100%; display: flex; justify-content: center; align-items: center;">
+          <i class="fa-solid fa-upload"></i>
+          <img id="preview-image-qwiz-type-6_${newIdentifier}" src="" alt="Предварительный просмотр изображения" style="display: none; width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+        </label>
+        <input type="file" name="image-qwiz-type-6_${newIdentifier}" id="image-qwiz-type-6_${newIdentifier}" style="display: none" class="form-control">
+      </div>
+      <div class="col-sm-1" style="align-content: center;">
+        <span style="text-align: center; display: inline-block; width: 100%;">или</span>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" id="qwiz_title_type_6_${newIdentifier}" name="qwiz_title_type_6_${newIdentifier}" class="form-control" placeholder="Текстовый вариант">
+      </div>
+      <div class="col-sm-2"><hr></div>
+      <div class="col-sm-2">
+        <label for="image-qwiz-type-second-6_${newIdentifier}" class="btn b-ln-height btn-outline-primary" style="height: 100%; display: flex; justify-content: center; align-items: center;">
+          <i class="fa-solid fa-upload"></i>
+          <img id="preview-image-qwiz-type-second-6_${newIdentifier}" src="" alt="Предварительный просмотр изображения" style="display: none; width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+        </label>
+        <input type="file" name="image-qwiz-type-second-6_${newIdentifier}" id="image-qwiz-type-second-6_${newIdentifier}" style="display: none" class="form-control">
+      </div>
+      <div class="col-sm-1" style="align-content: center;">
+        <span style="text-align: center; display: inline-block; width: 100%;">или</span>
+      </div>
+      <div class="col-sm-2">
+        <input type="text" id="qwiz_title_type_second_6_${newIdentifier}" name="qwiz_title_type_second_6_${newIdentifier}" class="form-control" placeholder="Текстовый вариант">
+      </div>
+      <button type="button" class="btn btn-danger remove-row">Удалить</button>
+    `;
+
+    containerEdit.appendChild(newRow);
+    initRowEvents(newRow);
+  });
+
+  // Инициализация уже существующих полей
+  containerEdit.querySelectorAll(".question-type-6").forEach(initRowEvents);
+}
+
+
+</script>

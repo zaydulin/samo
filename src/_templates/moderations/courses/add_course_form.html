@@ -1,0 +1,417 @@
+<form id="courseForm" action="{% url 'moderation:course_data_edit' course.id %}" method="post" enctype="multipart/form-data">
+
+    <div class="card checkout-cart">
+        <div class="card-body basic-wizard important-validation" id="msform">
+            <!-- Существующее содержимое формы -->
+            <div class="card-header d-flex justify-content-between">
+                <h5>Информация о курсе</h5>
+                <div>
+                    <button onclick="submitForm(event, 'save')" class="btn btn-primary" id="saveCourse">Сохранить</button>
+                        <button onclick="submitForm(event, 'publish')" class="btn btn-outline-primary ml-3" id="publicCourse">{% if course.draft %}В черновик{% else %}Опубликовать{% endif %}</button>
+                </div>
+            </div>
+            <!-- Добавим индикатор загрузки -->
+            <div id="loading-indicator" class="htmx-indicator">
+                Сохранение...
+            </div>
+            <div class="row g-3 custom-input">
+                {% csrf_token %}
+                <input type="hidden" name="course_id" id="course_id" value="{{ course.id }}">
+                <input type="hidden" name="action" id="formAction" value="update">
+                <div class="row g-3 custom-input">
+                    <div class="col-sm-2">
+                        <label class="form-label" for="id_price">Стоимость:</label>
+                        <input type="number" name="price" value="{{course.price}}" min="0" class="form-control" required id="id_price">
+                        <div class="alert-danger" id="alert-price"></div>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label" for="id_name">Название</label>
+                        <input type="text" name="name" class="form-control" id="id_name" required value="{% if course.name %}{{course.name}}{% endif %}">
+                        <div class="alert-danger" id="alert-name"></div>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label" for="id_category">Категория</label>
+                        <select name="category" id="id_category" multiple class="js-example-placeholder-multiple col-sm-12 select2-hidden-accessible">
+                            {% for category in all_categories %}
+                            <option value="{{ category.id }}" {% if category in course.category.all %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="alert-danger" id="alert-category"></div>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label" for="id_description_form">Описание</label>
+                        <textarea name="description" id="id_description" class="form-none" style="display: none;">{% if course.description %}{{course.description}}{% endif %}</textarea>
+                        <div id="id_description_form"></div>
+                        <div class="alert-danger" id="alert-description"></div>
+                    </div>
+                    <!-- Поля для изображений -->
+                    <div class="col-6">
+                        <label class="form-label" for="id_cover">Обложка</label>
+                        <input type="file" name="cover" id="id_cover" class="form-control">
+                        <img id="coverPreview" src="{% if course.cover %}{{course.cover.url}}{% endif %}" alt="Предварительный просмотр обложки" style="max-width: 100%; margin-top: 10px;">
+                        <div class="alert-danger" id="alert-cover"></div>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="id_image">Изображение</label>
+                        <input type="file" name="image" id="id_image" class="form-control">
+                        <img id="imagePreview" src="{% if course.image %}{{course.image.url}}{% endif %}" alt="Предварительный просмотр изображения" style="max-width: 100%; margin-top: 10px;">
+                        <div class="alert-danger" id="alert-image"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="id_slug">Slug</label>
+                        <input type="text" name="slug" value="{% if course.slug %}{{course.slug}}{% endif %}" id="id_slug" class="form-control">
+                        <div class="alert-danger" id="alert-slug"></div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <label class="form-label" for="id_previev">Изображение</label>
+                            <input type="file" name="previev" id="id_previev" class="form-control">
+                            <img id="coverPreviev" src="{% if course.previev %}{{course.previev.url}}{% endif %}" alt="Предварительный просмотр обложки" style="max-width: 100%; margin-top: 10px;">
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <label class="form-label" for="id_title">META - Заголовок</label>
+                                    <input type="text" name="title" id="id_title" value="{% if course.title %}{{course.title}}{% endif %}" class="form-control">
+                                    <div class="alert-danger" id="alert-title"></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <label class="form-label" for="id_content">META - Контент</label>
+                                    <textarea name="content" id="id_content" class="form-control">{% if course.content %}{{course.content}}{% endif %}</textarea>
+                                    <div class="alert-danger" id="alert-content"></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <label class="form-label" for="id_propertytitle">META - Заголовок ссылки</label>
+                                    <input type="text" name="propertytitle" id="id_propertytitle" value="{% if course.propertytitle %}{{course.propertytitle}}{% endif %}" class="form-control">
+                                    <div class="alert-danger" id="alert-propertytitle"></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <label class="form-label" for="id_propertydescription">META - Описание ссылки</label>
+                                    <textarea name="propertydescription" id="id_propertydescription" class="form-control">{% if course.propertydescription %}{{course.propertydescription}}{% endif %}</textarea>
+                                    <div class="alert-danger" id="alert-propertydescription"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+// Глобальные переменные для хранения экземпляров
+let editor;
+let select2Instance;
+
+// Функция для инициализации или реинициализации TinyMCE
+function initializeTinyMCE(elementId) {
+    // Уничтожаем существующий экземпляр, если есть
+    if (editor) {
+        tinymce.remove(editor);
+    }
+    try {
+        editor = tinymce.init({
+            selector: elementId,
+            plugins: 'print preview fullpage paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount spellchecker imagetools textpattern noneditable help charmap quickbars emoticons',
+            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            content_style: 'img { max-width: 100%; height: auto; }',
+            autosave_ask_before_unload: false, // Disable unload warning
+            imagetools_cors_hosts: ['picsum.photos'],
+            images_upload_url: "{% url 'moderation:tinymce_upload' %}", // URL для загрузки изображений
+            images_upload_credentials: true,
+            automatic_uploads: true,
+            image_advtab: true,
+            image_title: true,
+            height: 400,
+            notifications: false ,
+
+            // Обработчик загрузки изображений
+           images_upload_handler: function (blobInfo, success, failure) {
+                let formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                // Получаем текущий редактор
+                const editor = this; // 'this' указывает на текущий экземпляр редактора
+
+                fetch("{% url 'moderation:tinymce_upload' %}", {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin' // Важно для правильной передачи CSRF-токена
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.location) {
+                        success(result.location);
+                    } else {
+                        failure('Upload failed');
+                    }
+                })
+                .catch(error => {
+                    failure('Upload failed: ' + error);
+                });
+            },
+
+            // Событие изменения контента
+            setup: function (editor) {
+                editor.on('change', function () {
+                    const hiddenTextarea = document.querySelector('#id_description');
+                    if (hiddenTextarea) {
+                        hiddenTextarea.value = editor.getContent();
+                    }
+                });
+
+                // Prevent unload warning
+                editor.on('init', function() {
+                    editor.initialized = true;
+                    editor.isNotDirty = true;
+                });
+            },
+            // Загружаем начальное содержимое в редактор
+            init_instance_callback: function (editor) {
+                const hiddenTextarea = document.querySelector('#id_description');
+                if (hiddenTextarea && hiddenTextarea.value) {
+                    editor.setContent(hiddenTextarea.value);
+                }
+                editor.isNotDirty = true;
+            }
+        });
+    } catch (error) {
+        console.error('Ошибка инициализации TinyMCE:', error);
+    }
+}
+
+// Функция для инициализации Select2
+function initializeSelect2() {
+    if (select2Instance) {
+        select2Instance.select2('destroy');
+    }
+    select2Instance = $('.js-example-placeholder-multiple').select2({
+        placeholder: "Выберите категории",
+        allowClear: true
+    });
+}
+
+// Функция для создания и отображения уведомления
+function showNotification(message, isError = false) {
+    console.log('Показ уведомления:', message);
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.padding = '10px 20px';
+    notification.style.borderRadius = '5px';
+    notification.style.color = 'white';
+    notification.style.backgroundColor = isError ? '#f44336' : '#4CAF50';
+    notification.style.zIndex = '9999';
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.5s';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 500);
+    }, 3000);
+}
+
+// Функция для загрузки обновленного содержимого
+function loadUpdatedContent() {
+    if ($('#views-curse').length) {
+        $('#views-curse').load(location.href + ' #views-curse > *', function(response, status, xhr) {
+            if (status === 'error') {
+                console.error('Ошибка загрузки содержимого views-curse:', xhr.status, xhr.statusText);
+                showNotification("Ошибка при обновлении содержимого views-curse.", true);
+            } else {
+
+                // Деактивируем предупреждение о перезагрузке
+                if (tinymce.activeEditor) {
+                    tinymce.activeEditor.isNotDirty = true;
+                }
+            }
+        });
+    }
+
+    // Если нужно обновить другие части страницы
+    if ($('#views-course-name').length) {
+        $.get(location.href, function(data) {
+            const newContent = $(data).find('#views-course-name').html();
+            if (newContent) {
+                $('#views-course-name').html(newContent);
+            } else {
+                console.error('Ошибка: Не удалось найти #views-course-name в ответе');
+                showNotification("Ошибка при обновлении названия курса.", true);
+            }
+        }).fail(function(xhr, status, error) {
+            console.error('Ошибка загрузки содержимого views-course-name:', status, error);
+            showNotification("Ошибка при обновлении названия курса.", true);
+        });
+    }
+}
+
+// Функция для отправки формы
+async function submitForm(event, action) {
+    event.preventDefault();
+    const form = event.target.closest('form');
+    if (!form) return;
+
+    // Проверяем и получаем контент TinyMCE
+    const editorInstance = tinymce.get('id_description_form');
+    if (!editorInstance) {
+        showNotification("Редактор текста не инициализирован.", true);
+        return;
+    }
+
+    const editorContent = editorInstance.getContent();
+    if (!editorContent.trim()) {
+        showNotification("Поле описания не может быть пустым.", true);
+        return;
+    }
+
+    // Обновляем скрытое поле
+    const hiddenTextarea = document.querySelector('#id_description');
+    if (hiddenTextarea) {
+        hiddenTextarea.value = editorContent;
+    }
+
+    // Собираем данные формы
+    const formData = new FormData(form);
+    formData.set('description', editorContent); // Обновляем содержимое
+
+    // Добавляем действие (save/publish)
+    formData.set('action', action);
+
+    // Получаем выбранные категории
+    const selectedCategories = $('#id_category').val();
+    formData.delete('category');
+    selectedCategories.forEach(category => formData.append('category', category));
+
+    const url = form.getAttribute('action');
+    const button = document.querySelector(`#${action === 'save' ? 'saveCourse' : 'publicCourse'}`);
+
+    try {
+        const response = await fetch(url, {
+            method: form.method,
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP! статус: ${response.status}`);
+        }
+
+        // Деактивируем предупреждение о перезагрузке
+        if (tinymce.activeEditor) {
+            tinymce.activeEditor.isNotDirty = true;
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            const result = await response.json();
+            updateContent(result);
+        } else {
+            const htmlContent = await response.text();
+            document.querySelector('#create-curse').innerHTML = htmlContent;
+            reinitializeFormElements();
+        }
+
+        // Загружаем обновленное содержимое
+        loadUpdatedContent();
+
+        // Меняем текст кнопки в зависимости от действия
+        if (action === 'publish' && button) {
+            if (button.textContent.trim() === 'Опубликовать') {
+                button.textContent = 'В черновик';
+            } else if (button.textContent.trim() === 'В черновик') {
+                button.textContent = 'Опубликовать';
+            }
+        }
+
+        // Показываем уведомление об успешном сохранении
+        setTimeout(() => {
+            showNotification("Данные успешно сохранены!");
+        }, 100);
+    } catch (error) {
+        console.error('Ошибка отправки формы:', error);
+        showNotification("Ошибка при сохранении данных. Пожалуйста, попробуйте еще раз.", true);
+    }
+}
+
+// Функция для обновления содержимого после отправки формы (для JSON-ответа)
+function updateContent(data) {
+    for (const [key, value] of Object.entries(data)) {
+        const field = document.querySelector(`#id_${key}`);
+        if (field) {
+            if (field.tagName === 'SELECT' && field.multiple) {
+                $(field).val(value).trigger('change');
+            } else {
+                field.value = value;
+            }
+        }
+    }
+    reinitializeFormElements();
+}
+
+// Функция для реинициализации всех элементов формы
+function reinitializeFormElements() {
+    // Переинициализация TinyMCE
+    const descriptionElement = document.querySelector('#id_description_form');
+    if (descriptionElement) {
+        tinymce.remove(`#id_description_form`);
+        initializeTinyMCE('#id_description_form');
+    }
+
+    // Инициализация Select2
+    initializeSelect2();
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    // Отключаем предупреждение о перезагрузке для TinyMCE
+    tinymce.PluginManager.add('autosave', function(editor) {
+        editor.on('init', function() {
+            editor.autosave_draft = false;
+        });
+    });
+
+    initializeTinyMCE('#id_description_form');
+    initializeSelect2();
+
+    // Используем делегирование событий для обработки отправки формы
+    document.body.addEventListener('submit', function(event) {
+        const form = event.target.closest('#courseForm');
+        if (form) {
+            submitForm(event);
+        }
+    });
+
+    // Предотвращаем предупреждение о перезагрузке
+    window.onbeforeunload = function(e) {
+        if (tinymce.activeEditor && !tinymce.activeEditor.isNotDirty) {
+            return null; // Возвращаем null вместо текста предупреждения
+        }
+    };
+});
+</script>
+<style>
+    .select2-container--open {
+        height: 40px;
+    }
+    .select2-container {
+        height: 40px;
+    }
+</style>
+
+

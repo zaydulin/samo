@@ -1,0 +1,36 @@
+{% extends 'moderations/base_full.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+{% block content %}
+<form method="post" id="login-form" class="theme-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="mb-1"><strong>Логин</strong></label>
+            <input type="text" class="form-control" name="username" placeholder="Введите логин">
+        </div>
+        <div class="form-group">
+            <label class="mb-1"><strong>Пароль</strong></label>
+            <input type="password" class="form-control" name="password" placeholder="Введите пароль">
+        </div>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-block">Войти</button>
+        </div>
+    </form>
+    <div class="new-account mt-3">
+        <p><a class="text-primary" href="{% url 'useraccount:password_reset' %}">Сбросить пароль?</a> </p>
+    </div>
+    <!-- Отображение сообщения об ошибке -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock content %}
+{% block footer %}{% endblock footer %}

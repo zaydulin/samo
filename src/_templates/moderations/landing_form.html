@@ -1,0 +1,419 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }}{% endif %}{% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css">
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage"></script>
+    <script src="https://unpkg.com/grapesjs-blocks-basic"></script>
+    <script src="https://unpkg.com/grapesjs-plugin-forms"></script>
+
+    <style>
+        /* Стили для редактора */
+        .gjs-one-bg { background-color: #2c3e50; }
+        .gjs-two-color { color: #fff; }
+        .gjs-three-bg { background-color: #34495e; }
+        .gjs-four-color { color: #718093; }
+
+        /* Панели */
+        .panel__top {
+            padding: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .panel__devices {
+            position: initial;
+        }
+
+        .panel__editor {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        .panel__left {
+            width: 250px;
+            overflow-y: auto;
+        }
+
+        .panel__right {
+            width: 250px;
+            overflow-y: auto;
+        }
+
+        .panel__styles {
+            height: 70%;
+            overflow-y: auto;
+        }
+
+        .panel__traits {
+            height: 30%;
+            overflow-y: auto;
+        }
+
+        #gjs {
+            flex-grow: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="panel__top">
+    <div class="panel__basic-actions"></div>
+    <div class="panel__devices"></div>
+    <div class="panel__switcher"></div>
+</div>
+<div class="panel__editor">
+    <div class="panel__left">
+        <div id="blocks"></div>
+    </div>
+    <div id="gjs"></div>
+    <div class="panel__right">
+        <div class="panel__styles"></div>
+        <div class="panel__traits"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<script>
+const editor = grapesjs.init({
+    container: '#gjs',
+    height: '100%',
+    storageManager: {
+        type: 'remote',
+        stepsBeforeSave: 1,
+        urlStore: '{% url "moderation:save_landing" %}',
+        params: {
+            slug: '{{ object.slug|default:"" }}',
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    },
+
+    // Панели инструментов
+    panels: {
+        defaults: [
+            {
+                id: 'basic-actions',
+                el: '.panel__basic-actions',
+                buttons: [
+                    {
+                        id: 'visibility',
+                        active: true,
+                        className: 'btn-toggle-borders',
+                        label: '<i class="fa fa-square-o"></i>',
+                        command: 'sw-visibility'
+                    },
+                    {
+                        id: 'export',
+                        className: 'btn-open-export',
+                        label: '<i class="fa fa-code"></i>',
+                        command: 'export-template',
+                        context: 'export-template'
+                    },
+                    {
+                        id: 'show-json',
+                        className: 'btn-show-json',
+                        label: 'JSON',
+                        context: 'show-json',
+                        command(editor) {
+                            editor.Modal.setTitle('Components JSON')
+                                .setContent(`<textarea style="width:100%; height:250px;">
+                                    ${JSON.stringify(editor.getComponents(), null, 2)}
+                                </textarea>`)
+                                .open();
+                        }
+                    },
+                    {
+                        id: 'show-styles',
+                        className: 'btn-show-styles',
+                        label: '<i class="fa fa-paint-brush"></i>',
+                        command: 'show-styles',
+                        active: true
+                    },
+                    {
+                        id: 'preview',
+                        className: 'btn-preview',
+                        label: '<i class="fa fa-eye"></i>',
+                        command: 'preview'
+                    }
+                ]
+            },
+            {
+                id: 'panel-devices',
+                el: '.panel__devices',
+                buttons: [
+                    {
+                        id: 'device-desktop',
+                        label: '<i class="fa fa-desktop"></i>',
+                        command: 'set-device-desktop',
+                        active: true,
+                        togglable: false
+                    },
+                    {
+                        id: 'device-tablet',
+                        label: '<i class="fa fa-tablet"></i>',
+                        command: 'set-device-tablet',
+                        togglable: false
+                    },
+                    {
+                        id: 'device-mobile',
+                        label: '<i class="fa fa-mobile"></i>',
+                        command: 'set-device-mobile',
+                        togglable: false
+                    }
+                ]
+            }
+        ]
+    },
+
+    // Менеджер блоков
+    blockManager: {
+        appendTo: '#blocks',
+        blocks: [
+            {
+                id: 'section',
+                label: '<i class="fa fa-square-o"></i> Section',
+                category: 'Basic',
+                content: `
+                    <section class="py-8 px-4">
+                        <div class="container mx-auto">
+                            <h2 class="text-3xl font-bold mb-4">Section Title</h2>
+                            <p>Add your content here</p>
+                        </div>
+                    </section>
+                `
+            },
+            {
+                id: 'hero',
+                label: '<i class="fa fa-star-o"></i> Hero',
+                category: 'Sections',
+                content: `
+                    <section class="bg-gray-100 py-20">
+                        <div class="container mx-auto px-4">
+                            <div class="max-w-3xl mx-auto text-center">
+                                <h1 class="text-5xl font-bold mb-6">Welcome to Our Site</h1>
+                                <p class="text-xl mb-8">A powerful landing page template</p>
+                                <button class="bg-blue-500 text-white px-8 py-3 rounded-lg">Get Started</button>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+            {
+                id: 'text',
+                label: '<i class="fa fa-text-width"></i> Text',
+                category: 'Basic',
+                content: '<div class="text-base">Insert your text here</div>'
+            },
+            {
+                id: 'image',
+                label: '<i class="fa fa-image"></i> Image',
+                category: 'Basic',
+                content: { type: 'image' },
+                activate: true
+            },
+            {
+                id: 'form',
+                label: '<i class="fa fa-wpforms"></i> Form',
+                category: 'Forms',
+                content: `
+                    <form class="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-2">Email</label>
+                            <input type="email" class="w-full px-3 py-2 border rounded"/>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded">Submit</button>
+                    </form>
+                `
+            }
+        ]
+    },
+
+    // Настройки стилей
+    styleManager: {
+        appendTo: '.panel__styles',
+        sectors: [
+            {
+                name: 'Dimension',
+                open: false,
+                buildProps: ['width', 'min-width', 'height', 'min-height', 'padding', 'margin']
+            },
+            {
+                name: 'Typography',
+                open: false,
+                buildProps: [
+                    'font-family',
+                    'font-size',
+                    'font-weight',
+                    'letter-spacing',
+                    'color',
+                    'line-height',
+                    'text-align',
+                    'text-decoration',
+                    'text-shadow'
+                ]
+            },
+            {
+                name: 'Decorations',
+                open: false,
+                buildProps: [
+                    'background-color',
+                    'border',
+                    'border-radius',
+                    'box-shadow'
+                ]
+            },
+            {
+                name: 'Extra',
+                open: false,
+                buildProps: [
+                    'opacity',
+                    'transition',
+                    'transform'
+                ]
+            }
+        ]
+    },
+
+    // Устройства
+    deviceManager: {
+        devices: [
+            {
+                name: 'Desktop',
+                width: '',
+            },
+            {
+                name: 'Tablet',
+                width: '768px',
+                widthMedia: '768px',
+            },
+            {
+                name: 'Mobile',
+                width: '320px',
+                widthMedia: '320px',
+            }
+        ]
+    },
+
+    plugins: ['gjs-preset-webpage', 'gjs-blocks-basic', 'gjs-plugin-forms'],
+    pluginsOpts: {
+        'gjs-preset-webpage': {},
+        'gjs-blocks-basic': {},
+        'gjs-plugin-forms': {}
+    },
+
+    canvas: {
+        styles: [
+            'https://cdn.tailwindcss.com',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
+        ]
+    },
+
+    // Настройки трейтов (свойств компонентов)
+    traits: {
+        appendTo: '.panel__traits',
+    },
+});
+
+// Загрузка существующего контента
+{% if object and object.html_content %}
+    editor.setComponents({{ object.html_content|safe|escapejs }});
+{% endif %}
+{% if object and object.css_content %}
+    editor.setStyle({{ object.css_content|safe|escapejs }});
+{% endif %}
+
+// Команды для устройств
+editor.Commands.add('set-device-desktop', {
+    run: editor => editor.setDevice('Desktop')
+});
+editor.Commands.add('set-device-tablet', {
+    run: editor => editor.setDevice('Tablet')
+});
+editor.Commands.add('set-device-mobile', {
+    run: editor => editor.setDevice('Mobile')
+});
+
+// Команда предпросмотра
+editor.Commands.add('preview', {
+    run: function(editor, sender) {
+        sender.set('active', false);
+        editor.store();
+        const html = editor.getHtml();
+        const css = editor.getCss();
+
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+                    <style>${css}</style>
+                </head>
+                <body>${html}</body>
+            </html>
+        `);
+        win.document.close();
+    }
+});
+
+// Автосохранение
+editor.on('storage:store', () => {
+    const html = editor.getHtml();
+    const css = editor.getCss();
+
+    fetch('{% url "moderation:save_landing" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            slug: '{{ object.slug|default:"" }}',
+            html: html,
+            css: css
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Saved successfully');
+        } else {
+            console.error('Save failed:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving:', error);
+    });
+});
+
+// Обработка изменений
+editor.on('component:selected', () => {
+    const selectedComponent = editor.getSelected();
+    if (selectedComponent) {
+        console.log('Selected:', selectedComponent.getName());
+    }
+});
+
+// Предупреждение при закрытии страницы с несохраненными изменениями
+window.onbeforeunload = function(e) {
+    if (editor.getDirtyCount() > 0) {
+        e.preventDefault();
+        return 'You have unsaved changes';
+    }
+};
+</script>
+{% endblock footer %}

@@ -1,0 +1,126 @@
+<div class="module-container" id="module-{{ module.id }}">
+    <div class="card">
+        <div class="card-body">
+            <div class="card-header" style="    padding: 0px 0px 10px 0px;    display: flex;    margin-bottom: 10px;" id="module-header-{{ module.id }}">
+
+                <h5 class="module-name" id="module-name-{{ module.id }}" data-module-id="{{ module.id }}">{{ module.name }}</h5>
+
+                <div class="btn-group dropend" style=" right: -10px; position: absolute; ">
+                    <button class="btn btn-dark dropdown-toggle" style="padding: 0px 10px;"
+                            type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false"></button>
+                    <ul class="dropdown-menu" style="">
+                        <li>
+                            <!-- Редактирование модуля -->
+                            <a href="#" class="edit-module" onclick="editModule({{ module.id }})">
+                                <i class="fa fa-edit"></i> Изменить
+                            </a>
+                        </li>
+                        <li>
+                            <!-- Форма удаления модуля -->
+                            <form id="delete-module-{{ module.id }}" action="{% url 'moderation:delete_module' module.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link p-0" style="text-decoration: none!important;">
+                                    <i class="fa fa-trash"></i> Удалить
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <a href="#" class="move-module" data-module-id="{{ module.id }}" data-direction="up" data-module-position="{{ module.position }}">
+                                <i class="fa fa-arrow-up"></i> Вверх
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="move-module" data-module-id="{{ module.id }}" data-direction="down" data-module-position="{{ module.position }}">
+                                <i class="fa fa-arrow-down"></i> Вниз
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <form id="edit-module-form-{{ module.id }}" style="display: none;">
+                {% csrf_token %}
+                <input type="text" name="name" value="{{ module.name }}" class="form-control" required>
+                <div class="mb-2 mt-2" style="display: flex; justify-content: space-between">
+                    <button type="submit" class="btn btn-primary" style="width: -webkit-fill-available; margin-right: 5px;"><i class="fa-solid fa-floppy-disk"></i></button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="cancelEditModule({{ module.id }})" style="width: -webkit-fill-available; margin-left: 5px;"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </form>
+            {% if module.modulescourse.all %}
+            {% for theme in module.modulescourse.all %}
+            {% include "moderations/courses/theme_item.html" with theme=theme %}
+            {% endfor %}
+            {% else %}
+            <p>В этом модуле нет тем.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!--Редактирование модулей-->
+<script>
+    // Функция для показа формы редактирования
+    function editModule(moduleId) {
+        // Останавливаем прокрутку страницы
+        event.preventDefault();
+        console.log('click')
+        // Скрываем все открытые формы редактирования и восстанавливаем заголовки
+        const openForms = document.querySelectorAll('[id^="edit-module-form-"]');
+        openForms.forEach(form => {
+            const currentModuleId = form.id.replace('edit-module-form-', '');
+            form.style.display = 'none';
+
+            const moduleHeader = document.getElementById(`module-header-${currentModuleId}`);
+            if (moduleHeader) {
+                moduleHeader.style.display = 'flex';
+            }
+        });
+
+        // Скрываем заголовок текущего модуля
+        const moduleHeader = document.getElementById(`module-header-${moduleId}`);
+        moduleHeader.style.display = 'none';
+
+        // Показываем форму редактирования
+        document.getElementById(`edit-module-form-${moduleId}`).style.display = 'block';
+
+        // Добавляем обработчик отправки формы через AJAX
+        const form = document.getElementById(`edit-module-form-${moduleId}`);
+        form.onsubmit = function (event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+            const formData = new FormData(form);
+            fetch(`{% url 'moderation:edit_module' 7777 %}`.replace('7777', moduleId), {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': `{{csrf_token}}`,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновление на стороне клиента
+                    const moduleNameElement = document.getElementById(`module-name-${moduleId}`);
+                    moduleNameElement.textContent = data.updated_name;  // Обновляем название модуля
+
+                    // Прячем форму редактирования
+                    document.getElementById(`edit-module-form-${moduleId}`).style.display = 'none';
+                    document.getElementById(`module-header-${moduleId}`).style.display = 'flex';
+                } else {
+                    alert('Ошибка при сохранении данных');
+                }
+            })
+            .catch(error => {
+                alert('Ошибка сети');
+            });
+        };
+    }
+
+    // Функция для отмены редактирования (скрыть форму и вернуть заголовок)
+    function cancelEditModule(moduleId) {
+        // Скрываем форму редактирования
+        document.getElementById(`edit-module-form-${moduleId}`).style.display = 'none';
+
+        // Показываем заголовок модуля
+        document.getElementById(`module-header-${moduleId}`).style.display = 'flex';
+    }
+</script>

@@ -1,0 +1,74 @@
+<div class="grid-item" id="list-user-participant-{{ participants.user.id }}">
+    <div class="my-button" style="position: relative; z-index: 1000; left: 20px; top: 20px;width: 0;">
+        {% if current_user.id != videochat.spiker.id %}
+            {% if participants.hand %}
+                <button type="button" class="btn btn-lg bg-warning text-white" disabled>
+                    <i class="mgc_hand_line text-base"></i>
+                </button>
+            {% endif %}
+            <button type="button" class="btn btn-lg
+                {% if participants.sound_root == True %}
+                    bg-dark text-white
+                {% elif participants.sound == True %}
+                    bg-light text-slate-900 dark:text-slate-200
+                {% endif %}" disabled>
+                <i class="mgc_volume_mute_line text-base"></i>
+            </button>
+            <button type="button" class="btn btn-lg
+                {% if participants.video_root == True %}
+                    bg-dark text-white
+                {% elif participants.video == True %}
+                    bg-light text-slate-900 dark:text-slate-200
+                {% endif %}" disabled>
+                <i class="mgc_computer_camera_off_line text-base"></i>
+            </button>
+        {% endif %}
+    </div>
+    <video id="video-{{ participants.user.id }}" src="" class="video-bg" autoplay playsinline></video>
+    {% if current_user.id == videochat.spiker.id %}
+        <div class="relative" data-spiker="user-{{ current_user.id }}" style=" display: inline-flex; position: absolute; top: 50px; z-index: 1000; ">
+            {% if participants.hand %}
+                <button type="button" id="participants-hand-{{ participants.id }}" class="btn btn-lg bg-warning text-white">
+                    <i class="mgc_hand_line text-base"></i>
+                </button>
+            {% endif %}
+            <button type="button" id="participants-sound-{{ participants.id }}" class="btn btn-lg
+                {% if participants.sound_root == True %}
+                    bg-dark text-white
+                {% elif participants.sound == True %}
+                    bg-danger text-white
+                {% else %}
+                    bg-light text-slate-900 dark:text-slate-200
+                {% endif %}">
+                <i class="mgc_volume_mute_line text-base "></i>
+            </button>
+            <button type="button" id="participants-video-{{ participants.id }}" class="btn btn-lg
+                {% if participants.video_root == True %}
+                    bg-dark text-white
+                {% elif participants.video == True %}
+                    bg-danger text-white
+                {% else %}
+                    bg-light text-slate-900 dark:text-slate-200
+                {% endif %}">
+                <i class="mgc_computer_camera_off_line text-base "></i>
+            </button>
+            <button type="button" id="noparticipants-{{ participants.id }}" data-action="remove_participant" data-action="block_participant" class="btn btn-lg bg-light text-slate-900 dark:text-slate-200">
+                <i class="mgc_phone_block_line text-base"></i>
+            </button>
+            <button type="button" id="not_added-{{ participants.id }}" data-action="add_to_not_added" class="btn btn-lg bg-light text-slate-900 dark:text-slate-200">
+                <i class="mgc_exit_fill text-base"></i>
+            </button>
+            <button type="button" id="participants-saved_video-{{ participants.id }}" class="btn btn-lg
+                {% if participants.saved_video == True %}
+                    bg-danger/25 text-danger hover:bg-secondary hover:text-white
+                {% else %}
+                    bg-light text-slate-900 dark:text-slate-200
+                {% endif %}">
+                <i class="mgc_save_2_line text-base "></i>
+            </button>
+            <button type="button" id="pin-{{ participants.id }}" data-action="pin_primary"  class="btn btn-lg bg-danger/25 text-danger hover:bg-secondary hover:text-white">
+                <i class="mgc_pin_2_line text-base "></i>
+            </button>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,143 @@
+{% load generals_conference_tag %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>{% get_settings as settings %}{% if settings.name %}{{ settings.name }}{% endif %} - {% block headtitle %}{% endblock headtitle %}</title>
+    <meta content="{% block headdescription %}{% endblock headdescription %}" name="description">
+    <meta property="og:image" content="{% block previev %}{% endblock previev %}">
+    <!-- Favicons -->
+    {% get_settings as settings %}
+
+    <link rel="icon" type="image/png"  href="/_media/{% if settings.favicon %}{{ settings.favicon }}{% endif %}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Krub:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="{% static 'conference/site/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'conference/site/vendor/icofont/icofont.min.css' %}" rel="stylesheet">
+    <link href="{% static 'conference/site/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'conference/site/vendor/owl.carousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'conference/site/vendor/venobox/venobox.css' %}" rel="stylesheet">
+    <link href="{% static 'conference/site/vendor/aos/aos.css' %}" rel="stylesheet">
+    <!-- Template Main CSS File -->
+    <link href="{% static 'conference/site/css/style.css' %}" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+</head>
+<body>
+<!-- ======= Header ======= -->
+<header id="header" class="fixed-top">
+    <div class="container d-flex align-items-center">
+        <h1 class="logo mr-auto">
+            <a href="{% url 'con_home'  %}">
+                <img src="{% if settings.logo %}/_media/{{ settings.logo }}{% endif %}" alt="{% if settings.name %}{{ settings.name }}{% endif %}">
+            </a>
+        </h1>
+        <nav class="nav-menu d-none d-lg-block">
+            <ul>
+                <li class="active"><a href="{% url 'con_home'  %}">Главная</a></li>
+                <li class=""><a href="{% url 'con_about'  %}">О проекте</a></li>
+                <li><a href="{% url 'con_blogs' %}">Новости</a></li>
+                <li class=""><a href="{% url 'con_faq'  %}">FAQs</a></li>
+                <li class=""><a href="{% url 'con_requisites'  %}">Реквизиты</a></li>
+            </ul>
+        </nav>
+        <!-- .nav-menu -->
+    {% if user.is_authenticated %}
+        <a href="{% url 'con_logout'  %}" class="get-started-btn scrollto" style="margin-right: -20px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-speedometer2" viewBox="0 0 16 16">
+              <path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4M3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707M2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10m9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5m.754-4.246a.39.39 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.39.39 0 0 0-.029-.518z"></path>
+              <path fill-rule="evenodd" d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A8 8 0 0 1 0 10m8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3"></path>
+            </svg>
+        </a>
+        <a href="{% url 'con_logout'  %}" class="get-started-btn scrollto">Выйти</a>
+    {% else %}
+        <a href="{% url 'con_login'  %}" class="get-started-btn scrollto">Войти</a>
+    {% endif %}
+    </div>
+</header>
+<!-- End Header -->
+<!-- ======= Hero Section ======= -->
+<!-- End Hero -->
+<main id="main">
+{% block content %}
+{% endblock content %}
+
+</main>
+<!-- End #main -->
+<!-- ======= Footer ======= -->
+<footer id="footer">
+    <div class="footer-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 footer-contact">
+                    <h3 class="mb-3 footer-logo">
+                        <a href="{% url 'con_home'  %}" class="footer-link">
+                            <img src="{% if settings.logo %}/_media/{{ settings.logo }}{% endif %}" alt="{% if settings.name %}{{ settings.name }}{% endif %}" alt="{{ settings.name }}" class="footer-logo-img">
+                        </a>
+                    </h3>
+                    <p>
+                        {{ settings.description }} <br>
+                    </p>
+                </div>
+
+                <div class="col-lg-4 col-md-6 footer-links">
+                    <h4>Основная информация</h4>
+                    <ul>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_about'  %}">О проекте</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_blogs' %}">Новости</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_faq'  %}">FAQs</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_helping'  %}">Инструкция</a></li>
+
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6 footer-links">
+                    <h4>Полездно знать</h4>
+                    <ul>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_privacy-policy'  %}">Политика конфиденциальности</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_terms_of_use'  %}">Пользовательское соглашение</a></li>
+                        <li><i class="bx bx-chevron-right"></i><a href="{% url 'con_requisites'  %}">Реквизиты</a></li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container d-md-flex py-5">
+
+        <div class="mr-md-auto text-center text-md-left">
+            <div class="copyright">
+                &copy; {{ settings.content }}
+            </div>
+        </div>
+        <div class="social-links text-center text-md-right pt-3 pt-md-0">
+
+
+
+
+
+
+        </div>
+    </div>
+</footer><!-- End Footer -->
+<a href="{% url 'con_home'  %}" class="back-to-top">
+    <i class="icofont-simple-up"></i>
+</a>
+<!-- Vendor JS Files -->
+<script src="{% static 'conference/site/vendor/jquery/jquery.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/jquery.easing/jquery.easing.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/php-email-form/validate.js' %}"></script>
+<script src="{% static 'conference/site/vendor/owl.carousel/owl.carousel.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/isotope-layout/isotope.pkgd.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/venobox/venobox.min.js' %}"></script>
+<script src="{% static 'conference/site/vendor/aos/aos.js' %}"></script>
+<!-- Template Main JS File -->
+<script src="{% static 'conference/site/js/main.js' %}"></script>
+<script src="{% static 'conference/vendor/livewire/livewire.js@id=90730a3b0e7144480175' %}" data-turbo-eval="false" data-turbolinks-eval="false" ></script>
+</body>
+</html>

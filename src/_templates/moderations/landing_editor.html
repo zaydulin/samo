@@ -1,0 +1,40 @@
+{% extends 'moderations/base.html' %}
+{% load static %}
+{% load grapesjs_tags %}  {# Добавляем теги GrapesJS #}
+
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+
+{% block head %}
+{{ block.super }}
+{{ form.media }}  {# Подключаем медиа-файлы формы #}
+{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="field">
+        {{ form.title.errors }}
+        <label for="{{ form.title.id_for_label }}">Название:</label>
+        {{ form.title }}
+    </div>
+
+    <div class="field">
+        {{ form.slug.errors }}
+        <label for="{{ form.slug.id_for_label }}">Slug:</label>
+        {{ form.slug }}
+    </div>
+
+    <div class="field">
+        {{ form.content.errors }}
+        {% grapesjs_editor form.content.auto_id %}  {# Используем тег для редактора #}
+    </div>
+
+    <button type="submit">Сохранить</button>
+</form>
+{% endblock %}

@@ -1,0 +1,42 @@
+[
+  {
+    "model": "sites.site",
+    "pk": 1,
+    "fields": {
+      "domain": "crm-font.works-all.ru",
+      "name": "crm-font.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 2,
+    "fields": {
+      "domain": "lkcrm-font.works-all.ru",
+      "name": "lkcrm-font.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 3,
+    "fields": {
+      "domain": "mscrm-font.works-all.ru",
+      "name": "mscrm-font.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 4,
+    "fields": {
+      "domain": "crm-font-2.works-all.ru",
+      "name": "crm-font-2.works-all.ru"
+    }
+  },
+  {
+    "model": "sites.site",
+    "pk": 5,
+    "fields": {
+      "domain": "crm-font-3.works-all.ru",
+      "name": "crm-font-3.works-all.ru"
+    }
+  }
+]

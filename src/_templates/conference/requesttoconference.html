@@ -1,0 +1,276 @@
+{% extends 'moderations/base.html' %}
+
+{% load static %}
+{% load i18n %}
+{% block headtitle %} Запросить доступ к конференции{% endblock headtitle %}
+{% block headdescription %}{% endblock headdescription %}
+{% block headkeywords %}{% endblock headkeywords %}
+{% block head %}
+{% endblock head %}
+{% block content %}
+    <div class="p-4">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-3">
+                <div class="card">
+                    <div class="card-header">
+                        {% if videochat.is_closed %}
+                        <h6 class="card-title" >Конференция еще не началась</h6>
+                        {% else %}
+                        <h6 class="card-title" >Вас скоро добавят в эту конференцию</h6>
+                        {% endif %}
+                    </div>
+                    <div class="col-lg-12" style="padding: 30px;">
+                        <h6 class="card-title" >Или введите пароль от конференции</h6>
+                        <form id="token-form" method="post" action="{% url 'conference:request_access' %}">
+                            {% csrf_token %}
+                            <input type="text" name="token" class="form-control" placeholder="Введите пароль..." required>
+                            <input type="hidden" name="slug" value="{{ videochat.slug }}">
+                            <button style="margin-top: 15px" class="btn btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-original-title="Войти">Войти по паролю</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="p-4">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title" >{{ videochat.name }}</h6>
+                    </div>
+                    <div class="col-lg-12" style="padding: 30px;">
+                         <div class="row">
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <!-- stat 1 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid h-10 w-10"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">1</h4>
+                                            <span class="text-sm">Спикеры</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 2 -->
+                                    <div class="col-lg-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-square h-10 w-10"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.get_type_display }}</h4>
+                                            <span class="text-sm">Тип комнаты</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users h-10 w-10"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.visitors.count }}</h4>
+                                            <span class="text-sm">Участников</span>
+                                        </div>
+                                    </div>
+                                    <!-- stat 3 -->
+                                    <div class="col-lg-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock h-10 w-10"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        <div class="">
+                                            <h4 class="text-lg text-gray-700 dark:text-gray-300 font-medium">{{ videochat.time }}</h4>
+                                            <span class="text-sm">Длительность</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                             <div class="col-lg-6">
+
+                                 <h4 class="card-title">Об конференции</h4>
+
+                                <div class="p-6">
+                                    <div>
+                                        {{ videochat.descriptions }}
+                                        <div class="grid grid-cols-4 gap-6">
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    Дата старта
+                                                </p>
+                                                 <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-clock"></i>Время старта</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.start_time }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;">
+                                                    <i class="fa-regular fa-calendar"></i>Дата конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_data }}</h5>
+                                            </div>
+                                            <div class="">
+                                                <p style="margin-top: 10px; margin-bottom: 0px;"> <i class="fa-regular fa-clock"></i> Время конца</p>
+                                                <h5 class="text-base text-gray-700 dark:text-gray-300 font-medium">{{ videochat.end_time }}</h5>
+                                            </div>
+                                        </div>
+                                        {% if files %}
+                                        <div class="mt-6" style="margin-top: 20px;">
+                                            <h6 class="text-gray-800 font-medium mb-3">Файлы к конференции</h6>
+                                            <div class="grid md:grid-cols-4 gap-3">
+                                                {% for file in files %}
+                                                <div class="p-2 border border-gray-200 dark:border-gray-700 rounded mb-2">
+                                                    <div class="flex items-center">
+                                                        <div class="h-9 w-9 rounded flex justify-center items-center text-primary bg-primary/20 me-3">
+                                                            <i class="mgc_file_new_line text-xl"></i>
+                                                        </div>
+
+                                                        <div class="">
+                                                            <a href="{{ file.file.url }}" class="text-sm font-medium">{{ file.file.name }}</a>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                            </div>
+                         </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="col-lg-6">
+                            <div class="card-header">
+                                <h6 class="card-title">Спикеры</h6>
+                            </div>
+                             <div class="p-6" style="    padding: 30px;">
+                                <!-- Basic -->
+                                <div class="grid xl:grid-cols-5 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5"   style="overflow: auto; ">
+
+                                    <div class="flex relative user-card">
+                                        <img alt="gallery" class="absolute w-full object-cover object-center rounded" width="150px" src="{{ videochat.spiker.avatar.url }}">
+                                        <h1 class="username title-font text-lg font-medium text-gray-900 mb-3">
+                                            {{ videochat.spiker.username}}
+                                        </h1>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block bootonfooter %}
+<script>
+    function showAlert(message, type) {
+        // Создаем элемент div для уведомления
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        // Применяем стили
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px';
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out';
+        alertDiv.style.padding = '15px'; // Добавляем отступы для лучшего отображения
+
+        // Дополнительное оформление для типа 'danger'
+        if (type === 'danger') {
+            alertDiv.style.backgroundColor = '#f8d7da';
+            alertDiv.style.color = '#721c24';
+            alertDiv.style.border = '1px solid #f5c6cb';
+        }
+
+        // Добавляем уведомление на страницу
+        document.body.prepend(alertDiv);
+
+        // Удаляем уведомление через 3 секунды с эффектом исчезновения
+        setTimeout(() => {
+            alertDiv.style.opacity = '0';
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 300); // Время совпадает с CSS transition
+        }, 3000);
+    }
+
+    document.getElementById('token-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    submitButton.disabled = true; // Отключаем кнопку
+
+    const formData = new FormData(form);
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': csrfToken  },
+    })
+    .then(response => {
+        submitButton.disabled = false; // Включаем кнопку обратно
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || 'Произошла ошибка.');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        } else if (data.error) {
+            showAlert(data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        submitButton.disabled = false; // Включаем кнопку обратно в случае ошибки
+        console.error('Ошибка:', error);
+        showAlert(error.message || 'Произошла ошибка при отправке формы.', 'danger');
+    });
+});
+
+</script>
+<!-- Добавляем скрипт для WebSocket UserRedirect -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+        const userRedirectSocket = new WebSocket(wsScheme + '://' + window.location.host + '/user_redirect/');
+
+        userRedirectSocket.onopen = function(e) {
+            console.log("WebSocket подключен к user_redirect");
+        };
+
+        userRedirectSocket.onmessage = function(e) {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.action === 'user_allowed') {
+                    const redirectUrl = data.redirect_url;
+                    console.log(`Редирект на ${redirectUrl}`);
+                    window.location.href = redirectUrl;
+                }
+            } catch (err) {
+                console.error("Ошибка при обработке сообщения WebSocket (redirect):", err);
+            }
+        };
+
+        userRedirectSocket.onclose = function(e) {
+            console.log("WebSocket отключен от user_redirect");
+        };
+
+        userRedirectSocket.onerror = function(e) {
+            console.error("WebSocket ошибка (redirect):", e);
+        };
+    });
+</script>
+{% endblock bootonfooter %}

@@ -1,0 +1,1085 @@
+{% load static %}
+<form id="editthemesForm" method="POST"  action="{% if theme.id %}{% url 'moderation:themes_edit' theme.id %}{% endif %}">
+                    {% csrf_token %}
+    <div class="card checkout-cart">
+        <div class="card-body basic-wizard important-validation" id="editthemesmsform">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Редактировать лекцию</h5>
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-primary" onclick="submitEditForm()" id="saveAndeditThemes">Сохранить</button>
+                </div>
+            </div>
+            <div id="loading-indicator-editthemes" class="htmx-indicator">Сохранение...</div>
+            <div class="row g-3 custom-input">
+                <input type="hidden" name="id_themes" id="id_themes" value="{{ theme.id }}">
+                <!-- Добавляем выбор модуля -->
+                {% if modules %}
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_module_themes">Выберите модуль</label>
+                    <select name="module" class="form-control" id="id_module_themes">
+                        {% for module in modules %}
+                        <option value="{{ module.id }}" {% if theme.modules.id == module.id %}selected{% endif %}>
+                            {{ module.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="alert-danger" id="alert-module_themes">{{ errors.module }}</div>
+                </div>
+                {% endif %}
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_name_themes">Название лекции</label>
+                    <input type="text" name="name" class="form-control" id="id_name_themes" required value="{{ theme.name }}">
+                    <div class="alert-danger" id="alert-name_themes">{{ errors.name }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_description_edit_themes">Лекционный материал</label>
+                    <div id="description-editor"></div>
+                    <textarea name="description_edit_themes" id="id_description_edit_themes" class="form-control">{{ theme.description }}</textarea>
+
+
+                    <div class="alert-danger" id="alert-description_themes">{{ errors.description }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_access_type_themes">Доступна после прохождения предыдущего</label>
+                    <div id="access_type_themes"></div>
+                    <div class="form-check-size">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input check-size" id="id_access_type_themes" name="access_type" type="checkbox" role="switch" {% if theme.access_type %}checked{% endif %}>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-access_type_themes">{{ errors.access_type }}</div>
+                </div>
+<div class="col-sm-12">
+                <div class="row">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="id_home_work_status_themes_edit" style="margin-top: 10px">Наличие домашнего задания</label>
+                            <div id="point_home_work"></div>
+                            <div class="form-check-size">
+                                <div class="form-check form-switch form-check-inline">
+                                   <input class="form-check-input check-size" id="id_home_work_status_themes_edit" name="home_work_status" type="checkbox" role="switch" {% if theme.home_work_status %}checked{% endif %} onclick="toggleDisplay('id_home_work_status_themes_edit', 'id_home_work_show_edit')">
+                                </div>
+                            </div>
+                            <div class="alert-danger" id="alert-home_work_status">{{ errors.home_work }}</div>
+                        </div>
+                        <div class="col-sm-12" id="id_home_work_show_edit" {% if theme.home_work_status %} style="display: block" {% else %} style="display: none" {% endif %} >
+                            <label class="form-label" for="id_home_work_edit_themes" style="margin-top: 10px">Задание</label>
+                            <div id="home_work-editor"></div>
+                            <textarea name="home_work_edit_themes" id="id_home_work_edit_themes" class="form-control">{{ theme.home_work }}</textarea>
+
+
+                            <div class="alert-danger" id="alert-home_work">{{ errors.home_work }}</div>
+                        </div>
+                    </div>
+     </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="id_point_status_themes_edit">Количество баллов в тесте для прохождения</label>
+                            <div id="point_status"></div>
+                            <div class="form-check-size">
+                                <div class="form-check form-switch form-check-inline">
+                                   <input class="form-check-input check-size" id="id_point_status_themes_edit" name="point_status" type="checkbox" role="switch" {% if theme.point_status %}checked{% endif %} onclick="toggleDisplay('id_point_status_themes_edit', 'id_point_show_edit')">
+                                </div>
+                            </div>
+                            <div class="alert-danger" id="alert-point_status">{{ errors.point_status }}</div>
+                        </div>
+                        <div class="col-sm-8" id="id_point_show_edit"  {% if theme.point_status %} {% else %} style="display:none;" {% endif %}>
+                            <label class="form-label" for="id_point">Минимум баллов в тесте для прохождения тем</label>
+                            <input type="number" name="point" value="{{ theme.point|default_if_none:'' }}" min="0" class="form-control" id="id_point">
+                            <div class="alert-danger" id="alert-point">{{ errors.point }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="form-label" for="id_attempts_status_themes_edit">Ограничить попытки прохождения</label>
+                            <div id="attempts_status"></div>
+                            <div class="form-check-size">
+                                <div class="form-check form-switch form-check-inline">
+                                   <input class="form-check-input check-size" id="id_attempts_status_themes_edit" name="attempts_status" type="checkbox" role="switch" {% if theme.attempts_status %}checked{% endif %} onclick="toggleDisplay('id_attempts_status_themes_edit', 'id_attempts_show_edit')">
+                                </div>
+                            </div>
+                            <div class="alert-danger" id="alert-attempts_status">{{ errors.attempts_status }}</div>
+                        </div>
+                       <div class="col-sm-8" id="id_attempts_show_edit" {% if theme.attempts_status %}style="display:block;"{% else %}style="display:none;"{% endif %} >   <!-- style="display:none;"-->
+                            <label class="form-label" for="id_attempts">Попытки за прохождения в минуты</label>
+                            <input type="number" name="attempts" value="{{ theme.attempts|default_if_none:'' }}" min="0" class="form-control" id="id_attempts">
+                            <div class="alert-danger" id="alert-attempts">{{ errors.attempts }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_test_duration">Время на тест (в минутах)</label>
+                    <input type="number" name="test_duration" class="form-control" id="id_test_duration" required value="{{ theme.test_duration }}" placeholder="Количество минут">
+                    <div class="alert-danger" id="alert-test_duration">{{ errors.test_duration }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_show_answer_themes">После прохождения показывать ответы</label>
+                    <div id="show_answer_themes"></div>
+                    <div class="form-check-size">
+                        <div class="form-check form-switch form-check-inline">
+                            <input class="form-check-input check-size" id="id_show_answer_themes" name="show_answer" type="checkbox" role="switch" {% if theme.show_answer %}checked{% endif %}>
+                        </div>
+                    </div>
+                    <div class="alert-danger" id="alert-show_answer_themes">{{ errors.show_answer }}</div>
+                </div>
+                <div class="col-sm-12">
+                    <label class="form-label" for="id_files">Файлы к уроку</label>
+                    <input type="file" id="id_files" class="form-control" multiple>
+                    <div id="file-list"></div>
+                    <button type="button" id="upload-files" class="btn btn-primary mt-2" style="display: none">Загрузить файлы</button>
+                </div>
+                <div class="col-sm-12">
+                    <h6 style="padding-bottom: 20px;">Прикрепленные файлы:</h6>
+                    <ul id="current-files"  class="file-list">
+                        {% for file in files %}
+                        <li class="file-item" style="padding-bottom: 10px;">
+                            <div class="d-flex">
+                                <svg style=" height: 50px; width: 50px; padding-right: 5px;">
+                                    {% if file.type == 1 %}
+                                    <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-video"></use>
+                                    {% elif file.type == 2 %}
+                                    <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-audio"></use>
+                                    {% else %}
+                                    <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#doc-file"></use>
+                                    {% endif %}
+                                </svg>
+                                <div id="file-{{ file.id }}">
+                                    <h6 class="file-name">{{ file.name }}</h6>
+                                    <p class="mb-0 c-o-light">{{ file.create|date:"d/m/Y" }}</p>
+                                    <div class="button-container">
+                                        {% if file.type == 1 %}
+                                            {% if file.link %}
+                                                <button type="button" class="pipButton btn btn-primary" data-bs-toggle="modal" data-bs-target="#dashboard8" data-video-url="{{ file.files.url }}">Просмотреть видео</button>
+                                                <button class="btn btn-info btn-clipboard" data-info="{{ file.content }}" type="button" data-clipboard-action="copy" data-clipboard-target="#clipboardExample3"><i class="fa fa-copy"></i> Копировать</button>
+                                            {% else %}
+                                                <button type="button"
+                                                        class="btn btn-sm badge-light-success"
+                                                        onclick="uploadFileToHost({{ file.id }})">
+                                                    Загрузить на хостинг
+                                                </button>
+                                            {% endif %}
+                                        {% elif file.type == 2 %}
+                                            <audio controls="controls">
+                                                <source src="{{ file.files.url }}" type="audio/mpeg" />
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-danger delete-file" data-file-id="{{ file.id }}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- Модальное окно -->
+<div class="modal fade" id="dashboard8" tabindex="-1" aria-labelledby="dashboard8" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content category-popup">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modaldashboard">Видео</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 custom-input">
+                <div class="text-start">
+                    <video id="modalVideo" controls style="width: 100%;"></video>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Отправка и инициализация тем-->
+<script>
+    // Функция для отображения/скрытия элементов
+    function toggleDisplay(checkboxId, targetId) {
+        const checkbox = document.getElementById(checkboxId);
+        const target = document.getElementById(targetId);
+
+        if (checkbox && target) {
+            // Устанавливаем отображение блока в зависимости от состояния чекбокса
+            target.style.display = checkbox.checked ? 'block' : 'none';
+        }
+    }
+
+    // Инициализация начального состояния
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleDisplay('id_point_status_themes_edit', 'id_point_show_edit');
+        toggleDisplay('id_attempts_status_themes_edit', 'id_attempts_show_edit');
+        toggleDisplay('id_home_work_status_themes_edit', 'id_home_work_show_edit');
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let descriptionEditor, homeWorkEditor;
+
+    // Функция для инициализации CKEditor
+    function initializeTinyMCEforEditTheme(syncTextareaId) {
+        const textarea = document.querySelector(`#${syncTextareaId}`);
+        if (!textarea) {
+            console.error(`Не найден элемент с id "${syncTextareaId}"`);
+            return;
+        }
+        if (textarea) {
+            console.log(`ТЕМЫ ДЕСКРИПТИОН "${syncTextareaId}"`);
+        }
+
+        // Уничтожаем существующий экземпляр, если он уже существует
+        const existingEditor = tinymce.get(syncTextareaId);
+        if (existingEditor) {
+            tinymce.remove(existingEditor);
+             console.log(`УДАЛЯЕМ "${existingEditor}"`);
+        }
+
+    try {
+        tinymce.init({
+            selector: `#${syncTextareaId}`, // Привязка к конкретному ID текстовой области
+            plugins: 'print preview fullpage paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount spellchecker imagetools textpattern noneditable help charmap quickbars emoticons',
+            toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+            content_style: 'img { max-width: 100%; height: auto; }',
+            autosave_ask_before_unload: false, // Disable unload warning
+            imagetools_cors_hosts: ['picsum.photos'],
+            images_upload_url: "{% url 'moderation:tinymce_upload' %}", // URL для загрузки изображений
+            images_upload_credentials: true,
+            automatic_uploads: true,
+            image_advtab: true,
+            image_title: true,
+            height: 400,
+            notifications: false ,
+
+                // Обработчик загрузки изображений
+                images_upload_handler: function (blobInfo, success, failure) {
+                    let formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                    fetch("{% url 'moderation:tinymce_upload' %}", {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin' // Важно для правильной передачи CSRF-токена
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.location) {
+                            success(result.location);
+                        } else {
+                            failure('Upload failed');
+                        }
+                    })
+                    .catch(error => {
+                        failure('Upload failed: ' + error);
+                    });
+                },
+
+                // Событие изменения контента
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        const hiddenTextarea = document.querySelector(`#${syncTextareaId}`);
+                        if (hiddenTextarea) {
+                            hiddenTextarea.value = editor.getContent();
+                        }
+                    });
+
+                    // Prevent unload warning
+                    editor.on('init', function() {
+                        editor.initialized = true;
+                        editor.isNotDirty = true;
+                    });
+                },
+                // Загружаем начальное содержимое в редактор
+                init_instance_callback: function (editor) {
+                    const hiddenTextarea = document.querySelector(`#${syncTextareaId}`);
+                    if (hiddenTextarea && hiddenTextarea.value) {
+                        editor.setContent(hiddenTextarea.value);
+                    }
+                    editor.isNotDirty = true;
+                }
+            });
+        } catch (error) {
+            console.error(`Ошибка инициализации TinyMCE для ТЕМЫ ДЕСКРИПТИОН ${syncTextareaId}:`, error);
+        }
+    }
+
+function addImageResizeFunctionality(imageElement, editorInstance, syncTextarea) {
+    const existingHandles = document.querySelectorAll('.resize-handle');
+    existingHandles.forEach(handle => handle.remove());
+
+    const resizeHandles = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+    resizeHandles.forEach(position => {
+        const handle = document.createElement('div');
+        handle.className = `resize-handle ${position}`;
+        document.body.appendChild(handle);
+
+        positionHandle(handle, imageElement, position);
+
+        handle.addEventListener('mousedown', (event) => {
+            startResizing(event, imageElement, handle, editorInstance, syncTextarea);
+        });
+    });
+}
+
+function positionHandle(handle, imageElement, position) {
+    const rect = imageElement.getBoundingClientRect();
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    switch (position) {
+        case 'top-left':
+            handle.style.left = `${rect.left + scrollLeft - 10}px`;
+            handle.style.top = `${rect.top + scrollTop - 10}px`;
+            break;
+        case 'top-right':
+            handle.style.left = `${rect.right + scrollLeft - 10}px`;
+            handle.style.top = `${rect.top + scrollTop - 10}px`;
+            break;
+        case 'bottom-left':
+            handle.style.left = `${rect.left + scrollLeft - 10}px`;
+            handle.style.top = `${rect.bottom + scrollTop - 10}px`;
+            break;
+        case 'bottom-right':
+            handle.style.left = `${rect.right + scrollLeft - 10}px`;
+            handle.style.top = `${rect.bottom + scrollTop - 10}px`;
+            break;
+    }
+
+    handle.style.position = 'absolute';
+    handle.style.width = '10px';
+    handle.style.height = '10px';
+    handle.style.background = 'red';
+    handle.style.cursor = 'nwse-resize';
+    handle.style.zIndex = '1000';
+    handle.style.borderRadius = '50%';
+}
+
+function startResizing(event, imageElement, handle, editorInstance, syncTextarea) {
+    const initialX = event.clientX;
+    const initialY = event.clientY;
+    const initialWidth = imageElement.offsetWidth;
+    const initialHeight = imageElement.offsetHeight;
+    const aspectRatio = initialWidth / initialHeight;
+
+    function resize(event) {
+        const deltaX = event.clientX - initialX;
+        const deltaY = event.clientY - initialY;
+
+        let newWidth = initialWidth + deltaX;
+        let newHeight = initialHeight + deltaY;
+
+        // Сохраняем пропорции
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            newHeight = newWidth / aspectRatio;
+        } else {
+            newWidth = newHeight * aspectRatio;
+        }
+
+        if (newWidth > 50 && newHeight > 50) {
+            imageElement.style.width = `${newWidth}px`;
+            imageElement.style.height = `${newHeight}px`;
+        }
+    }
+
+    function stopResizing() {
+        window.removeEventListener('mousemove', resize);
+        window.removeEventListener('mouseup', stopResizing);
+
+        // Обновляем размеры изображения в редакторе
+        editorInstance.undoManager.add();
+        const updatedContent = editorInstance.getContent();
+        syncTextarea.value = updatedContent;
+    }
+
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+}
+
+
+function createResizeHandles(imageElement, initialWidth, initialHeight, editorInstance) {
+        const existingHandles = document.querySelectorAll('.resize-handle');
+        existingHandles.forEach(handle => handle.remove());
+
+        const resizeHandles = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+        resizeHandles.forEach(position => {
+            const handle = document.createElement('div');
+            handle.className = `resize-handle ${position}`;
+            document.body.appendChild(handle);
+
+            positionHandle(handle, imageElement, position);
+
+            handle.addEventListener('mousedown', (event) => {
+                startResizing(event, imageElement, handle, initialWidth, initialHeight, editorInstance);
+            });
+        });
+    }
+
+function positionHandle(handle, imageElement, position) {
+        const rect = imageElement.getBoundingClientRect();
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        switch (position) {
+            case 'top-left':
+                handle.style.left = `${rect.left + scrollLeft - 10}px`;
+                handle.style.top = `${rect.top + scrollTop - 10}px`;
+                break;
+            case 'top-right':
+                handle.style.left = `${rect.right + scrollLeft - 0}px`;
+                handle.style.top = `${rect.top + scrollTop - 10}px`;
+                break;
+            case 'bottom-left':
+                handle.style.left = `${rect.left + scrollLeft - 10}px`;
+                handle.style.top = `${rect.bottom + scrollTop - 0}px`;
+                break;
+            case 'bottom-right':
+                handle.style.left = `${rect.right + scrollLeft - 0}px`;
+                handle.style.top = `${rect.bottom + scrollTop - 0}px`;
+                break;
+        }
+
+        handle.style.position = 'absolute';
+        handle.style.width = '10px';
+        handle.style.height = '10px';
+        handle.style.background = 'red';
+        handle.style.cursor = 'nwse-resize';
+        handle.style.zIndex = 1000;
+        handle.style.borderRadius = '50%';
+    }
+
+function stopResizing(editorInstance, syncTextarea, imageElement) {
+        // Синхронизация данных с CKEditor и скрытым полем
+        const imageData = imageElement.getBoundingClientRect();
+        const newWidth = imageData.width;
+        const newHeight = imageData.height;
+
+        // Обновляем размеры изображения в HTML
+        imageElement.setAttribute('width', newWidth);
+        imageElement.setAttribute('height', newHeight);
+
+        editorInstance.model.change(writer => {
+            const imageElementModel = editorInstance.model.document.selection.getSelectedElement();
+            if (imageElementModel && imageElementModel.is('element', 'image')) {
+                writer.setAttribute('width', imageElement.width, imageElementModel);
+                writer.setAttribute('height', imageElement.height, imageElementModel);
+            }
+        });
+
+        // Добавляем запись стилей размера в data-атрибут
+        imageElement.setAttribute('data-image-style', `width:${newWidth}px;height:${newHeight}px`);
+
+        // Обновляем скрытое поле с актуальными данными и стилями изображений
+        if (syncTextarea) {
+            const editorContent = editorInstance.getData();
+            syncTextarea.value = editorContent;
+        }
+
+
+        // Удаляем маркеры resize
+        const handles = document.querySelectorAll('.resize-handle');
+        handles.forEach(handle => handle.remove());
+    }
+
+function startResizing(event, imageElement, handle, initialWidth, initialHeight, editorInstance) {
+    event.preventDefault();
+
+    // Найдем syncTextarea для текущего редактора
+    const syncTextarea = document.querySelector(
+        editorInstance === descriptionEditor
+            ? '#id_description_edit_themes'
+            : '#id_home_work_edit_themes'
+    );
+
+    const initialX = event.clientX;
+    const initialY = event.clientY;
+
+    const aspectRatio = initialWidth / initialHeight;
+
+    function resize(event) {
+        const deltaX = event.clientX - initialX;
+        const deltaY = event.clientY - initialY;
+
+        let newWidth = initialWidth + deltaX;
+        let newHeight = initialHeight + deltaY;
+
+        if (handle.className.includes('bottom-right') || handle.className.includes('top-left')) {
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                newHeight = newWidth / aspectRatio;
+            } else {
+                newWidth = newHeight * aspectRatio;
+            }
+        }
+
+        if (newWidth > 50 && newHeight > 50) {
+            imageElement.style.width = `${newWidth}px`;
+            imageElement.style.height = `${newHeight}px`;
+
+            // Обновляем атрибуты ширины и высоты в модели CKEditor
+            editorInstance.model.change(writer => {
+                const modelElement = editorInstance.model.document.selection.getSelectedElement();
+                if (modelElement && modelElement.is('element', 'image')) {
+                    writer.setAttribute('width', newWidth, modelElement);
+                    writer.setAttribute('height', newHeight, modelElement);
+                }
+            });
+        }
+
+        const handles = document.querySelectorAll('.resize-handle');
+        handles.forEach(handle => positionHandle(handle, imageElement, handle.className.split(' ')[1]));
+    }
+
+    function stopResizingWrapper() {
+        window.removeEventListener('mousemove', resize);
+        window.removeEventListener('mouseup', stopResizingWrapper);
+        stopResizing(editorInstance, syncTextarea, imageElement);
+    }
+
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizingWrapper);
+}
+
+    // Инициализация файловой системы
+    function initializeFileSystem() {
+        const fileInput = document.getElementById('id_files');
+        const fileList = document.getElementById('file-list');
+        const currentFiles = document.getElementById('current-files');
+        const uploadAllButton = document.getElementById('upload-files');
+
+        console.log('Проверка элементов файловой системы');
+
+        if (fileInput && fileList && currentFiles && uploadAllButton) {
+            console.log('Все элементы файловой системы найдены');
+
+            // Установка обработчиков событий для файлов
+            fileInput.addEventListener('change', function(event) {
+                console.log('Событие выбора файлов сработало');
+                updateFileList(event.target.files, fileList);
+            });
+
+            uploadAllButton.addEventListener('click', function() {
+                uploadAllFiles();
+            });
+
+            // Установка обработчиков для существующих файлов
+            const deleteButtons = currentFiles.querySelectorAll('.delete-file');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const fileId = this.getAttribute('data-file-id');
+                    const listItem = this.closest('li');
+                    deleteFile(fileId, listItem);
+                });
+            });
+
+            console.log('Инициализация файловой системы завершена');
+        } else {
+            console.log('Не все элементы файловой системы найдены');
+        }
+    }
+    // Инициализация модальных окон
+    function initializeModalSystem() {
+        console.log('Запуск инициализации модального окна');
+        if (typeof setupModalPopup === 'function') {
+            setupModalPopup();
+            console.log('Модальное окно инициализировано');
+        } else {
+            console.error('Функция setupModalPopup не найдена');
+        }
+    }
+    function loadEditForm(themeId) {
+            console.log("Loading edit form for theme ID:", themeId);
+            $.ajax({
+                url: `{% url 'moderation:themes_edit_get' 2222 %}`.replace('2222', themeId), // Укажите правильный URL
+                data: {
+                    'theme_id': themeId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    console.log("Received data:", data);
+
+                    const editContainer = $('#edit-themes');
+
+                    // Вставляем HTML формы редактирования
+                    editContainer.html(data.form_html);
+                                        // Выполняем инициализацию после вставки формы
+                    console.log("Выполняем инициализацию после вставки формы");
+                    initializeTinyMCEforEditTheme('id_description_edit_themes');
+                    initializeTinyMCEforEditTheme('id_home_work_edit_themes');
+                    // Показываем контейнер редактирования
+                    editContainer.removeClass('form-none');
+
+                    // Скрываем остальные формы
+                    $('#form-list > div').not(editContainer).addClass('form-none');
+
+
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading edit form:", error);
+                    console.error("Status:", status);
+                    console.error("Response:", xhr.responseText);
+                    alert("Произошла ошибка при загрузке формы редактирования. Пожалуйста, попробуйте еще раз.");
+                }
+            });
+        }
+    // Загрузка формы редактирования
+$(document).ready(function() {
+        console.log("Initializing loadEditForm");
+
+        // Событие для загрузки формы редактирования
+        $(document).on('click', 'a[for="edit-themes"]', function(e) {
+            e.preventDefault();
+            var themeId = $(this).data('theme-id');
+            console.log("Clicked on edit for theme ID:", themeId);
+            loadEditForm(themeId);
+        });
+
+
+    });
+    // Отправка формы редактирования
+    // Инициализация кнопок редактирования
+    function initializeEditButtons() {
+        document.querySelectorAll('.edit-theme').forEach(button => {
+            button.addEventListener('click', loadEditForm);
+        });
+    }
+
+    // Инициализация страницы
+    initializeEditButtons(); // Кнопки редактирования
+
+    initializeFileSystem(); // Добавляем инициализацию файловой системы
+    initializeModalSystem(); // Добавляем инициализацию модального окна
+});
+</script>
+<script>
+        // Показ уведомлений
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '1000';
+        alertDiv.style.borderRadius = '5px';
+        alertDiv.style.minWidth = '250px';
+        alertDiv.style.textAlign = 'center';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+        alertDiv.style.transition = 'opacity 0.3s ease-in-out';
+
+        document.body.prepend(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    function submitEditForm() {
+
+    const form = document.getElementById('editthemesForm');
+    if (!form) return;
+
+    // Синхронизируем данные TinyMCE с текстовыми полями
+    tinymce.triggerSave();
+
+    const formData = new FormData(form);
+
+    document.getElementById('loading-indicator-editthemes').style.display = 'block';
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+    })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('loading-indicator-editthemes').style.display = 'none';
+
+            if (data.success) {
+                showAlert('Лекция обновлена', 'success');
+
+                // Обновляем текст названия в интерфейсе
+                const themeId = data.theme_id; // Передай ID темы в ответе
+                const newTitle = data.new_title; // Передай новое название в ответе
+                const themeElement = document.querySelector(`#theme-${themeId} .main-title`);
+                if (themeElement) {
+                    themeElement.textContent = newTitle;
+                }
+
+
+            } else if (data.errors) {
+                console.error('Ошибки:', data.errors);
+                showAlert('Лекция не обновлена', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка отправки формы:', error);
+            document.getElementById('loading-indicator-editthemes').style.display = 'none';
+            showAlert('Лекция не обновлена', 'danger');
+        });
+}
+</script>
+<!-- Воспроизведение видео -->
+<script>
+    console.log('Скрипт загружен');
+
+    function setupModalPopup() {
+        const currentFiles = document.getElementById('current-files');
+        const modalVideo = document.getElementById('modalVideo');
+        const videoModal = document.getElementById('dashboard8'); // Исправленный элемент
+
+        if (!currentFiles || !modalVideo || !videoModal) {
+            console.error('Не все элементы найдены!');
+            return;
+        }
+
+        // Открытие попапа с видео
+        currentFiles.addEventListener('click', function(event) {
+            const target = event.target.closest('.pipButton');
+            if (target) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const videoUrl = target.getAttribute('data-video-url');
+                console.log('Ссылка на видео:', videoUrl);
+
+                if (!videoUrl) {
+                    console.error('Ошибка: URL видео не найден');
+                    return;
+                }
+
+                // Задать источник видео и показать модальное окно
+                modalVideo.src = videoUrl;
+
+                // Инициализируем модальное окно с помощью Bootstrap
+                const modal = new bootstrap.Modal(videoModal);
+                modal.show();
+            }
+        });
+
+        // Закрытие попапа при клике на крестик
+        const closeBtn = videoModal.querySelector('.btn-close');
+        closeBtn.addEventListener('click', function() {
+            // Остановить воспроизведение видео и очистить его источник
+            modalVideo.pause();
+            modalVideo.src = '';
+
+            // Получаем экземпляр модального окна и скрываем его
+            const modal = bootstrap.Modal.getInstance(videoModal);
+            modal.hide();
+
+            // Удаляем backdrop после закрытия модала
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
+        });
+    }
+
+    // Запуск функции после загрузки DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupModalPopup);
+    } else {
+        setupModalPopup();
+    }
+
+    console.log('Скрипт завершил выполнение');
+
+
+</script>
+<!-- Загрузка файлов -->
+<script>
+    console.log('Script начал выполнение');
+
+    function checkElements() {
+        const fileInput = document.getElementById('id_files');
+        const fileList = document.getElementById('file-list');
+        const currentFiles = document.getElementById('current-files');
+        const uploadAllButton = document.getElementById('upload-files');
+
+        console.log('Элемент input file:', fileInput);
+        console.log('Элемент списка файлов:', fileList);
+        console.log('Элемент текущих файлов:', currentFiles);
+        console.log('Кнопка загрузки всех файлов:', uploadAllButton);
+
+        if (fileInput && fileList && currentFiles && uploadAllButton) {
+            console.log('Все элементы найдены');
+            setupEventListeners(fileInput, fileList, uploadAllButton);
+            setupExistingFileDeleteListeners(currentFiles);
+        } else {
+            console.error('Не удалось найти все необходимые элементы');
+        }
+    }
+
+    function setupEventListeners(fileInput, fileList, uploadAllButton) {
+        fileInput.addEventListener('change', function(event) {
+            console.log('Событие выбора файлов сработало');
+            updateFileList(event.target.files, fileList);
+        });
+
+        uploadAllButton.addEventListener('click', function() {
+            uploadAllFiles();
+        });
+
+        console.log('Обработчики событий установлены');
+    }
+
+    function setupExistingFileDeleteListeners(currentFiles) {
+        const deleteButtons = currentFiles.querySelectorAll('.delete-file');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const fileId = this.getAttribute('data-file-id');
+                const listItem = this.closest('li');
+                deleteFile(fileId, listItem);
+            });
+        });
+        console.log('Обработчики удаления для существующих файлов установлены');
+    }
+
+    function updateFileList(files, fileList) {
+        console.log('Обновление списка файлов');
+        fileList.innerHTML = '';
+
+        for (let i = 0; i < files.length; i++) {
+            const li = document.createElement('li');
+            li.innerHTML = `
+            ${files[i].name}
+            <button class="delete-file btn btn-sm btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></button>
+            <button class="upload-file btn btn-primary"><i class="fa fa-upload" aria-hidden="true"></i></button>
+            <div class="progress" style="display:none; width:100%; background-color:#f0f0f0;">
+                <div class="progress-bar" style="width:0%; height:20px; background-color:#4CAF50;"></div>
+            </div>
+        `;
+            fileList.appendChild(li);
+            console.log('Добавлен файл:', files[i].name);
+
+            const deleteButton = li.querySelector('.delete-file');
+            const uploadButton = li.querySelector('.upload-file');
+            const progressBar = li.querySelector('.progress-bar');
+            const progress = li.querySelector('.progress');
+
+            deleteButton.addEventListener('click', function() {
+                li.remove();
+                console.log('Файл удален из списка:', files[i].name);
+            });
+
+            uploadButton.addEventListener('click', function() {
+                console.log('Запрос на загрузку файла:', files[i].name);
+                uploadFile(files[i], progressBar, progress, uploadButton, li);
+            });
+        }
+
+        document.getElementById('upload-files').style.display = files.length > 0 ? 'block' : 'none';
+    }
+
+    function uploadAllFiles() {
+        const fileList = document.getElementById('file-list');
+        const uploadButtons = fileList.querySelectorAll('.upload-file');
+        uploadButtons.forEach(button => button.click());
+    }
+
+    function uploadFile(file, progressBar, progress, uploadButton, listItem) {
+        const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+        const themeId = document.getElementById('id_themes').value;
+
+        formData.append('file', file);
+        formData.append('theme_id', themeId);
+        formData.append('file_name', file.name);
+
+        xhr.open('POST', `{% url 'moderation:file_upload' 6666 %}`.replace('6666', themeId));
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+        xhr.upload.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                progressBar.style.width = percentComplete + '%';
+                progressBar.textContent = percentComplete.toFixed(2) + '%';
+            }
+        };
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    console.log('Файл успешно загружен');
+                    uploadButton.innerHTML = '<i class="fa fa-check" aria-hidden="true"></i>';
+                    uploadButton.disabled = true;
+                    updateCurrentFilesList(response.file_id, response.file_name, response.file_type);
+                    listItem.remove();  // Удаляем элемент из списка загрузки
+                } else {
+                    console.error('Ошибка при загрузке файла:', response.message);
+                    uploadButton.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+                    progressBar.style.backgroundColor = '#ff0000';
+                }
+            } else {
+                console.error('Ошибка при загрузке файла');
+                uploadButton.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+                progressBar.style.backgroundColor = '#ff0000';
+            }
+        };
+
+        xhr.onerror = function() {
+            console.error('Ошибка сети при загрузке файла');
+            uploadButton.innerHTML = '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>';
+            progressBar.style.backgroundColor = '#ff0000';
+        };
+
+        progress.style.display = 'block';
+        uploadButton.innerHTML = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i>';
+        uploadButton.disabled = true;
+
+        xhr.send(formData);
+    }
+
+    function updateCurrentFilesList(fileId, fileName, fileType) {
+        const currentFilesList = document.getElementById('current-files');
+        if (currentFilesList) {
+            const li = document.createElement('li');
+            li.className = 'file-item';
+
+            // Определяем иконку на основе типа файла
+            let iconHref;
+            // Проверяем тип файла, учитывая возможность строкового значения
+            if (fileType === 1 || fileType === '1' || fileType === 'Видео') {
+                iconHref = "{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-video";
+            } else if (fileType === 2 || fileType === '2' || fileType === 'Аудио') {
+                iconHref = "{% static 'site/_generals/svg/icon-sprite.svg' %}#attach-audio";
+            } else {
+                iconHref = "{% static 'site/_generals/svg/icon-sprite.svg' %}#doc-file";
+            }
+
+            // Получаем текущую дату и время
+            const now = new Date();
+            const formattedDate = now.toLocaleString('ru-RU', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            li.innerHTML = `
+            <div class="d-flex">
+                <svg style="height: 50px; width: 50px; padding-right: 5px;">
+                    <use href="${iconHref}"></use>
+                </svg>
+                <div>
+                    <h6 class="file-name">${fileName}</h6>
+                    <p class="mb-0 c-o-light">${formattedDate}</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger delete-file" data-file-id="${fileId}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+            </div>
+        `;
+
+            currentFilesList.appendChild(li);
+
+            li.querySelector('.delete-file').addEventListener('click', function() {
+                deleteFile(fileId, li);
+            });
+        }
+    }
+
+    function deleteFile(fileId, listItem) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `{% url 'moderation:file_delete' 6666 %}`.replace('6666', fileId));
+        xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                listItem.remove();
+                console.log('Файл успешно удален:', fileId);
+            } else {
+                console.error('Ошибка при удалении файла:', xhr.status, xhr.statusText);
+                alert('Ошибка при удалении файла');
+            }
+        };
+        xhr.onerror = function() {
+            console.error('Ошибка сети при удалении файла');
+            alert('Ошибка сети при удалении файла');
+        };
+
+        xhr.send();
+    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    // Проверяем, загружен ли DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkElements);
+    } else {
+        checkElements();
+    }
+    console.log('Script завершил выполнение');
+</script>
+<!--Загрузка на хостинг-->
+<script>
+    function uploadFileToHost(fileId) {
+    // Находим кнопку и её родительский блок с кнопками
+    const button = document.querySelector(`button[onclick="uploadFileToHost(${fileId})"]`);
+    const fileElement = button.closest('#file-' + fileId);
+    const buttonContainer = fileElement.querySelector('.button-container');
+
+    // Отправляем POST-запрос на сервер
+    fetch("{% url 'moderation:update_file_link' 3333 %}".replace('3333', fileId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ file_id: fileId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.link === true) {
+            // Обновляем содержимое только контейнера с кнопками
+            buttonContainer.innerHTML = `
+                <button type="button" class="pipButton btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#dashboard8"
+                        data-video-url="${data.video_url}">
+                    Просмотреть видео
+                </button>
+                <button class="btn btn-info btn-clipboard"
+                        data-info="${data.file_id}"
+                        type="button"
+                        data-clipboard-action="copy"
+                        data-clipboard-target="#clipboardExample3">
+                    <i class="fa fa-copy"></i> Копировать
+                </button>
+            `;
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+<style>
+    h6.file-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 300px;
+        min-width: 300px;
+    }
+    #point-show-edit {
+        display: none;
+    }
+
+</style>

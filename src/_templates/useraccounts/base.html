@@ -1,0 +1,161 @@
+{% load static generals_tag %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title> {% get_settings_first as settings %}{{settings.name}} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% if settings.favicon %}{{settings.favicon.url}}{% endif %}" />
+    <!-- Analitic link -->
+    <!-- Google font-->
+    <link href="https://fonts.googleapis.com/css?family=Rubik:400,400i,500,500i,700,700i&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i,900&amp;display=swap" rel="stylesheet">
+    <!-- Font Awesome-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/fontawesome.css' %}">
+    <!-- ico-font-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/icofont.css' %}">
+    <!-- Themify icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/themify.css' %}">
+    <!-- Flag icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/flag-icon.css' %}">
+    <!-- Feather icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/feather-icon.css' %}">
+    <!-- Plugins css start-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/slick.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/slick-theme.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/scrollbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/jquery.dataTables.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/select.bootstrap5.css' %}">
+    <!-- Plugins css Ends-->
+    <!-- Bootstrap css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/vendors/bootstrap.css' %}">
+    <!-- App css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/style.css' %}">
+    <link id="color" rel="stylesheet" href="{% static 'site/_generals/css/color-1.css' %}" media="screen">
+    <!-- Responsive css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'site/_generals/css/responsive.css' %}">
+
+    {% block head %}{% endblock head %}
+</head>
+<body onload="startTime()">
+<!-- loader starts-->
+<div class="loader-wrapper">
+    <div class="loader-index"> <span></span></div>
+    <svg>
+        <defs></defs>
+        <filter id="goo">
+            <fegaussianblur in="SourceGraphic" stddeviation="11" result="blur"></fegaussianblur>
+            <fecolormatrix in="blur" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"> </fecolormatrix>
+        </filter>
+    </svg>
+</div>
+<!-- tap on top starts-->
+<div class="tap-top"><i data-feather="chevrons-up"></i></div>
+<!-- tap on tap ends-->
+<!-- page-wrapper Start-->
+<div class="page-wrapper compact-wrapper" id="pageWrapper">
+    <!-- Page Header Start-->
+    {% include 'moderations/include/header-top.html' %}
+    <!-- Page Header Ends                              -->
+    <!-- Page Body Start-->
+    <div class="page-body-wrapper">
+        <!-- Page Sidebar Start-->
+        <div class="sidebar-wrapper" data-sidebar-layout="stroke-svg">
+            {% include 'moderations/include/sidebar-menu.html' %}
+        </div>
+        <!-- Page Sidebar Ends-->
+        <div class="page-body">
+            <div class="container-fluid">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h3>
+                                {% block left-title %}{% endblock left-title %}
+                            </h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'moderation:dashboard_moder' %}">
+                                        <svg class="stroke-icon">
+                                            <use href="{% static 'site/_generals/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                        </svg>
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active">{% block breadcrumb %}{% endblock breadcrumb %}</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Container-fluid starts-->
+            <div class="container-fluid">
+                {% block content %}{% endblock content %}
+            </div>
+            <!-- Container-fluid Ends-->
+        </div>
+        <!-- footer start-->
+        {% if settings.content %}
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 footer-copyright text-center">
+                        <p class="mb-0">{{settings.content}}</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        {% endif %}
+    </div>
+</div>
+{% block footer %}{% endblock footer %}
+{% block topfooter %}{% endblock topfooter %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- latest jquery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- htmx js-->
+<script src="{% static 'site/htmx.min.js' %}"></script>
+<!-- Bootstrap js-->
+<script src="{% static 'site/_generals/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<!-- feather icon js-->
+<script src="{% static 'site/_generals/js/icons/feather-icon/feather.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/icons/feather-icon/feather-icon.js' %}"></script>
+<!-- scrollbar js-->
+<script src="{% static 'site/_generals/js/scrollbar/simplebar.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/scrollbar/custom.js' %}"></script>
+<!-- Sidebar jquery-->
+<script src="{% static 'site/_generals/js/config.js' %}"></script>
+<!-- Plugins JS start-->
+<script src="{% static 'site/_generals/js/sidebar-menu.js' %}"></script>
+<script src="{% static 'site/_generals/js/sidebar-pin.js' %}"></script>
+<script src="{% static 'site/_generals/js/slick/slick.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/slick/slick.js' %}"></script>
+<script src="{% static 'site/_generals/js/header-slick.js' %}"></script>
+<script src="{% static 'site/_generals/js/chart/apex-chart/apex-chart.js' %}"></script>
+<script src="{% static 'site/_generals/js/chart/apex-chart/stock-prices.js' %}"></script>
+<script src="{% static 'site/_generals/js/counter/counter-custom.js' %}"></script>
+<script src="{% static 'site/_generals/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'site/_generals/js/datatable/datatables/dataTables.js' %}"></script>
+<script src="{% static 'site/_generals/js/datatable/datatables/dataTables.select.js' %}"></script>
+<script src="{% static 'site/_generals/js/datatable/datatables/datatable.custom.js' %}"></script>
+<script src="{% static 'site/_generals/js/dashboard/dashboard_2.js' %}"></script>
+<script src="{% static 'site/_generals/js/tooltip-init.js' %}"></script>
+<!-- Plugins JS Ends-->
+<!-- Theme js-->
+<script src="{% static 'site/_generals/js/script.js' %}"></script>
+<script src="{% static 'site/_generals/js/script1.js' %}"></script>
+<script>
+
+</script>
+{% block bootonfooter %}{% endblock bootonfooter %}
+
+{#% include 'moderations/include/right-dop-menu.html' %#}
+</body>
+</html>

@@ -1,0 +1,149 @@
+{% extends 'moderations/base.html' %}
+{% load static moderations_tag %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}
+<style>
+    #chart {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .feather.feather-star{
+    height: 100px !important;
+    width: 100px !important;
+    color: #efef21;
+    }
+</style>
+{% endblock head %}
+{% block left-title %}{% endblock left-title %}
+{% block breadcrumb %}{% endblock breadcrumb %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header" style="justify-content: center;align-items: center;display: flex;padding: 80px!important;">
+                    {% if theme_control.status == 1 %}
+                    <h1 style="font-size: 34px;">Тест успешно пройден!</h1>
+                    {% else %}
+                    <h1 style="font-size: 34px;">Тест не пройден!</h1>
+                    {% endif %}
+                </div>
+                <div class="card-body" style="justify-content: center;align-items: center;display: flex;">
+                    {% if theme_control.status == 1 %}
+                    <span style="font-size: 20px;">Вы можете продолжить обучение или пройти тест заново для улучшения результата</span>
+                    {% else %}
+                    <span style="font-size: 20px;">Повторите попытку или продолжите обучение с текущим результатом</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="card" style="height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="    text-align: center;">ПРАВИЛЬНЫЕ ОТВЕТЫ</h5>
+                                    <div id="chart" style="text-align: center;"></div>
+                                    <p class="card-text" style="    text-align: center;">{{ theme_control.correctanswer }} из {{ qwiz_count }} правильных ответов</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="card" style="height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;">
+                                <div class="card-body">
+                                    <h5 class="card-title" style="    text-align: center;">НАБРАНО БАЛЛОВ</h5>
+                                    <h2 class="card-text" style="text-align: center;    height: 206px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    font-size: 100px;">
+                                        <i data-feather="star"></i> {{ theme_control.point }}
+
+                                    </h2>
+                                    <p class="card-text" style="text-align: center;">{{ theme_control.point }} из {{ max_score }} возможных</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="justify-content: center;align-items: center;display: flex;">
+                      <div class="col-xl-12" style="">
+                    <div class="row">
+                        <div class="col-xl-4" style="">
+                           </div>
+                        <div class="col-xl-2" style="align-items: center; display: flex; justify-content: center;">
+                            <a href="{% url 'moderation:quiz_pass' theme.id %}" class="btn btn-dark">Пройти заново</a>
+                        </div>
+                        <div class="col-xl-2" style="align-items: center; display: flex; justify-content: center;">
+                            <a href="{% url 'moderation:coursepassing' course.id %}" class="btn btn-success">Следующий урок</a>
+                        </div>
+                        <div class="col-xl-4" style="">
+                           </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var correctAnswers = {{ theme_control.correctanswer }};
+        var totalQuestions = {{ qwiz_count }};
+        var incorrectAnswers = totalQuestions - correctAnswers;
+
+        var data = [
+            { label: 'Правильные', value: correctAnswers },
+            { label: 'Не правильные', value: incorrectAnswers }
+        ];
+
+        var width = 200,
+            height = 200,
+            radius = Math.min(width, height) / 2;
+
+        var color = d3.scaleOrdinal()
+            .range(["#4CAF50", "#F44336"]);
+
+        var arc = d3.arc()
+            .outerRadius(radius - 10)
+            .innerRadius(radius - 70);
+
+        var pie = d3.pie()
+            .sort(null)
+            .value(function(d) { return d.value; });
+
+        var svg = d3.select("#chart").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+        var g = svg.selectAll(".arc")
+            .data(pie(data))
+            .enter().append("g")
+            .attr("class", "arc");
+
+        g.append("path")
+            .attr("d", arc)
+            .style("fill", function(d) { return color(d.data.label); });
+
+        g.append("text")
+            .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")"; })
+            .attr("dy", ".35em")
+            .style("text-anchor", "middle")
+            .text(function(d) { return d.data.label; });
+    });
+</script>
+
+{% endblock %}

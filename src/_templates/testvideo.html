@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Видеоконференция с демонстрацией экрана (Mesh)</title>
+  <style>
+    video {
+      width: 300px;
+      margin: 5px;
+      background: #000;
+    }
+    .remoteContainer {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 5px;
+      display: inline-block;
+      vertical-align: top;
+    }
+    .remoteContainer .label {
+      font-weight: bold;
+      margin-bottom: 3px;
+      text-align: center;
+    }
+    #participantsList div {
+      margin: 2px;
+      padding: 2px;
+      border: 1px solid #ccc;
+      display: inline-block;
+    }
+    button {
+      margin: 5px;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Моя камера/Демонстрация экрана</h2>
+  <video id="localVideo" autoplay muted playsinline></video>
+  <br>
+  <!-- Кнопки управления -->
+  <button id="toggleVideo">Выключить видео</button>
+  <button id="toggleMic">Выключить микрофон</button>
+  <button id="toggleScreen">Демонстрация экрана</button>
+  <h2>Удалённые видео</h2>
+  <div id="remoteVideos"></div>
+
+  <h2>Участники</h2>
+  <div id="participantsList"></div>
+
+  <script>
+    /***************** Глобальные переменные *****************/
+    const localVideo = document.getElementById('localVideo');
+    const toggleVideoButton = document.getElementById('toggleVideo');
+    const toggleMicButton = document.getElementById('toggleMic');
+    const toggleScreenButton = document.getElementById('toggleScreen');
+    const remoteVideosContainer = document.getElementById('remoteVideos');
+    const participantsListContainer = document.getElementById('participantsList');
+
+    let localStream = null;           // Текущий поток (камера или демонстрация)
+    let localVideoTrack = null;       // Текущая видео-дорожка локального потока
+    let localAudioTrack = null;       // Текущая аудио-дорожка
+    let isScreenSharing = false;      // Флаг демонстрации экрана
+    let screenStream = null;          // Поток демонстрации экрана
+    let peerConnections = {};         // RTCPeerConnection для каждого участника
+    let negotiationInProgress = {};   // Флаги renegotiation для каждого участника
+
+    // Уникальный идентификатор пользователя (предполагается, что сервер подставляет его)
+    const userId = "{{ request.user.id }}" || `user_${Date.now()}`; // Пример уникального ID
+    const roomSlug = 'room1';
+    const wsUrl = `wss://${window.location.host}/video/${roomSlug}/`;
+    const signalingSocket = new WebSocket(wsUrl);
+
+    /***************** Функция добавления удалённого видео *****************/
+    function addRemoteStream(remoteUserId, stream) {
+      let container = document.getElementById(`remoteContainer_${remoteUserId}`);
+      if (!container) {
+        container = document.createElement("div");
+        container.id = `remoteContainer_${remoteUserId}`;
+        container.classList.add("remoteContainer");
+
+        // Создаём метку с ID пользователя
+        const label = document.createElement("div");
+        label.classList.add("label");
+        label.textContent = remoteUserId;
+        container.appendChild(label);
+
+        // Создаём видеоэлемент
+        const videoElem = document.createElement("video");
+        videoElem.id = `remoteVideo_${remoteUserId}`;
+        videoElem.autoplay = true;
+        videoElem.playsInline = true;
+        videoElem.style.border = "1px solid #ccc";
+        container.appendChild(videoElem);
+
+        // Сохраняем uid в атрибуте
+        container.setAttribute("data-uid", remoteUserId);
+        remoteVideosContainer.appendChild(container);
+      }
+      const videoElem = document.getElementById(`remoteVideo_${remoteUserId}`);
+      videoElem.srcObject = stream;
+      console.log(`[WebRTC] Установлен srcObject для видео ${remoteUserId}`);
+    }
+
+    /***************** WS сигнализация *****************/
+    signalingSocket.onopen = () => {
+      console.log("[WebSocket] Соединение установлено");
+      // Получаем локальный поток с веб-камеры сразу после установки соединения
+      startVideo();
+    };
+
+    signalingSocket.onerror = (error) => {
+      console.error("[WebSocket] Ошибка:", error);
+    };
+
+    signalingSocket.onclose = (event) => {
+      console.warn("[WebSocket] Соединение закрыто", event);
+    };
+
+    signalingSocket.onmessage = async (event) => {
+      const message = JSON.parse(event.data);
+      console.log("[WebSocket] Получено сообщение:", message, message.type);
+
+      if (message.type === "participants_update") {
+        updateParticipantsList(message.participants);
+        setupMeshConnections(message.participants);
+        return;
+      }
+
+      const { type, sender, sdp, candidate } = message;
+      if (sender === userId) return; // Игнорировать свои сообщения
+
+      if (type === "offer") {
+        console.log("[WebRTC] Получен offer от:", sender);
+        await handleOffer(sender, sdp);
+      } else if (type === "answer") {
+        console.log("[WebRTC] Получен answer от:", sender);
+        await handleAnswer(sender, sdp);
+      } else if (type === "ice") {
+        console.log("[WebRTC] Получен ICE-кандидат от:", sender);
+        await handleIceCandidate(sender, candidate);
+      }
+    };
+
+    /***************** Обновление списка участников *****************/
+    function updateParticipantsList(participants) {
+      // Обновляем список участников (для блока participantsList)
+      participantsListContainer.innerHTML = "";
+      participants.forEach(participantId => {
+        const elem = document.createElement("div");
+        elem.id = `participant_${participantId}`;
+        elem.textContent = participantId;
+        participantsListContainer.appendChild(elem);
+      });
+
+      // Удаляем контейнеры удалённых участников из remoteVideos
+      const remoteContainers = remoteVideosContainer.querySelectorAll("[data-uid]");
+      remoteContainers.forEach(container => {
+        const uid = container.getAttribute("data-uid");
+        if (!participants.includes(uid)) {
+          container.remove();
+          console.log(`[DOM] Удалён контейнер для удалённого пользователя ${uid}`);
+          // Закрываем RTCPeerConnection для этого пользователя
+          if (peerConnections[uid]) {
+            peerConnections[uid].close();
+            delete peerConnections[uid];
+            delete negotiationInProgress[uid];
+            console.log(`[RTCPeerConnection] Закрыто соединение с ${uid}`);
+          }
+        }
+      });
+    }
+
+    // Функция для установки RTCPeerConnections (Mesh)
+    async function setupMeshConnections(participants) {
+      for (let remoteUserId of participants) {
+        if (remoteUserId === userId) continue;
+        await createPeerConnection(remoteUserId);
+      }
+    }
+
+    /***************** Обработка offer/answer/ICE *****************/
+    async function handleOffer(sender, sdp) {
+      if (!peerConnections[sender]) {
+        await createPeerConnection(sender);
+      }
+      const remoteDesc = new RTCSessionDescription({ type: 'offer', sdp });
+      await peerConnections[sender].setRemoteDescription(remoteDesc);
+      const answer = await peerConnections[sender].createAnswer();
+      await peerConnections[sender].setLocalDescription(answer);
+      signalingSocket.send(JSON.stringify({
+        type: 'answer',
+        sdp: answer.sdp,
+        sender: userId,
+        target: sender,
+      }));
+      console.log("[WebRTC] Отправлен answer пользователю:", sender);
+    }
+
+    async function handleAnswer(sender, sdp) {
+      if (!peerConnections[sender]) {
+        console.error("Получен answer от неизвестного пользователя:", sender);
+        return;
+      }
+      const remoteDesc = new RTCSessionDescription({ type: 'answer', sdp });
+      await peerConnections[sender].setRemoteDescription(remoteDesc);
+      console.log("[WebRTC] Установлен remoteDescription для:", sender);
+    }
+
+    async function handleIceCandidate(sender, candidate) {
+      if (!peerConnections[sender]) {
+        console.error("Получен ICE-кандидат от неизвестного пользователя:", sender);
+        return;
+      }
+      try {
+        await peerConnections[sender].addIceCandidate(new RTCIceCandidate(candidate));
+        console.log("[WebRTC] Добавлен ICE-кандидат от:", sender);
+      } catch (error) {
+        console.error("[WebRTC] Ошибка добавления ICE-кандидата:", error);
+      }
+    }
+
+    /***************** Создание RTCPeerConnection *****************/
+    async function createPeerConnection(remoteUserId) {
+      console.log("Создаем Peer", remoteUserId);
+      const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+      const peerConnection = new RTCPeerConnection(configuration);
+      peerConnections[remoteUserId] = peerConnection;
+      negotiationInProgress[remoteUserId] = false; // Инициализируем флаг renegotiation
+
+      // Обработка событий renegotiation
+      peerConnection.onnegotiationneeded = async () => {
+        if (!negotiationInProgress[remoteUserId]) {
+          negotiationInProgress[remoteUserId] = true;
+          try {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            signalingSocket.send(JSON.stringify({
+              type: 'offer',
+              sdp: offer.sdp,
+              sender: userId,
+              target: remoteUserId,
+            }));
+            console.log(`[onnegotiationneeded] Отправлен offer для ${remoteUserId}`);
+          } catch(e) {
+            console.error("Ошибка onnegotiationneeded для", remoteUserId, e);
+          } finally {
+            negotiationInProgress[remoteUserId] = false;
+          }
+        }
+      };
+
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log(`[ICE] Создан кандидат для ${remoteUserId}:`, event.candidate);
+          signalingSocket.send(JSON.stringify({
+            type: 'ice',
+            candidate: event.candidate,
+            sender: userId,
+            target: remoteUserId,
+          }));
+        }
+      };
+
+      peerConnection.ontrack = (event) => {
+        console.log(`[WebRTC] ontrack от ${remoteUserId}:`, event);
+        if (event.streams && event.streams.length > 0) {
+          addRemoteStream(remoteUserId, event.streams[0]);
+        } else {
+          console.warn(`[WebRTC] ontrack, но streams пустой для ${remoteUserId}`);
+        }
+      };
+
+      // Добавляем дорожки локального потока, если он уже получен
+      if (localStream) {
+        localStream.getTracks().forEach(track => {
+          peerConnection.addTrack(track, localStream);
+          console.log(`[WebRTC] Добавлена дорожка ${track.kind} для ${remoteUserId}`);
+        });
+      }
+
+      // Если вы ранее инициировали создание offer вручную для инициатора, его необходимо убрать,
+      // чтобы избежать двойного создания offer и нарушения порядка m-lines.
+      // Например, закомментируйте следующий блок:
+      /*
+      if (isInitiator(remoteUserId)) {
+        console.log(`Инициатор: мой userId (${userId}) < remoteUserId (${remoteUserId}) = ${userId < remoteUserId}`);
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        signalingSocket.send(JSON.stringify({
+          type: 'offer',
+          sdp: offer.sdp,
+          sender: userId,
+          target: remoteUserId,
+        }));
+        console.log("[WebRTC] Отправлен offer пользователю:", remoteUserId);
+      }
+      */
+    }
+
+    // Функция для определения инициатора (можно оставить, если нужно для другой логики)
+    function isInitiator(remoteUserId) {
+      // Простая логика инициатора: пользователь с меньшим ID инициирует соединение
+      return userId < remoteUserId;
+    }
+
+    /***************** Управление локальным потоком *****************/
+    async function startVideo() {
+      try {
+        // Запрашиваем поток с веб-камеры и микрофона
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localVideo.srcObject = localStream;
+        localVideoTrack = localStream.getVideoTracks()[0];
+        localAudioTrack = localStream.getAudioTracks()[0];
+        toggleVideoButton.textContent = "Выключить видео";
+        toggleMicButton.textContent = "Выключить микрофон";
+        console.log("[Media] Локальный поток (камера) получен");
+
+        // Обновляем соединения: если какие-то соединения уже есть, добавляем дорожки
+        for (let remoteUserId in peerConnections) {
+          localStream.getTracks().forEach(track => {
+            if (!peerConnections[remoteUserId].getSenders().some(s => s.track && s.track.kind === track.kind)) {
+              peerConnections[remoteUserId].addTrack(track, localStream);
+              console.log(`[WebRTC] Добавлена дорожка ${track.kind} для ${remoteUserId} после получения локального потока`);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("[Media] Ошибка получения локального потока:", error);
+      }
+    }
+
+    // Переключение видео (включение/выключение)
+    function toggleVideo() {
+      if (localVideoTrack) {
+        localVideoTrack.enabled = !localVideoTrack.enabled;
+        toggleVideoButton.textContent = localVideoTrack.enabled ? "Выключить видео" : "Включить видео";
+        console.log("[Media] Видео", localVideoTrack.enabled ? "включено" : "выключено");
+        for (let remoteUserId in peerConnections) {
+          const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "video");
+          if (sender) {
+            sender.replaceTrack(localVideoTrack);
+            console.log(`[WebRTC] Обновлена видеодорожка для ${remoteUserId}`);
+          }
+        }
+      }
+    }
+
+    // Переключение микрофона (включение/выключение)
+    function toggleMic() {
+      if (localAudioTrack) {
+        localAudioTrack.enabled = !localAudioTrack.enabled;
+        toggleMicButton.textContent = localAudioTrack.enabled ? "Выключить микрофон" : "Включить микрофон";
+        console.log("[Media] Микрофон", localAudioTrack.enabled ? "включен" : "выключен");
+        for (let remoteUserId in peerConnections) {
+          const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "audio");
+          if (sender) {
+            sender.replaceTrack(localAudioTrack);
+            console.log(`[WebRTC] Обновлена аудиодорожка для ${remoteUserId}`);
+          }
+        }
+      }
+    }
+
+    /***************** Демонстрация экрана *****************/
+    async function startScreenShare() {
+      try {
+        if (isScreenSharing) {
+          stopScreenShare();
+          return;
+        }
+        screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        localVideo.srcObject = screenStream;
+        const screenTrack = screenStream.getVideoTracks()[0];
+        localVideoTrack = screenTrack;
+        isScreenSharing = true;
+        toggleScreenButton.textContent = "Отключить демонстрацию";
+        console.log("[Screen] Поток демонстрации экрана получен");
+
+        for (let remoteUserId in peerConnections) {
+          const sender = peerConnections[remoteUserId].getSenders().find(s => s.track && s.track.kind === "video");
+          if (sender) {
+            sender.replaceTrack(screenTrack);
+            console.log(`[Screen] Замена видеодорожки для ${remoteUserId}`);
+          }
+        }
+
+        // Если демонстрация остановлена браузером
+        screenTrack.onended = () => {
+          stopScreenShare();
+        };
+      } catch (error) {
+        console.error("[Screen] Ошибка получения потока демонстрации экрана:", error);
+      }
+    }
+
+    function stopScreenShare() {
+      if (isScreenSharing && screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
+        isScreenSharing = false;
+        toggleScreenButton.textContent = "Демонстрация экрана";
+        console.log("[Screen] Демонстрация экрана остановлена");
+        // Возвращаем поток с веб-камеры
+        startVideo();
+      }
+    }
+
+    /***************** Привязка событий кнопок *****************/
+    toggleVideoButton.addEventListener("click", toggleVideo);
+    toggleMicButton.addEventListener("click", toggleMic);
+    toggleScreenButton.addEventListener("click", startScreenShare);
+    /***************** Конец скрипта *****************/
+  </script>
+</body>
+</html>

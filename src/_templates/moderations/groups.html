@@ -1,0 +1,124 @@
+{% extends 'moderations/base_moderation.html' %}
+{% load static  %}
+{% block title %}{{ seo_title }}{% endblock title %}
+{% block description %}{{ seo_description }}{% endblock description %}
+{% block propertytitle %}{% if seo_previev %}{{ seo_previev.url }} {% endif %} {% endblock propertytitle %}
+{% block propertydescription %}{{ seo_propertytitle }}{% endblock propertydescription %}
+{% block propertyimage %}{{ seo_propertydescription }}{% endblock propertyimage %}
+{% block head %}{% endblock head %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <!-- row -->
+        <div class="container-fluid">
+            <div class="project-nav">
+                <div class="d-flex align-items-center">
+                    <a href="{% url 'moderation:groups_create' %}" id="btn-add-contact"  class="btn btn-primary rounded text-white">+ Добавить группу</a>
+                </div>
+            </div>
+        </div>
+        {% for group in groups %}
+        <div class="me-auto  mb-lg-0 mb-3">
+            <div class="mb-4">
+                <h2 class="title-num text-black font-w700">{{group.name}}</h2>
+                <a href="{% url 'moderation:groups_update' group.id %}" class="btn btn-light rounded me-3 mb-sm-0 mb-2"><i class="fas fa-pen-square me-3 scale5" aria-hidden="true"></i>Редактировать</a>
+                <button type="button" class="btn btn-light rounded mb-sm-0 mb-2 delete-group-btn" data-group-id="{{ group.id }}" data-bs-toggle="modal" data-bs-target="#deleteGroupModal"><i class="fas fa-trash me-3 scale5" aria-hidden="true"  ></i>Удалить</button>
+            </div>
+            <div class="d-sm-flex d-block align-items-center">
+                <ul class="users-lg ms-sm-5 ms-0">
+                    {% for user in group.users.all %}
+                    <li><img src="{{user.avatar.url}}" alt="" style="height: 60px;"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <span class="fs-14">
+        {% for accest in group.access.all %}
+            {{accest.name}}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </span>
+        </div>
+        <hr>
+        <br>
+        {% endfor %}
+    </div>
+</div>
+<!-- Button trigger modal -->
+<!-- Modal -->
+<div class="modal fade" id="deleteGroupModal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGroupModalLabel">Подтвердите удаление группы</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить эту группу?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для подтверждения удаления -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="deleteGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteGroupModalLabel">Подтвердите удаление группы</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить эту группу?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteGroupId = null;
+
+        // Обработчик клика на кнопке Удалить группу
+        document.querySelectorAll('.delete-group-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                deleteGroupId = btn.getAttribute('data-group-id');
+                $('#deleteGroupModal').modal('show');
+            });
+        });
+
+        // Обработчик клика на кнопке подтверждения удаления
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (deleteGroupId) {
+                $.ajax({
+                    url: '/groups/' + deleteGroupId + '/delete/',
+                    method: 'POST',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        // Обновление страницы или другие действия после успешного удаления
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        // Обработка ошибок удаления, если необходимо
+                        console.error(error);
+                    }
+                });
+            }
+            $('#deleteGroupModal').modal('hide');
+        });
+    });
+</script>
+
+{% endblock content %}

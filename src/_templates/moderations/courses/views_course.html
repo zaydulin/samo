@@ -1,0 +1,13 @@
+{% load static%}
+<div class="card checkout-cart">
+    <div class="card-body basic-wizard important-validation" id="msform">
+        <!-- Существующее содержимое формы -->
+        <div class="card-header d-flex justify-content-between">
+            <h5>{{course.name}}</h5>
+        </div>
+        <div class="col-sm-12">
+            {{course.description|safe}}
+        </div>
+    </div>
+
+</div>

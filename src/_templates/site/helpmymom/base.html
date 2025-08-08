@@ -1,0 +1,502 @@
+{% load static generals_tag %}
+<!DOCTYPE html><html xml:lang="ru" lang="ru" class="">
+<head>
+	<meta charset="UTF-8">
+    <title> {% get_settings_first as settings %}{{settings.name}} - {% block title %}{% endblock title %}</title>
+    <meta content="{% block description %}{% endblock description %}" name="description">
+    <meta property="og:title" content="{% block propertytitle %} {% endblock propertytitle %}">
+    <meta property="og:description" content="{% block propertydescription %}{% endblock propertydescription %}">
+    <meta property="og:image" content="{% block propertyimage %}{% endblock propertyimage %}">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% if settings.favicon %}{{settings.favicon.url}}{% endif %}" />
+    {{settings.yandex_metrica}}
+    {{settings.google_analitic}}
+
+	<script async="" src="{% static 'site/helpmother/js/loader_1_6t4czp.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/call.tracker.js"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_11_rbftej.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_10_wqgbuo.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_14_ajhhho.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/loader_9_xtqnab.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/assets_webpack_6a62ea2bc3_1702519308.js' %}"></script>
+    <script type="text/javascript" async="" id="tmr-code" src="{% static 'site/helpmother/js/code.js' %}"></script>
+    <script async="" src="{% static 'site/helpmother/js/tag.js' %}"></script>
+
+<style type="text/css">
+				:root {
+					--primary: #ff740a !important;
+					--primary-darken-1: hsl(25.96, 100%, 50%);
+					--primary-darken-2: hsl(25.96, 100%, 47%);
+					--primary-darken-3: hsl(25.96, 100%, 42%);
+					--primary-lighten-1: hsl(25.96, 100%, 62%);
+					--primary-opacity-0: rgba(255, 116, 10, 0);
+					--primary-opacity-0_05: rgba(255, 116, 10, 0.05);
+					--primary-opacity-0_1: rgba(255, 116, 10, 0.1);
+					--primary-opacity-0_15: rgba(255, 116, 10, 0.15);
+					--primary-opacity-0_2: rgba(255, 116, 10, 0.2);
+					--primary-opacity-0_25: rgba(255, 116, 10, 0.25);
+					--primary-opacity-0_3: rgba(255, 116, 10, 0.3);
+					--primary-opacity-0_35: rgba(255, 116, 10, 0.35);
+					--primary-opacity-0_4: rgba(255, 116, 10, 0.4);
+					--primary-opacity-0_45: rgba(255, 116, 10, 0.45);
+					--primary-opacity-0_5: rgba(255, 116, 10, 0.5);
+					--primary-opacity-0_55: rgba(255, 116, 10, 0.55);
+					--primary-opacity-0_6: rgba(255, 116, 10, 0.6);
+					--primary-opacity-0_65: rgba(255, 116, 10, 0.65);
+					--primary-opacity-0_7: rgba(255, 116, 10, 0.7);
+					--primary-opacity-0_75: rgba(255, 116, 10, 0.75);
+					--primary-opacity-0_8: rgba(255, 116, 10, 0.8);
+					--primary-opacity-0_85: rgba(255, 116, 10, 0.85);
+					--primary-opacity-0_9: rgba(255, 116, 10, 0.9);
+					--primary-opacity-0_95: rgba(255, 116, 10, 0.95);
+					--theme-color-main: hsl(25.96, 20%, 20%);
+					--theme-color-secondary: hsl(25.96, 20%, 80%);
+					--theme-color-title: hsl(25.96, 20%, 20%);
+					--theme-color-strict-inverse: #ffffff;
+				}
+			</style>
+<style type="text/css">
+							:root {
+								--theme-color-b24button: var(--primary);
+							}
+						</style>
+<style>:root {--theme-color-main: #000000 !important;--theme-color-title: #616161 !important;}</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/lucide-icons@latest/dist/lucide.css">
+
+<link href="{% static 'site/helpmother/css/intranet-common.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/ui.design-tokens.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/bitrix24-design-tokens.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/ui.font.opensans.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/main.popup.bundle.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/sidepanel.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/core_date.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/landing_public.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/style.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/popup.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/catalog_cond.min.css' %}" type="text/css" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/bootstrap.min.css' %}" type="text/css" data-template-style="true" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/theme.min.css' %}" type="text/css" data-template-style="true" rel="stylesheet">
+<link href="{% static 'site/helpmother/css/template_styles.min.css' %}" type="text/css" data-template-style="true" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'site/helpmother/js/core.min.js' %}"></script>
+
+<script type="text/javascript" src="{% static 'site/helpmother/js/protobuf.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/model.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/rest.client.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/pull.client.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/core_fx.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/pageobject.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/main.popup.bundle.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/core_clipboard.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/manager.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/slider.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/main.date.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/core_date.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/core_window.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/core_tree.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/intersectionobserver.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/lazyload.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'site/helpmother/js/script.min.js' %}"></script>
+
+<meta name="robots" content="all">
+<style>
+	body.landing-page-transition::after {
+		background: #ffffff;
+	}
+
+	body {
+		--landing-font-family: Open Sans
+	}
+
+	body {
+		font-weight: 400;
+		font-family: Open Sans;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		-moz-font-feature-settings: "liga", "kern";
+		text-rendering: optimizelegibility;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		font-family: Source Sans Pro;
+	}
+
+	html {
+		font-size: 14px;
+	}
+
+	body {
+		font-size: 1.14286rem;
+	}
+
+	.g-font-size-default {
+		font-size: 1.14286rem;
+	}
+
+	main.landing-public-mode {
+		line-height: 1.5;
+		font-weight: 400;
+	}
+
+	.landing-public-mode .h1, .landing-public-mode .h2, .landing-public-mode .h3, .landing-public-mode .h4,
+	.landing-public-mode .h5, .landing-public-mode .h6, .landing-public-mode .h7,
+	.landing-public-mode h1, .landing-public-mode h2, .landing-public-mode h3, .landing-public-mode h4,
+	.landing-public-mode h5, .landing-public-mode h6 {
+		font-weight: 600;
+	}
+
+
+</style>
+
+<link rel="stylesheet" href="https://fonts.bitrix24.ru/css2?family=Open+Sans:wght@100;200;300;400;500;600;700;800;900">
+
+<link rel="stylesheet" href="https://fonts.bitrix24.ru/css2?family=Source+Sans+Pro:wght@100;200;300;400;500;600;700;800;900">
+
+<script>
+	BX.namespace("BX.Landing");
+	BX.Landing.getMode = () => "view";
+</script>
+    {% block head %}{% endblock head %}
+</head>
+<body class="landing-page-transition landing-b24button-use-style">
+
+<main class="w-100 landing-public-mode">
+	<div class="landing-header">
+		<div id="b966" class="block-wrapper block-35-7-header-logo-and-slogan">
+			<header class="landing-block g-pb-auto g-pt-15"
+					style="--bg: ;--bg-url: ;--bg-url-2x: ;--bg-overlay: ;--bg-size: ;--bg-attachment: ;background-image: ;">
+				<div class="landing-block-node-container container text-center">
+					<a href="{% url 'webmain:home' %}">
+						<img class="landing-block-node-logo img-fluid g-mb-5" src="{% if settings.logo %}{{settings.logo.url}}{% else %}{% static 'site/website/images/logo-light-165x76.png' %}{% endif %}" alt='Logo'/>
+					</a>
+					<div class="landing-block-node-containerimg g-pointer-events-all text-left"></div>
+					<div class="landing-block-node-containerimg g-pointer-events-all text-right"></div>
+				</div>
+			</header>
+		</div>
+		<div id="b968" class="block-wrapper block-35-4-header-with-social">
+			<header class="landing-block landing-semantic-background-color g-bg-white g-pb-20 g-brd-bottom g-brd-gray-light-v4 text-center text-lg-left g-pt-20 l-d-xs-none"
+					style="--bg: ;--bg-url: ;--bg-url-2x: ;--bg-overlay: ;--bg-size: ;--bg-attachment: ;background-image: ;">
+				<div class="container">
+					<div class="row no-gutters flex-lg-row align-items-center justify-content-lg-start">
+						<div class="col-12 col-sm-3 col-lg-2 text-center text-md-left">
+							<!-- Logo -->
+							<a href="#" class="navbar-brand landing-block-node-menu-logo-link g-mb-10 g-mb-0--sm g-mr-0"
+							   target="_self">
+							</a>
+							<h2 class="landing-block-node-title-9501 g-pointer-events-all h2 g-line-height-0_7 g-mb-4 g-font-size-24 g-color text-right g-pr-20" style="--color: #b5b5b5;">
+								<p>
+									<span style="color: var(--theme-color-title); font-size: 2rem;">Свяжитесь<br>с нами</span>
+								</p>
+							</h2>
+							<!-- End Logo -->
+						</div>
+						<div class="col-12 col-sm-9 col-lg-10">
+							<div class="row g-ml-20--sm">
+								<!-- contacts -->
+								<div class="landing-block-card-menu-contact-container col-sm-8 col-md-9">
+								{% get_contacts_first as contact %}
+									<div class="landing-block-card-menu-contact-container-inner row">
+										<div class="landing-block-node-card col-md g-mb-10 g-mb-0--md g-brd-right--md g-brd-gray-light-v4"
+											 data-card-preset="contact-link">
+											<a href="tel:{{contact.phone}}" class="landing-block-node-card-contactlink-link g-pa-10--md row align-items-center justify-content-center justify-content-sm-start justify-content-md-center justify-content-lg-start g-text-decoration-none--hover" target="_blank">
+												<span class="landing-block-node-card-icon-container text-md-center text-lg-left g-font-size-18 g-line-height-1 d-none d-sm-inline-block g-color-primary g-mr-10 col-12 g-pa-0 ">
+													<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smartphone"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+												</span>
+												<span class="landing-block-node-card-text-container text-center text-sm-left text-md-center text-lg-left d-inline-block col-12 g-pa-0">
+													<span class="landing-block-node-menu-contactlink-title landing-block-node-card-title-style landing-semantic-text-medium g-color-main d-block text-uppercase g-font-size-13">Телефон</span>
+													<span class="landing-block-node-card-contactlink-text landing-block-node-card-text-style landing-semantic-link-small d-block g-color-main g-font-weight-700 g-text-decoration-none g-text-underline--hover">{{contact.phone}}</span>
+													<div class="landing-block-node-text-9788-8746 g-pointer-events-all g-pb-1 text-left"><p>{{contact.grafik}}</p></div>
+												</span>
+											</a>
+										</div>
+										<div class="landing-block-node-card col-md g-mb-10 g-mb-0--md g-brd-right--md g-brd-gray-light-v4"
+											 data-card-preset="contact-link">
+											<a href="mailto:{{contact.email}}" class="landing-block-node-card-contactlink-link g-pa-10--md row align-items-center justify-content-center justify-content-sm-start justify-content-md-center justify-content-lg-start g-text-decoration-none--hover" target="_self">
+												<span class="landing-block-node-card-icon-container text-md-center text-lg-left g-font-size-18 g-line-height-1 d-none d-sm-inline-block g-color-primary g-mr-10 col-12 g-pa-0 ">
+													<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+												</span>
+												<span class="landing-block-node-card-text-container text-center text-sm-left text-md-center text-lg-left d-inline-block col-12 g-pa-0">
+													<span class="landing-block-node-menu-contactlink-title landing-block-node-card-title-style landing-semantic-text-medium g-color-main d-block text-uppercase g-font-size-13">Почта</span>
+													<span class="landing-block-node-card-contactlink-text landing-block-node-card-text-style landing-semantic-link-small d-block g-color-main g-font-weight-700 g-text-decoration-none g-text-underline--hover">{{contact.email}}</span>
+													<div class="landing-block-node-text-9788-8746 g-pointer-events-all g-pb-1 text-left"><p><br></p></div>
+												</span>
+											</a>
+										</div>
+										<div class="landing-block-node-card col-md g-mb-10 g-mb-0--md g-brd-right--md g-brd-gray-light-v4"
+											 data-card-preset="contact-text">
+											<div class="g-pa-10--md row align-items-center justify-content-center justify-content-sm-start justify-content-md-center justify-content-lg-start">
+												<div class="landing-block-node-card-icon-container text-md-center text-lg-left g-font-size-18 g-line-height-1 d-none d-sm-inline-block g-color-primary g-mr-10 col-12 g-pa-0 ">
+													<script data-b24-form="click/9/xtqnab" data-skip-moving="true">
+														(function (w, d, u) {
+															var s = d.createElement('script');
+															s.async = true;
+															s.src = u + '?' + (Date.now() / 180000 | 0);
+															var h = d.getElementsByTagName('script')[0];
+															h.parentNode.insertBefore(s, h);
+														})(window, document, 'https://portal.so-ratniki.ru/upload/crm/form/loader_9_xtqnab.js');
+													</script>
+													<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hand-heart"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9"/><path d="m2 15 6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.73 2.73 0 0 0 16 4a2.78 2.78 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12Z"/></svg>
+												</div>
+												<div class="landing-block-node-card-text-container text-center text-sm-left text-md-center text-lg-left d-inline-block col-12 g-pa-0">
+													<div class="landing-block-node-card-title landing-block-node-card-title-style landing-semantic-text-medium g-color-main text-uppercase g-font-size-13">
+														Помощь
+													</div>
+													<div class="landing-block-node-card-text landing-block-node-card-text-style landing-semantic-link-small g-color-main g-font-weight-700">
+														<span style="color: rgb(33, 33, 33);">
+															<script data-b24-form="click/9/xtqnab" data-skip-moving="true">
+																(function (w, d, u) {
+																	var s = d.createElement('script');
+																	s.async = true;
+																	s.src = u + '?' + (Date.now() / 180000 | 0);
+																	var h = d.getElementsByTagName('script')[0];
+																	h.parentNode.insertBefore(s, h);
+																})(window, document, 'https://portal.so-ratniki.ru/upload/crm/form/loader_9_xtqnab.js');
+															</script>
+															<a href="#" onclick="BX.PreventDefault();" target="">Отправить запрос</a></span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+								</div>
+								<!-- socials -->
+								<div class="landing-block-socials-container col-sm-4 col-md-3 g-mb-10 g-mb-0--md align-self-center">
+									<ul class="landing-block-cards-social list-inline g-pa-10--md g-mb-0 row align-items-center justify-content-center justify-content-sm-start">
+										<li class="landing-block-node-social-item list-inline-item g-valign-middle g-mx-3 g-mb-6"
+											data-card-preset="vk">
+											<a class="landing-block-node-social-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14 " href="{% if contact.vk %}{{contact.vk}}{% endif %}" target="_blank">
+												<i class="landing-block-node-social-icon fa-brands fa-vk"></i>
+											</a>
+										</li>
+										<li class="landing-block-node-social-item list-inline-item g-valign-middle g-mx-3 g-mb-6"
+											data-card-preset="telegram">
+											<a class="landing-block-node-social-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14 " href="{% if contact.telegram %}{{contact.telegram}}{% endif %}" target="_blank">
+												<i class="fa-brands fa-telegram"></i>
+											</a>
+										</li>
+										<li class="landing-block-node-social-item list-inline-item g-valign-middle g-mx-3 g-mb-6"
+											data-card-preset="odnoklassniki">
+											<a class="landing-block-node-social-link d-block u-icon-v3 u-icon-size--sm g-rounded-50x g-bg-gray-light-v4 g-color-gray-light-v1 g-bg-primary--hover g-color-white--hover g-font-size-14 " href="{% if contact.whatsapp %}{{contact.whatsapp}}{% endif %}" target="_blank">
+												<i class="fa-brands fa-odnoklassniki"></i>
+											</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</header>
+		</div>
+		<div id="b3718" class="block-wrapper block-0-menu-21-wo-logo">
+			<header class="landing-block u-header landing-block-menu-store landing-semantic-background-color w-100 g-bg-primary g-pt-25 g-pb-25 u-header--relative u-header--sticky"
+					style="--bg: ;">
+				<nav class="g-pa-0 g-mb-0 navbar navbar-expand-lg g-brd-0 u-navbar-color-main--hover u-navbar-align-around"
+					 style="--navbar-color: ;--navbar-color--hover: ;">
+					<div class="container">
+						<div class="collapse navbar-collapse align-items-center flex-sm-row" id="navBar615">
+							<ul class="landing-block-node-menu-list js-scroll-nav navbar-nav text-uppercase g-font-weight-700 g-font-size-12 g-pt-20 g-pt-0--lg ml-auto">
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+									<a href="{% url 'webmain:home' %}"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Главная</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg">
+									<a href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/postavshchik_sotsialnyh_uslug/"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Поставщик социальных услуг</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg">
+									<a href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/obuchenie/"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Обучение</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg">
+									<a href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/meropriyatiya/"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Мероприятия</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg">
+									<a href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/metodicheskie_i_informatsionnye_materialy/"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Инфо-киоск</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg">
+									<a href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/specialisty/"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">Специалисты</a>
+								</li>
+								<li class="landing-block-node-menu-list-item nav-item g-mr-20--lg g-ml-10 g-ml-0--lg g-mb-7 g-mb-0--lg {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+									<a href="{% url 'webmain:about' %}"
+									   class="landing-block-node-menu-list-item-link landing-semantic-menu-h-text nav-link p-0 g-line-height-0 g-letter-spacing-inherit"
+									   target="_self" style="">О нас</a>
+								</li>
+							</ul>
+						</div>
+						<!-- Responsive Toggle Button -->
+						<button class="navbar-toggler btn g-line-height-1 g-brd-none g-pa-10 g-pr-20 ml-auto"
+								type="button" aria-label="Toggle navigation" aria-expanded="false"
+								aria-controls="navBar615" data-toggle="collapse" data-target="#navBar615">
+					<span class="hamburger hamburger--slider">
+					  <span class="hamburger-box">
+						<span class="hamburger-inner"></span>
+					  </span>
+					</span>
+						</button>
+						<!-- End Responsive Toggle Button -->
+					</div>
+				</nav>
+			</header>
+		</div>
+		<div id="b2682" class="block-wrapper block-27-one-col-fix-title-and-text-2">
+			<section class="landing-block js-animation g-pt-30 u-block-border-none animated g-pb-20"
+					 style="--bg: ;--bg-url: ;--bg-url-2x: ;--bg-overlay: ;--bg-size: ;--bg-attachment: ;background-image: ;">
+				<div class="landing-block-node-text-container landing-semantic-text-width container g-max-width-container">
+					<div class="landing-block-node-text landing-semantic-text-medium js-animation g-pb-1 animated g-mb-minus-20"
+						 style="--color: ;"><p style="text-align: center;"><span
+							style="color: var(--theme-color-main); font-size: 1.14286rem;">У НАС НОВЫЙ <span
+							style="font-weight: bold;">БЕСПЛАТНЫЙ </span>МНОГОКАНАЛЬНЫЙ НОМЕР&nbsp;!</span></p></div>
+					<h2 class="landing-block-node-title-9095 g-pointer-events-all h2 g-color g-text-shadow-none text-center g-letter-spacing-inherit g-font-size-45 g-pt-auto g-mb-auto"
+						style="--color: var(--primary);">{{contact.phone}}</h2>
+				</div>
+			</section>
+		</div>
+	</div>
+		{% block content %}{% endblock content %}
+	<div class="landing-footer"	>
+		<div id="b1282" class="block-wrapper block-35-2-footer-dark">
+			<section class="landing-semantic-background-color g-pt-60 g-bg-gray-dark-v1 g-pb-auto" style="">
+				<div class="container">
+					<div class="row">
+						<div class="landing-block-node-main-card js-animation fadeInLeft col-sm-12 col-md-6 col-lg-6 g-mb-25 g-mb-0--lg"
+							 style="">
+							<h2 class="landing-block-node-title landing-semantic-subtitle-small text-uppercase g-color-white g-font-weight-700 g-font-size-16 g-mb-20"
+								style="">Контакты</h2>
+							<div class="landing-block-node-text landing-semantic-text-medium g-color-gray-light-v1 g-mb-20"
+								 style=""><p>{{settings.description|safe}}</p></div>
+
+							<address class="g-mb-20">
+								<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="text"
+									 style="">
+									<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1" style="margin-right: 10px;">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+									</div>
+									<div class="landing-block-node-card-contact-text landing-semantic-text-medium g-color-gray-light-v1" style="">
+										<span style="font-weight: bold;">{{ contact.adress }}</span>
+									</div>
+								</div>
+								<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link"
+									 style="">
+									<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1" style="margin-right: 10px;">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+									</div>
+									<div>
+										<span class="landing-block-node-card-contact-text landing-semantic-text-medium g-color-gray-light-v1" style=""> </span>
+										<a class="landing-block-node-card-contact-link landing-semantic-link-medium g-color-gray-light-v1 g-font-weight-700"
+										   href="mailto:{{contact.email}}" target="_self" style="">{{contact.email}}</a>
+									</div>
+								</div>
+								<div class="landing-block-card-contact d-flex g-pos-rel g-mb-7" data-card-preset="link"
+									 style="">
+									<div class="landing-block-node-card-contact-icon-container g-color-gray-light-v1" style="margin-right: 10px;">
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+									</div>
+									<div>
+										<span class="landing-block-node-card-contact-text landing-semantic-text-medium g-color-gray-light-v1"
+											  style=""> </span>
+										<a class="landing-block-node-card-contact-link landing-semantic-link-medium g-color-gray-light-v1 g-font-weight-700"
+										   href="tel:{{contact.phone}}" target="_self" style="">{{contact.phone}}</a>
+									</div>
+								</div>
+							</address>
+
+						</div>
+
+
+						<div class="landing-block-node-column js-animation fadeInRight col-sm-12 col-md-2 col-lg-2 g-mb-25 g-mb-0--lg"
+							 style="">
+							<h2 class="landing-block-node-title landing-semantic-subtitle-small text-uppercase g-color-white g-font-weight-700 g-font-size-16 g-mb-20"
+								style=""></h2>
+							<ul class="landing-block-card-list1 list-unstyled g-mb-30">
+								<li class="landing-block-card-list1-item g-mb-10">
+
+								</li>
+								<li class="landing-block-card-list1-item g-mb-10">
+
+								</li>
+							</ul>
+						</div>
+
+						<div class="landing-block-node-column js-animation bounceInRight col-sm-12 col-md-2 col-lg-2 g-mb-25 g-mb-0--lg"
+							 style="">
+							<h2 class="landing-block-node-title landing-semantic-subtitle-small text-uppercase g-color-white g-font-weight-700 g-font-size-16 g-mb-20"
+								style="">Безопасность</h2>
+							<ul class="landing-block-card-list2 list-unstyled g-mb-30">
+								<li class="landing-block-card-list2-item g-mb-10">
+									{% if pages %}{% for page in pages %}{% if page.pagetype == 3 %}
+									<a class="landing-block-node-list-item landing-semantic-menu-h-text g-color-gray-dark-v5"
+									   href="{% url 'webmain:page' page.slug %}" style="" target="_self">Политика конфедециальности</a>
+									{% endif %}{% endfor %}{% endif %}
+								</li>
+								<li class="landing-block-card-list2-item g-mb-10">
+									{% if pages %}{% for page in pages %}{% if page.pagetype == 2 %}
+									<a class="landing-block-node-list-item landing-semantic-menu-h-text g-color-gray-dark-v5"
+									   href="{% url 'webmain:page' page.slug  %}" style=""
+									   target="_self">Пользовательское соглашение</a>
+									{% endif %}{% endfor %}{% endif %}
+								</li>
+							</ul>
+						</div>
+
+						<div class="landing-block-node-column js-animation bounceInRight col-sm-12 col-md-2 col-lg-2"
+							 style="">
+							<h2 class="landing-block-node-title landing-semantic-subtitle-small text-uppercase g-color-white g-font-weight-700 g-font-size-16 g-mb-20"
+								style="">Дополнительно</h2>
+							<ul class="landing-block-card-list1 list-unstyled g-mb-30">
+								<li class="landing-block-card-list3-item g-mb-10">
+									<a class="landing-block-node-list-item landing-semantic-menu-h-text g-color-gray-dark-v5"
+									   href="{#% url 'webmain:partnerships' %#}" style="" target="_self">Партнерство и сотрудничество</a>
+								</li>
+								<li class="landing-block-card-list3-item g-mb-10">
+									{% if pages %}{% for page in pages %}{% if page.pagetype == 6 %}
+									<a class="landing-block-node-list-item landing-semantic-menu-h-text g-color-gray-dark-v5"
+									   href="https://xn--80afgabojtdcbobeh7c.xn--p1ai/poryadok_predostavleniya_uslug/"
+									   style="" target="_self">Порядок предоставления услуг
+									</a>
+									{% endif %}{% endfor %}{% endif %}
+								</li>
+							</ul>
+						</div>
+
+					</div>
+				</div>
+			</section>
+		</div>
+		<div id="b2091" class="block-wrapper block-27-4-one-col-fix-text">
+			<section class="landing-block js-animation g-pt-30 g-pb-30 g-bg"
+					 style="--bg: #121212;--bg-url: ;--bg-url-2x: ;--bg-overlay: ;--bg-size: ;--bg-attachment: ;background-image: ;">
+				<div class="landing-block-node-text js-animation fadeIn landing-semantic-text-medium landing-semantic-text-width g-pb-1 container g-max-width-container g-color"
+					 style="--color: var(--primary);"><p style="text-align: center;">©{% if settings.content %}{{settings.content}}{% endif %}<br></p>
+				</div>
+			</section>
+		</div>
+	</div>
+	<style>
+    body::after {
+        content: normal !important;
+    }
+</style>
+	{% block footer %}{% endblock footer %}
+</body>
+</html>
